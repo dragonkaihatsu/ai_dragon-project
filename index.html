@@ -196,6 +196,18 @@ details.alt textarea{width:100%;min-height:110px;font-family:var(--f-mono);font-
 .steps li[data-done] .num,.steps li[data-done] .state{color:var(--ok)}
 a.btn{text-decoration:none;display:inline-block}
 
+/* dynamics console */
+.console{display:flex;gap:6px;padding-bottom:4px}
+.ch{flex:1 0 96px;max-width:150px;display:flex;flex-direction:column;gap:6px;border:1px solid var(--rule);border-radius:4px;padding:8px 6px;background:var(--sunk);min-width:0}
+.ch .lv{display:flex;flex-direction:column-reverse;gap:3px}
+.ch .lv button{height:15px;border:1px solid var(--rule);border-radius:2px;background:var(--sheet);cursor:pointer;padding:0}
+.ch .lv button[aria-pressed="true"]{background:var(--c);border-color:var(--c)}
+.ch .lv button:hover{border-color:var(--ink)}
+.ch b{font-size:12px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ch .elabel{font-size:10.5px;text-align:center;color:var(--muted);font-family:var(--f-mono);white-space:nowrap}
+.ch select{font-size:11.5px;padding:3px 2px;width:100%}
+.dyn-empty{flex:1;border:1px dashed var(--rule);border-radius:4px;padding:16px;font-size:13px;color:var(--muted);margin:0}
+
 /* tips + footer */
 .tips{background:var(--sheet);border:1px solid var(--rule);border-radius:6px;padding:16px 20px}
 .tips h2{font-size:13px;letter-spacing:.1em;margin:0 0 8px;color:var(--muted)}
@@ -391,6 +403,13 @@ a.btn{text-decoration:none;display:inline-block}
     </section>
   </main>
 
+  <section class="sheet" aria-labelledby="dynTape">
+    <div class="tape" id="dynTape">DYNAMICS<small>展開・緩急</small></div>
+    <p class="hint">セクションごとに盛り上がりの大きさ（5段階）と演出を選ぶと、歌詞のタグに書き込みます（例: <span class="mono">[Chorus: explosive, key change up]</span>）。Suno はタグをヒントとして使うので毎回その通りになるとは限りません。何回か生成して聴き比べてください。</p>
+    <div class="templates" id="dynPatterns"><span>展開パターン</span></div>
+    <div class="strip-scroll"><div class="console" id="console"></div></div>
+  </section>
+
   <section class="sheet" aria-labelledby="briefTape">
     <div class="tape" id="briefTape">PROMPT<small>作詞プロンプト</small></div>
     <p class="hint">ChatGPT や Claude などの AI に、Suno 用の日本語の歌詞を書いてもらうための指示文を作ります。上で選んだスタイルと構成が自動で入ります。できた歌詞は LYRICS に貼り付けてください。</p>
@@ -457,6 +476,7 @@ a.btn{text-decoration:none;display:inline-block}
       <li>1行を短めにすると譜割りが安定する。サビは同じ文字数の行をそろえると覚えやすい。</li>
       <li>「日本語の歌として指定する」をオンにすると、スタイルに Japanese vocals（女性・男性ボーカルを選んでいれば Japanese female vocals など）が入る。</li>
       <li>Suno で同じ設定のまま何回か生成すると、毎回ちがうメロディになる。気に入るまで生成し直すのが近道。</li>
+      <li>緩急は「タグの演出指定」「スタイルの言葉（dynamic build など）」「歌詞の密度」の3つで作る。静かな所は言葉を少なく、サビは短く強いフレーズに。</li>
       <li>歌わせたくない区間は <code>[Instrumental]</code> や <code>[Guitar Solo]</code> だけを置いて、歌詞を書かない。</li>
     </ul>
   </aside>
@@ -499,7 +519,8 @@ a.btn{text-decoration:none;display:inline-block}
     { id: "prod", ja: "サウンド・制作", items: [
       ["高音質","polished production"],["Lo-fi","lo-fi"],["アナログ感","analog warmth"],["リバーブ深め","reverb-heavy"],["ワイドなステレオ","wide stereo"],
       ["パンチのあるドラム","punchy drums"],["4つ打ち","four-on-the-floor"],["ハーフタイム","half-time groove"],["ミニマル","minimal"],
-      ["80年代","80s"],["90年代","90s"],["キャッチーなフック","catchy hook"]
+      ["80年代","80s"],["90年代","90s"],["キャッチーなフック","catchy hook"],
+      ["だんだん盛り上がる","dynamic build"],["サビで爆発","explosive chorus"],["静と動の対比","quiet-loud dynamics"],["転調あり","key change"]
     ]}
   ];
   const NO_RANDOM = new Set(["instrumental","rap","choir","duet"]);
@@ -746,6 +767,7 @@ a.btn{text-decoration:none;display:inline-block}
     if (kind === "bridge") return "Cメロ";
     return name;
   };
+  const baseOf = name => name.split(":")[0].trim();
   const NO_LYRIC_OK = /intro|outro|fade|end|instrumental|solo|break|drop|build|interlude|間奏|ソロ|イントロ|アウトロ/i;
 
   SEC_TAGS.forEach(([en, ja]) => {
@@ -826,9 +848,9 @@ a.btn{text-decoration:none;display:inline-block}
     text.split("\n").forEach(line => {
       const m = line.match(/^\s*\[([^\]]+)\]\s*$/);
       if (m) {
-        const name = m[1].trim(), kind = kindOf(name);
+        const name = m[1].trim(), base = baseOf(name), kind = kindOf(base);
         if (/[^\x00-\x7F]/.test(name)) jpTags++;
-        if (kind) { curSec = { name, kind, lines: 0, chars: 0, offset }; secs.push(curSec); }
+        if (kind) { curSec = { name, base, kind, lines: 0, chars: 0, offset }; secs.push(curSec); }
       } else if (line.trim()) {
         const n = len(line.replace(/\s/g, ""));
         lyricLines++; chars += n;
@@ -910,14 +932,15 @@ a.btn{text-decoration:none;display:inline-block}
     L.push("", "## 構成", "次の順番でセクションを書いてください。各セクションの最初の行に、英語のタグを [ ] で囲んで1行だけ置きます。");
     const seen = new Set();
     structFor(p).forEach(name => {
-      const kind = kindOf(name) || "verse", key = name.toLowerCase().replace(/\s*\d+$/, "");
-      let note = linesFor(name, kind);
-      if (kind === "chorus" && seen.has(key) && !NO_LYRIC_OK.test(name)) note = "1回目と同じ歌詞（最後のサビは少し変えてもよい）";
+      const base = baseOf(name), kind = kindOf(base) || "verse", key = base.toLowerCase().replace(/\s*\d+$/, "");
+      let note = linesFor(base, kind);
+      if (kind === "chorus" && seen.has(key) && !NO_LYRIC_OK.test(base)) note = "1回目と同じ歌詞（最後のサビは少し変えてもよい）";
       seen.add(key);
       L.push(`[${name}] … ${note}`);
     });
     L.push("", "## 書き方のルール");
-    L.push("- セクションタグは英語のまま、上の表記どおりに書く（日本語のタグは歌われてしまうため）");
+    L.push("- セクションタグは英語のまま、上の表記どおりに書く（日本語のタグは歌われてしまうため。: のあとの演出指定もそのまま残す）");
+    L.push("- 静かなセクションは言葉数を少なく、盛り上がるセクションは力強く短いフレーズにして、緩急をつける");
     L.push(`- 1行はおよそ ${LINE_LEN[b.line]} 文字。同じセクションの行は長さをそろえる`);
     L.push("- サビには曲の核になるフレーズを入れ、覚えやすく繰り返す");
     if (b.rhyme) L.push("- 行末の母音をそろえて韻を踏む（特にサビ）");
@@ -1186,6 +1209,100 @@ a.btn{text-decoration:none;display:inline-block}
   });
   $("#btnSendReset").addEventListener("click", () => { sent.clear(); renderSend(); });
 
+  /* ---------- dynamics ---------- */
+  const ENERGY = ["very soft", "soft", "mid-energy", "powerful", "explosive"];
+  const ENERGY_JA = ["とても静か", "静か", "中くらい", "力強い", "最高潮"];
+  const ARR = [["ピアノと歌だけ","piano and vocals only"],["アコースティック","stripped-back acoustic"],["ドラム抜き","no drums"],["ハーフタイム","half-time feel"],
+    ["倍テン","double-time drums"],["盛り上げていく","rising tension"],["落ちサビ→全開","soft start into full band"],["転調（上げ）","key change up"],
+    ["一瞬止める","sudden stop"],["合唱を重ねる","with choir"],["掛け合い","call and response"],["アカペラ","a cappella"],["フェードアウト","fade out"]];
+  function parseTag(name) {
+    const i = name.indexOf(":"), base = (i < 0 ? name : name.slice(0, i)).trim();
+    const mods = i < 0 ? [] : name.slice(i + 1).split(",").map(x => x.trim()).filter(Boolean);
+    const t = { base, energy: 0, arr: "", rest: [] };
+    mods.forEach(x => {
+      const l = x.toLowerCase(), ei = ENERGY.indexOf(l), ai = ARR.find(a => a[1].toLowerCase() === l);
+      if (ei >= 0 && !t.energy) t.energy = ei + 1;
+      else if (ai && !t.arr) t.arr = ai[1];
+      else t.rest.push(x);
+    });
+    return t;
+  }
+  const buildTag = t => { const m = [t.energy ? ENERGY[t.energy - 1] : "", t.arr, ...t.rest].filter(Boolean); return `[${t.base}${m.length ? ": " + m.join(", ") : ""}]`; };
+  function rewriteSections(edits) { // edits: Map index -> fn(tag)
+    const a = analyze(ta.value); let v = ta.value;
+    [...edits.keys()].sort((x, y) => y - x).forEach(i => {
+      const s = a.secs[i]; if (!s) return;
+      const t = parseTag(s.name); edits.get(i)(t);
+      const end = v.indexOf("\n", s.offset), e = end < 0 ? v.length : end;
+      const indent = v.slice(s.offset, e).match(/^\s*/)[0];
+      v = v.slice(0, s.offset) + indent + buildTag(t) + v.slice(e);
+    });
+    if (v !== ta.value) setLyrics(v);
+  }
+  const DYN_PATTERNS = [
+    { id: "build", name: "王道の盛り上がり", desc: "だんだん大きくして最後のサビで最高潮に" },
+    { id: "contrast", name: "静と動", desc: "Aメロはドラム抜きで静かに、サビで一気に爆発" },
+    { id: "ochisabi", name: "落ちサビ→大サビ", desc: "最後のサビを静かに始めて、途中から全開に" },
+    { id: "keychange", name: "ラスサビ転調", desc: "最後のサビで半音〜全音上げる" },
+    { id: "stop", name: "ためて爆発", desc: "最後のサビの直前で一瞬止めてから入る" }
+  ];
+  function planFor(secs, type) {
+    const cs = secs.map((s, i) => s.kind === "chorus" ? i : -1).filter(i => i >= 0), lastC = cs.length ? cs[cs.length - 1] : -1;
+    let vN = 0;
+    return secs.map((s, i) => {
+      const k = s.kind, last = i === lastC;
+      let e = { edge: 2, verse: 2, pre: 3, chorus: 4, bridge: 2, inst: 3 }[k] || 3, a = "";
+      if (k === "verse" && ++vN > 1) e = 3;
+      if (k === "edge" && i === secs.length - 1) e = 1;
+      if (k === "pre") a = "rising tension";
+      if (last) e = 5;
+      if (type === "build" && k === "bridge") a = "half-time feel";
+      if (type === "contrast") { if (k === "verse") { e = 2; a = "no drums"; } if (k === "chorus") e = 5; if (k === "bridge") { e = 1; a = "piano and vocals only"; } }
+      if (type === "ochisabi") { if (last) a = "soft start into full band"; if (k === "bridge") e = 2; }
+      if (type === "keychange" && last) a = "key change up";
+      if (type === "stop" && i === lastC - 1) a = "sudden stop";
+      return { e, a };
+    });
+  }
+  const dynBox = $("#dynPatterns");
+  DYN_PATTERNS.forEach(d => { const b = document.createElement("button"); b.type = "button"; b.className = "btn ghost"; b.dataset.dyn = d.id; b.textContent = d.name; b.title = d.desc; dynBox.appendChild(b); });
+  const rb = document.createElement("button"); rb.type = "button"; rb.className = "btn ghost"; rb.dataset.dyn = "reset"; rb.textContent = "指定を外す"; dynBox.appendChild(rb);
+  dynBox.addEventListener("click", e => {
+    const b = e.target.closest("[data-dyn]"); if (!b) return;
+    const secs = analyze(ta.value).secs;
+    if (!secs.length) { toast("先に LYRICS に [Verse] や [Chorus] のタグを入れてください"); return; }
+    const prev = ta.value, edits = new Map();
+    if (b.dataset.dyn === "reset") secs.forEach((s, i) => edits.set(i, t => { t.energy = 0; t.arr = ""; }));
+    else planFor(secs, b.dataset.dyn).forEach((pl, i) => edits.set(i, t => { t.energy = pl.e; t.arr = pl.a; }));
+    rewriteSections(edits);
+    if (ta.value !== prev) toast(b.dataset.dyn === "reset" ? "盛り上がりと演出の指定を外しました" : `「${b.textContent}」をタグに書き込みました`, "元に戻す", () => setLyrics(prev));
+  });
+  const KIND_VAR = { verse: "--sec-verse", pre: "--sec-pre", chorus: "--sec-chorus", bridge: "--sec-bridge", inst: "--sec-inst", edge: "--muted" };
+  function renderDyn(secs) {
+    const box = $("#console");
+    if (!secs.length) { box.innerHTML = `<p class="dyn-empty">LYRICS に [Verse] や [Chorus] のタグを入れるか構成テンプレを選ぶと、ここにセクションが並び、盛り上がりを調整できます。</p>`; return; }
+    box.innerHTML = secs.map((s, i) => {
+      const t = parseTag(s.name), nm = shortName(s.base, s.kind);
+      const lv = [1, 2, 3, 4, 5].map(n => `<button type="button" data-i="${i}" data-lv="${n}" aria-pressed="${t.energy >= n}" aria-label="${esc(nm)} の盛り上がり ${n}（${ENERGY_JA[n - 1]}）"></button>`).join("");
+      const opts = `<option value="">演出なし</option>` + ARR.map(([ja, en]) => `<option value="${esc(en)}"${t.arr === en ? " selected" : ""}>${ja}</option>`).join("");
+      return `<div class="ch" style="--c:var(${KIND_VAR[s.kind] || "--muted"})" title="${esc("[" + s.name + "]")}">
+        <div class="lv">${lv}</div>
+        <span class="elabel">${t.energy ? ENERGY_JA[t.energy - 1] : "指定なし"}</span>
+        <b>${esc(nm)}</b>
+        <select data-i="${i}" aria-label="${esc(nm)} の演出">${opts}</select>
+      </div>`;
+    }).join("");
+  }
+  $("#console").addEventListener("click", e => {
+    const b = e.target.closest("[data-lv]"); if (!b) return;
+    const n = +b.dataset.lv;
+    rewriteSections(new Map([[+b.dataset.i, t => { t.energy = t.energy === n ? 0 : n; }]]));
+  });
+  $("#console").addEventListener("change", e => {
+    const sel = e.target.closest("select[data-i]"); if (!sel) return;
+    rewriteSections(new Map([[+sel.dataset.i, t => { t.arr = sel.value; }]]));
+  });
+
   /* ---------- rendering ---------- */
   function meter(el, n, max) {
     const pct = max ? Math.min(100, n / max * 100) : 0;
@@ -1224,7 +1341,7 @@ a.btn{text-decoration:none;display:inline-block}
       strip.innerHTML = `<div class="strip-empty">[Verse] や [Chorus] などのタグを入れると、ここに曲の流れが表示されます</div>`;
     } else {
       strip.innerHTML = a.secs.map((s, i) =>
-        `<button type="button" class="blk" data-kind="${s.kind}" data-i="${i}" style="flex-grow:${Math.max(1, s.lines)}" title="${esc(s.name)}：${s.lines}行 / ${s.chars}文字"><b>${esc(shortName(s.name, s.kind))}</b><span>${s.lines ? s.lines + "行" : "—"}</span></button>`
+        `<button type="button" class="blk" data-kind="${s.kind}" data-i="${i}" style="flex-grow:${Math.max(1, s.lines)}" title="${esc(s.name)}：${s.lines}行 / ${s.chars}文字"><b>${esc(shortName(s.base, s.kind))}</b><span>${s.lines ? s.lines + "行" : "—"}</span></button>`
       ).join("");
       strip.querySelectorAll(".blk").forEach(b => b.addEventListener("click", () => jumpTo(a.secs[+b.dataset.i].offset)));
     }
@@ -1234,11 +1351,11 @@ a.btn{text-decoration:none;display:inline-block}
     const notes = [];
     if (text.trim() && !a.secs.length) notes.push("セクションタグがありません。[Verse] や [Chorus] を入れると構成が安定します。");
     if (a.loose && a.secs.length) notes.push(`最初のタグより前に歌詞が ${a.loose} 行あります。`);
-    a.secs.forEach(s => { if (!s.lines && !NO_LYRIC_OK.test(s.name)) notes.push(`[${s.name}] に歌詞がありません。`); });
+    a.secs.forEach(s => { if (!s.lines && !NO_LYRIC_OK.test(s.base)) notes.push(`[${s.name}] に歌詞がありません。`); });
     if (a.jpTags) notes.push(`日本語のタグが ${a.jpTags} 個あります。英語のタグにすると歌われにくくなります。`);
     if (a.longLines) notes.push(`30文字を超える長い行が ${a.longLines} 行あります。分けると譜割りが安定しやすいです。`);
     if (len(text) > LIMITS[store.limit].lyrics) notes.push("歌詞が文字数の上限を超えています。");
-    renderSend();
+    renderSend(); renderDyn(a.secs);
     lastReads = findReads(text, cur().readIgnore);
     $("#readsGroup").hidden = !lastReads.length;
     $("#reads").innerHTML = lastReads.map((r, i) => `<div class="read"><b>${esc(r.w + r.ctx)}</b><span class="n">${r.n}か所</span>` +
