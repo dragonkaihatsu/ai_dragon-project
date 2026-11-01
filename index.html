@@ -182,6 +182,20 @@ details.alt textarea{width:100%;min-height:110px;font-family:var(--f-mono);font-
 .idea .foot{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:auto;flex-wrap:wrap}
 .ideas-empty{border:1px dashed var(--rule);border-radius:4px;padding:16px;font-size:13px;color:var(--muted);margin:0}
 
+/* claude writer + send */
+#writeOut{width:100%;min-height:320px;background:var(--sheet);border:1px solid var(--rule);border-radius:4px;padding:10px 12px;font-size:14px;line-height:1.8;resize:vertical}
+.title-ideas{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.title-ideas > span{font-size:11px;color:var(--muted);font-weight:700;letter-spacing:.08em;margin-right:4px}
+.steps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:10px}
+.steps li{display:flex;align-items:center;gap:12px;border:1px solid var(--rule);border-radius:4px;padding:12px 14px;background:var(--sheet);min-width:0}
+.steps .num{font-family:var(--f-display);font-size:22px;color:var(--muted);width:1.2em;text-align:center}
+.steps li > div{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.steps li b{font-size:14px}
+.steps li .state{font-size:11px;font-family:var(--f-mono);color:var(--muted)}
+.steps li[data-done]{border-color:var(--ok)}
+.steps li[data-done] .num,.steps li[data-done] .state{color:var(--ok)}
+a.btn{text-decoration:none;display:inline-block}
+
 /* tips + footer */
 .tips{background:var(--sheet);border:1px solid var(--rule);border-radius:6px;padding:16px 20px}
 .tips h2{font-size:13px;letter-spacing:.1em;margin:0 0 8px;color:var(--muted)}
@@ -403,7 +417,33 @@ details.alt textarea{width:100%;min-height:110px;font-family:var(--f-mono);font-
       <div class="out">
         <div class="out-head"><b>LYRICS PROMPT</b><button class="btn primary" data-copy="brief" type="button">プロンプトをコピー</button></div>
         <textarea id="briefOut" readonly aria-label="作詞プロンプト"></textarea>
+        <div class="askrow">
+          <button class="btn primary" id="btnWrite" type="button" disabled>Claude に歌詞を書いてもらう</button>
+          <button class="btn ghost" id="btnWriteStop" type="button" hidden>止める</button>
+          <span class="status" id="writeStatus" role="status"></span>
+        </div>
       </div>
+    </div>
+    <div class="out" id="writeBox" hidden>
+      <div class="out-head"><b>CLAUDE が書いた歌詞</b>
+        <span class="row" style="gap:6px"><button class="btn ghost" id="btnWriteDiscard" type="button">捨てる</button><button class="btn primary" id="btnWriteUse" type="button">LYRICS に反映</button></span></div>
+      <textarea id="writeOut" aria-label="Claude が書いた歌詞（反映前に直せます）"></textarea>
+      <div class="title-ideas" id="titleIdeas" hidden></div>
+    </div>
+  </section>
+
+  <section class="sheet" aria-labelledby="sendTape">
+    <div class="tape" id="sendTape">SEND<small>Suno に貼る</small></div>
+    <p class="hint">Suno の作成画面で「Custom」を選び、上から順にコピーして貼り付けます。Suno には外部から曲を作らせる公開 API がないため、貼り付けと生成ボタンは Suno の画面で押してください。</p>
+    <ol class="steps" id="steps">
+      <li data-k="lyrics"><span class="num">1</span><div><b>Lyrics</b><span class="state"></span></div><button class="btn" type="button" data-send="lyrics">コピー</button></li>
+      <li data-k="style"><span class="num">2</span><div><b>Styles</b><span class="state"></span></div><button class="btn" type="button" data-send="style">コピー</button></li>
+      <li data-k="exclude"><span class="num">3</span><div><b>Exclude styles</b><span class="state"></span></div><button class="btn" type="button" data-send="exclude">コピー</button></li>
+      <li data-k="title"><span class="num">4</span><div><b>Song Title</b><span class="state"></span></div><button class="btn" type="button" data-send="title">コピー</button></li>
+    </ol>
+    <div class="row">
+      <a class="btn primary" href="https://suno.com/create" target="_blank" rel="noopener noreferrer">Suno の作成画面を開く ↗</a>
+      <button class="btn ghost" id="btnSendReset" type="button">コピー済みの印を消す</button>
     </div>
   </section>
 
@@ -416,6 +456,7 @@ details.alt textarea{width:100%;min-height:110px;font-family:var(--f-mono);font-
       <li>スタイルは先頭の要素ほど効きやすい。いちばん大事なジャンルを最初に置く。</li>
       <li>1行を短めにすると譜割りが安定する。サビは同じ文字数の行をそろえると覚えやすい。</li>
       <li>「日本語の歌として指定する」をオンにすると、スタイルに Japanese vocals（女性・男性ボーカルを選んでいれば Japanese female vocals など）が入る。</li>
+      <li>Suno で同じ設定のまま何回か生成すると、毎回ちがうメロディになる。気に入るまで生成し直すのが近道。</li>
       <li>歌わせたくない区間は <code>[Instrumental]</code> や <code>[Guitar Solo]</code> だけを置いて、歌詞を書かない。</li>
     </ul>
   </aside>
@@ -1055,6 +1096,96 @@ details.alt textarea{width:100%;min-height:110px;font-family:var(--f-mono);font-
     }
   });
 
+  /* ---------- claude writes lyrics ---------- */
+  const btnWrite = $("#btnWrite"), btnWriteStop = $("#btnWriteStop");
+  const setWStatus = (msg, tone) => { const s = $("#writeStatus"); s.textContent = msg; s.dataset.tone = tone || ""; };
+  let writeFn = null, writeCtl = null;
+  function noWriter(msg) { btnWrite.hidden = true; btnWriteStop.hidden = true; setWStatus(msg); }
+  if (window.claude && typeof window.claude.use === "function") {
+    window.claude.use("sample").then(s => {
+      if (!s) { noWriter("ここでは Claude を呼び出せません。プロンプトをコピーして、ほかの AI に貼ってください。"); return; }
+      writeFn = s; btnWrite.disabled = false;
+    }, () => noWriter("ここでは Claude を呼び出せません。プロンプトをコピーして、ほかの AI に貼ってください。"));
+  } else {
+    noWriter("このページを直接開いている場合は、プロンプトをコピーしてほかの AI に貼ってください。");
+  }
+  function splitWritten(text) {
+    const parts = text.split(/^\s*-{3,}\s*$/m);
+    const lyrics = parts[0].replace(/^```[a-z]*\s*/i, "").replace(/```\s*$/, "").trim();
+    const titles = (parts.slice(1).join("\n").match(/[^\n]+/g) || [])
+      .map(l => l.replace(/^\s*(?:[-*・•]|\d+[.)．、])\s*/, "").replace(/^(?:タイトル案|title)\s*[:：]?\s*/i, "").replace(/^[「『"]|[」』"]$/g, "").trim())
+      .filter(l => l && l.length <= 40).slice(0, 5);
+    return { lyrics, titles };
+  }
+  function showTitles(titles) {
+    const box = $("#titleIdeas");
+    box.hidden = !titles.length;
+    box.innerHTML = titles.length ? `<span>タイトル案</span>` + titles.map(t => `<button type="button" class="chip" data-title="${esc(t)}">${esc(t)}</button>`).join("") : "";
+  }
+  $("#titleIdeas").addEventListener("click", e => {
+    const b = e.target.closest("[data-title]"); if (!b) return;
+    const p = cur(), prev = p.title;
+    p.title = b.dataset.title; delete p.sample; touch(); $("#title").value = p.title; renderTitle(); renderProjects();
+    toast(`タイトルを「${p.title}」にしました`, "元に戻す", () => { p.title = prev; touch(); $("#title").value = prev; renderTitle(); renderProjects(); });
+  });
+  btnWriteStop.addEventListener("click", () => writeCtl && writeCtl.abort());
+  btnWrite.addEventListener("click", async () => {
+    if (!writeFn) return;
+    const p = cur();
+    writeCtl = new AbortController();
+    btnWrite.disabled = true; btnWriteStop.hidden = false;
+    setWStatus("書いています…（最初の文字が出るまで30秒ほどかかることがあります）");
+    const box = $("#writeBox"), out = $("#writeOut");
+    box.hidden = false; out.value = ""; showTitles([]);
+    try {
+      const { text, truncated } = await writeFn(briefText(p), {
+        signal: writeCtl.signal, cache: false,
+        onText: ({ text }) => { out.value = text; out.scrollTop = out.scrollHeight; }
+      });
+      const w = splitWritten(text);
+      out.value = w.lyrics; showTitles(w.titles);
+      setWStatus(truncated ? "途中で切れました。構成を短くしてもう一度試してください。" : "書けました。直したいところは下で直してから「LYRICS に反映」を押してください。", truncated ? "bad" : "");
+      btnWrite.textContent = "書き直してもらう";
+    } catch (e) {
+      const code = e && e.code;
+      if (e && e.text) out.value = e.text;
+      if (code === "cancelled") setWStatus("止めました。");
+      else if (HIDE.has(code)) { box.hidden = !out.value; noWriter("Claude の利用が許可されていないため、プロンプトをコピーしてほかの AI に貼ってください。"); }
+      else setWStatus(ASK_ERR[code] || "うまく受け取れませんでした。もう一度押してください。", "bad");
+    } finally {
+      btnWrite.disabled = false; btnWriteStop.hidden = true; writeCtl = null;
+    }
+  });
+  $("#btnWriteDiscard").addEventListener("click", () => { $("#writeBox").hidden = true; $("#writeOut").value = ""; showTitles([]); setWStatus(""); });
+  $("#btnWriteUse").addEventListener("click", () => {
+    const v = $("#writeOut").value.trim(); if (!v) { toast("反映する歌詞がありません"); return; }
+    const prev = ta.value;
+    setLyrics(v + "\n");
+    $("#lyricsTape").scrollIntoView({ block: "start", behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+    toast("Claude の歌詞を LYRICS に反映しました", "元に戻す", () => setLyrics(prev));
+  });
+
+  /* ---------- send to suno ---------- */
+  const sent = new Set();
+  function sendValue(k) { const p = cur(); return { lyrics: p.lyrics, style: styleText(p), exclude: p.exclude, title: p.title }[k] || ""; }
+  const SEND_NAME = { lyrics: "歌詞", style: "スタイル", exclude: "除外スタイル", title: "タイトル" };
+  function renderSend() {
+    document.querySelectorAll("#steps li").forEach(li => {
+      const k = li.dataset.k, v = sendValue(k).trim(), n = len(v);
+      const max = k === "lyrics" ? LIMITS[store.limit].lyrics : k === "title" ? 0 : LIMITS[store.limit][k];
+      li.querySelector("button").disabled = !v;
+      if (sent.has(k)) li.dataset.done = "1"; else delete li.dataset.done;
+      li.querySelector(".state").textContent = !v ? (k === "exclude" ? "なし（飛ばしてOK）" : "まだ空です")
+        : sent.has(k) ? "コピー済み" : max ? `${n.toLocaleString()} / ${max.toLocaleString()} 文字` : `${n} 文字`;
+    });
+  }
+  $("#steps").addEventListener("click", e => {
+    const b = e.target.closest("[data-send]"); if (!b) return;
+    const k = b.dataset.send; copyText(sendValue(k).trim(), SEND_NAME[k]);
+    sent.add(k); renderSend();
+  });
+  $("#btnSendReset").addEventListener("click", () => { sent.clear(); renderSend(); });
+
   /* ---------- rendering ---------- */
   function meter(el, n, max) {
     const pct = max ? Math.min(100, n / max * 100) : 0;
@@ -1076,13 +1207,14 @@ details.alt textarea{width:100%;min-height:110px;font-family:var(--f-mono);font-
     out.placeholder = "上のタグを選ぶと、ここに Suno の「Style of Music」に貼る文字列ができます";
     autosize(out);
     meter($("#styleMeter"), len(s), LIMITS[store.limit].style);
-    renderBrief();
+    renderBrief(); renderSend();
   }
   function renderExclude() {
     const list = splitList(cur().exclude).map(x => x.toLowerCase());
     exWrap.querySelectorAll(".chip").forEach(b => b.setAttribute("aria-pressed", list.includes(b.dataset.tag.toLowerCase())));
     const n = len(cur().exclude), max = LIMITS[store.limit].exclude;
     $("#excludeCount").textContent = `${n} / ${max} 文字`;
+    renderSend();
   }
   function renderLyrics() {
     const text = ta.value, a = analyze(text);
@@ -1106,6 +1238,7 @@ details.alt textarea{width:100%;min-height:110px;font-family:var(--f-mono);font-
     if (a.jpTags) notes.push(`日本語のタグが ${a.jpTags} 個あります。英語のタグにすると歌われにくくなります。`);
     if (a.longLines) notes.push(`30文字を超える長い行が ${a.longLines} 行あります。分けると譜割りが安定しやすいです。`);
     if (len(text) > LIMITS[store.limit].lyrics) notes.push("歌詞が文字数の上限を超えています。");
+    renderSend();
     lastReads = findReads(text, cur().readIgnore);
     $("#readsGroup").hidden = !lastReads.length;
     $("#reads").innerHTML = lastReads.map((r, i) => `<div class="read"><b>${esc(r.w + r.ctx)}</b><span class="n">${r.n}か所</span>` +
@@ -1131,7 +1264,7 @@ details.alt textarea{width:100%;min-height:110px;font-family:var(--f-mono);font-
     $("#bLine").value = b.line; $("#bEng").value = b.eng; $("#bRhyme").checked = b.rhyme; $("#bKana").checked = b.kana; $("#bTitles").checked = b.titles;
     renderTitle();
   }
-  function renderTitle() { $("#titleCount").textContent = len(cur().title) + " 文字"; }
+  function renderTitle() { $("#titleCount").textContent = len(cur().title) + " 文字"; renderSend(); }
   function renderAll() { renderProjects(); fillFields(); renderStyle(); renderExclude(); renderLyrics(); renderExport(); renderIdeas(); renderAltPrompt(); }
 
   /* ---------- field events ---------- */
@@ -1162,7 +1295,7 @@ details.alt textarea{width:100%;min-height:110px;font-family:var(--f-mono);font-
   });
 
   /* ---------- projects ---------- */
-  $("#proj").addEventListener("change", e => { store.currentId = e.target.value; save(); renderAll(); });
+  $("#proj").addEventListener("change", e => { store.currentId = e.target.value; save(); sent.clear(); renderAll(); });
   $("#btnNew").addEventListener("click", () => { const p = blank(); store.projects.push(p); store.currentId = p.id; save(); renderAll(); $("#title").focus(); });
   $("#btnDup").addEventListener("click", () => {
     const src = cur(), p = normalize(JSON.parse(JSON.stringify(src)));
