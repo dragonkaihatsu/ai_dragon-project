@@ -232,6 +232,13 @@ a.btn{text-decoration:none;display:inline-block}
 .chord span{font-family:var(--f-mono);font-size:11px;color:var(--muted)}
 .harm-words{font-family:var(--f-mono);font-size:12px;background:var(--sunk);border:1px dashed var(--muted);border-radius:4px;padding:8px 10px;overflow-wrap:anywhere}
 
+/* combos */
+.combos{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,320px),1fr));gap:12px}
+.combo{border:1px solid var(--accent);border-radius:4px;padding:14px;display:flex;flex-direction:column;gap:8px;background:var(--sheet)}
+.combo h4{margin:0;font-size:17px}
+.combo p{margin:0;font-size:13px}
+.combo ul{margin:0;padding-left:1.2em;font-size:12px;color:var(--muted);display:flex;flex-direction:column;gap:2px}
+
 /* tips + footer */
 .tips{background:var(--sheet);border:1px solid var(--rule);border-radius:6px;padding:16px 20px}
 .tips h2{font-size:13px;letter-spacing:.1em;margin:0 0 8px;color:var(--muted)}
@@ -309,6 +316,10 @@ a.btn{text-decoration:none;display:inline-block}
 
   <section class="sheet" aria-labelledby="ideaTape">
     <div class="tape" id="ideaTape">IDEA<small>イメージから決める</small></div>
+    <div class="group">
+      <h3>組み合わせセット<span class="count">スタイル・構成・コード・歌詞までまとめて新しい曲にする</span></h3>
+      <div class="combos" id="combos"></div>
+    </div>
     <div class="idea-grid">
       <div class="form">
         <div class="f"><label class="lbl" for="iImage">イメージ・情景</label>
@@ -1616,6 +1627,55 @@ a.btn{text-decoration:none;display:inline-block}
     toast("コードを歌詞に書き込みました。[Chorus] などのタグのすぐ下に置くと、そのセクションのヒントになります", "元に戻す", () => setLyrics(prev));
   });
   $("#btnHarmCopy").addEventListener("click", () => copyText(progChords(false).join(" "), "コード進行"));
+
+  /* ---------- combos ---------- */
+  const COMBOS = [{
+    name: "田中秀和風アイドル × クラブ",
+    summary: "aug やおしゃれなコードで動くアイドルソングを、4つ打ちとスラップベースでクラブ仕様に。ピアノで落としてから転調した大サビで締める、約2分の曲。",
+    includes: ["STYLE: アイドルポップ・ハウス・フューチャーファンク・渋谷系、148 BPM、F メジャー", "LYRICS: オリジナル歌詞「ハレノチ☆ステージ」（盛り上がり・小節数・コードのヒントつき）", "DYNAMICS: 落ちサビ → スネアロール → 転調した大サビ（目標 2分）", "HARMONY: aug の分数コード", "PROMPT: 田中秀和さんの曲で多い歌詞の雰囲気 + 女の子の等身大"],
+    data: {
+      title: "ハレノチ☆ステージ",
+      style: ["idol pop","J-pop","house","future funk","Shibuya-kei","uplifting","cute","energetic","female vocals","vocal harmonies","piano","slap bass","brass section","synth","four-on-the-floor","catchy hook","jazzy chord progressions","augmented chords","sudden key change"],
+      custom: "group vocals, chromatic chord movement, sidechained synth chords, punchy brass hits",
+      bpm: 148, key: "F major", exclude: "rap, heavy distortion, metal, lo-fi", target: 120,
+      harmony: { key: 5, prog: 5 },
+      brief: { theme: "くもり空の月曜日から、初めてのステージに立つ日までを、天気予報にたとえて描くデビューの歌", words: "ハレノチ, ステージ, ミラーボール, デビューデイ", pov: "watashi", struct: "cur", line: "short", eng: "some", rhyme: true, kana: true, titles: false, essence: ["dream","daily","play","call","eng","bitter","girl"] },
+      lyrics: [
+        "[Intro: mid-energy, 4 bars]", "(Hey! Ready? 1, 2, 3!)", "",
+        "[Verse 1: soft, 8 bars]", "[Chord Progression: F - Faug - F6 - F7]", "月曜日の あさ七時", "てんきよほうは くもりぞら", "寝ぐせのまま 鏡の前", "ひみつの練習 ワンツースリー", "",
+        "[Pre-Chorus: mid-energy, rising tension, 4 bars]", "[Chord Progression: Bm7b5 - Bbm6 - Am7 - D7b9]", "ドキドキ ドレミ ドアをあけたら", "ちょっとだけ こわいけど", "(せーの!)", "",
+        "[Chorus: powerful, 8 bars]", "[Chord Progression: Bbmaj7 - C7 - Am7 - Dm]", "ハレノチ☆ステージ きみと踊ろう", "予報なんて ぜんぶ ぬりかえて", "Shine on! 光る ミラーボール", "きょうが わたしの デビューデイ", "(ハイ! ハイ! ハイハイハイ!)", "",
+        "[Verse 2: soft, 8 bars]", "火曜 水曜 木曜も", "レッスン帰りの コンビニで", "あまいプリンと 作戦会議", "あしたのわたしに 負けないで", "",
+        "[Pre-Chorus: mid-energy, rising tension, 4 bars]", "ドキドキ ドレミ ドアをあけたら", "ちょっとだけ こわいけど", "(せーの!)", "",
+        "[Chorus: powerful, 8 bars]", "ハレノチ☆ステージ きみと踊ろう", "予報なんて ぜんぶ ぬりかえて", "Shine on! 光る ミラーボール", "きょうが わたしの デビューデイ", "(ハイ! ハイ! ハイハイハイ!)", "",
+        "[Break: soft, piano breakdown, 8 bars]", "[Chord Progression: Gm7 - Gm7/C - C7b9 - Fmaj7 - Am7/D - Dm7]", "ほんとはね ないしょだよ", "ふるえる手を ぎゅっとにぎった", "",
+        "[Build-up: snare roll build, 4 bars]", "[Shout]", "Somebody scream!", "",
+        "[Chorus: explosive, key change up, 8 bars]", "ハレノチ☆ステージ どこまでも", "きみの声が いちばん星", "Shine on! 光れ ミラーボール", "きょうも あしたも デビューデイ", "(ハイ! ハイ! ハイハイハイ!)", "",
+        "[Outro: soft, 4 bars]", "", "[End]", ""
+      ].join("\n")
+    }
+  }];
+  $("#combos").innerHTML = COMBOS.map((c, i) => `<article class="combo"><h4>${esc(c.name)}</h4><p>${esc(c.summary)}</p>
+    <ul>${c.includes.map(x => `<li>${esc(x)}</li>`).join("")}</ul>
+    <div class="row"><button class="btn primary" type="button" data-combo="${i}">新しい曲として作る</button></div></article>`).join("");
+  $("#combos").addEventListener("click", e => {
+    const b = e.target.closest("[data-combo]"); if (!b) return;
+    const c = COMBOS[+b.dataset.combo], d = c.data;
+    const conv = sanitizeIdea({ tags: { any: d.style }, extra: [] }, "preset");
+    const extra = [...conv.extra, ...splitList(d.custom)];
+    const p = normalize({
+      title: d.title, tags: conv.tags, jp: true, bpm: d.bpm, bpmOn: true, key: d.key, custom: [...new Set(extra)].join(", "),
+      exclude: d.exclude, lyrics: d.lyrics, target: d.target, harmony: { ...d.harmony }, brief: JSON.parse(JSON.stringify(d.brief))
+    });
+    p.id = uid(); p.updated = Date.now();
+    const prevId = store.currentId;
+    store.projects.push(p); store.currentId = p.id; save(); sent.clear(); renderAll();
+    window.scrollTo({ top: 0, behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+    toast(`「${d.title}」を新しい曲として作りました`, "元に戻す", () => {
+      store.projects = store.projects.filter(x => x.id !== p.id);
+      store.currentId = store.projects.some(x => x.id === prevId) ? prevId : store.projects[0].id; save(); renderAll();
+    });
+  });
 
   /* ---------- rendering ---------- */
   function meter(el, n, max) {
