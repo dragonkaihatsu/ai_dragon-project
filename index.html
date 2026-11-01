@@ -136,6 +136,25 @@ select,input[type=text],input[type=number]{background:var(--sheet);border:1px so
 .notes li::before{content:"";flex:none;width:7px;height:7px;border-radius:50%;background:var(--warn);transform:translateY(-1px)}
 .notes li.ok::before{background:var(--ok)}
 
+/* japanese mode + reads */
+.jp-toggle{background:var(--sunk);border:1px solid var(--rule);border-radius:4px;padding:8px 12px;flex-wrap:wrap;gap:4px 8px}
+.jp-toggle small{font-size:11px}
+.reads{display:flex;flex-direction:column;gap:8px}
+.read{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:13px}
+.read b{font-size:15px;min-width:4em}
+.read .n{font-family:var(--f-mono);font-size:11px;color:var(--muted);margin-right:4px}
+
+/* lyrics brief */
+.brief-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:24px;align-items:start}
+@media (max-width:960px){.brief-grid{grid-template-columns:minmax(0,1fr)}}
+.form{display:flex;flex-direction:column;gap:14px;min-width:0}
+.form .f{display:flex;flex-direction:column;gap:6px;min-width:0}
+.form .lbl{font-size:12px;font-weight:700;letter-spacing:.08em;color:var(--muted)}
+.form textarea{width:100%;min-height:84px;background:var(--sheet);border:1px solid var(--rule);border-radius:4px;padding:8px;resize:vertical;line-height:1.6}
+.form select{width:100%}
+.pair{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
+#briefOut{min-height:440px;overflow:auto;resize:vertical;font-size:12.5px;line-height:1.75}
+
 /* tips + footer */
 .tips{background:var(--sheet);border:1px solid var(--rule);border-radius:6px;padding:16px 20px}
 .tips h2{font-size:13px;letter-spacing:.1em;margin:0 0 8px;color:var(--muted)}
@@ -220,6 +239,8 @@ select,input[type=text],input[type=number]{background:var(--sheet);border:1px so
         <button class="btn ghost" id="btnClearStyle" type="button">選択をクリア</button>
       </div>
 
+      <label class="check jp-toggle" for="jpOn"><input type="checkbox" id="jpOn"> 日本語の歌として指定する <small class="mono hint">Japanese vocals を追加</small></label>
+
       <div id="catGroups" class="group-list" style="display:flex;flex-direction:column;gap:18px"></div>
 
       <div class="group">
@@ -283,9 +304,43 @@ select,input[type=text],input[type=number]{background:var(--sheet);border:1px so
         </div>
         <div class="stats" id="stats"></div>
         <ul class="notes" id="notes"></ul>
+        <div class="group" id="readsGroup" hidden>
+          <h3>読みに注意する漢字<span class="count">かなを選ぶと歌詞の中をまとめて置き換え</span></h3>
+          <div class="reads" id="reads"></div>
+        </div>
       </div>
     </section>
   </main>
+
+  <section class="sheet" aria-labelledby="briefTape">
+    <div class="tape" id="briefTape">PROMPT<small>作詞プロンプト</small></div>
+    <p class="hint">ChatGPT や Claude などの AI に、Suno 用の日本語の歌詞を書いてもらうための指示文を作ります。上で選んだスタイルと構成が自動で入ります。できた歌詞は LYRICS に貼り付けてください。</p>
+    <div class="brief-grid">
+      <div class="form">
+        <div class="f"><label class="lbl" for="bTheme">テーマ・ストーリー</label><textarea id="bTheme" placeholder="例: 夏の終わり、海沿いの道を一人で走りながら、言えなかった気持ちを思い出す"></textarea></div>
+        <div class="f"><label class="lbl" for="bWords">入れたい言葉（カンマ区切り）</label><input type="text" id="bWords" class="textin" placeholder="例: 夕凪, ハイウェイ, サングラス" autocomplete="off"></div>
+        <div class="pair">
+          <div class="f"><label class="lbl" for="bPov">語り手</label><select id="bPov">
+            <option value="auto">おまかせ</option><option value="boku">僕</option><option value="watashi">私</option><option value="ore">俺</option><option value="atashi">あたし</option><option value="third">三人称（物語）</option><option value="duo">男女の掛け合い</option>
+          </select></div>
+          <div class="f"><label class="lbl" for="bStruct">構成</label><select id="bStruct"></select></div>
+          <div class="f"><label class="lbl" for="bLine">1行の長さ</label><select id="bLine">
+            <option value="short">短め（7〜11文字）</option><option value="mid">ふつう（10〜16文字）</option><option value="long">長め（14〜22文字）</option>
+          </select></div>
+          <div class="f"><label class="lbl" for="bEng">英語のフレーズ</label><select id="bEng">
+            <option value="none">入れない</option><option value="some">サビに少し</option><option value="more">多め</option>
+          </select></div>
+        </div>
+        <label class="check" for="bRhyme"><input type="checkbox" id="bRhyme"> 韻を踏む（特にサビ）</label>
+        <label class="check" for="bKana"><input type="checkbox" id="bKana"> 読みが複数ある漢字はひらがなで書かせる</label>
+        <label class="check" for="bTitles"><input type="checkbox" id="bTitles"> タイトル案も出してもらう</label>
+      </div>
+      <div class="out">
+        <div class="out-head"><b>LYRICS PROMPT</b><button class="btn primary" data-copy="brief" type="button">プロンプトをコピー</button></div>
+        <textarea id="briefOut" readonly aria-label="作詞プロンプト"></textarea>
+      </div>
+    </div>
+  </section>
 
   <aside class="tips">
     <h2>日本語で作るときのコツ</h2>
@@ -295,6 +350,7 @@ select,input[type=text],input[type=number]{background:var(--sheet);border:1px so
       <li><code>( )</code> で囲んだ行はコーラスや合いの手として歌われやすい。</li>
       <li>スタイルは先頭の要素ほど効きやすい。いちばん大事なジャンルを最初に置く。</li>
       <li>1行を短めにすると譜割りが安定する。サビは同じ文字数の行をそろえると覚えやすい。</li>
+      <li>「日本語の歌として指定する」をオンにすると、スタイルに Japanese vocals（女性・男性ボーカルを選んでいれば Japanese female vocals など）が入る。</li>
       <li>歌わせたくない区間は <code>[Instrumental]</code> や <code>[Guitar Solo]</code> だけを置いて、歌詞を書かない。</li>
     </ul>
   </aside>
@@ -316,6 +372,10 @@ select,input[type=text],input[type=number]{background:var(--sheet);border:1px so
       ["シンセウェイヴ","synthwave"],["Lo-fi ヒップホップ","lo-fi hip hop"],["トラップ","trap"],["R&B","R&B"],["ファンク","funk"],["ジャズ","jazz"],
       ["ボサノバ","bossa nova"],["バラード","ballad"],["フォーク","acoustic folk"],["アイドル","idol pop"],["演歌","enka"],["オーケストラ","orchestral"],["アンビエント","ambient"]
     ]},
+    { id: "jp", ja: "和・日本らしさ", items: [
+      ["歌謡曲","kayokyoku"],["昭和歌謡","Showa-era kayokyoku"],["渋谷系","Shibuya-kei"],["ヴィジュアル系","visual kei"],["アニメOP風","anime opening"],
+      ["和風","traditional Japanese"],["三味線","shamisen"],["琴","koto"],["尺八","shakuhachi"],["和太鼓","taiko drums"],["祭囃子","matsuri festival rhythm"]
+    ]},
     { id: "mood", ja: "ムード", items: [
       ["明るい","uplifting"],["爽やか","refreshing"],["エネルギッシュ","energetic"],["切ない","bittersweet"],["ノスタルジック","nostalgic"],["憂鬱","melancholic"],
       ["エモーショナル","emotional"],["夢見心地","dreamy"],["チル","chill"],["ロマンチック","romantic"],["壮大","epic"],["ダーク","dark"],["攻撃的","aggressive"],["かわいい","cute"]
@@ -327,7 +387,7 @@ select,input[type=text],input[type=number]{background:var(--sheet);border:1px so
     { id: "inst", ja: "楽器", items: [
       ["ピアノ","piano"],["エレピ","rhodes piano"],["アコギ","acoustic guitar"],["エレキ","electric guitar"],["シンセ","synth"],["ストリングス","strings"],
       ["ヴァイオリン","violin"],["ブラス","brass section"],["サックス","saxophone"],["スラップベース","slap bass"],["808","808 bass"],["オルガン","organ"],
-      ["チップチューン","chiptune"],["三味線","shamisen"],["琴","koto"],["和太鼓","taiko drums"]
+      ["チップチューン","chiptune"]
     ]},
     { id: "prod", ja: "サウンド・制作", items: [
       ["高音質","polished production"],["Lo-fi","lo-fi"],["アナログ感","analog warmth"],["リバーブ深め","reverb-heavy"],["ワイドなステレオ","wide stereo"],
@@ -352,11 +412,13 @@ select,input[type=text],input[type=number]{background:var(--sheet);border:1px so
   /* ---------- storage ---------- */
   const KEY = "tracksheet.v1";
   const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
-  const blank = () => ({ id: uid(), title: "", tags: { genre: [], mood: [], vocal: [], inst: [], prod: [] }, bpm: 100, bpmOn: false, key: "", custom: "", exclude: "", lyrics: "", updated: Date.now() });
+  const blank = () => ({ id: uid(), title: "", tags: { genre: [], jp: [], mood: [], vocal: [], inst: [], prod: [] }, jp: true, bpm: 100, bpmOn: false, key: "", custom: "", exclude: "", lyrics: "", readIgnore: [],
+    brief: { theme: "", words: "", pov: "auto", struct: "cur", line: "mid", eng: "some", rhyme: true, kana: true, titles: true }, updated: Date.now() });
   const sample = () => Object.assign(blank(), {
     sample: true, title: "夕凪ハイウェイ",
     tags: { genre: ["city pop"], mood: ["nostalgic","bittersweet"], vocal: ["female vocals","airy vocals"], inst: ["rhodes piano","slap bass","brass section"], prod: ["80s","analog warmth"] },
     bpm: 104, bpmOn: true, key: "F major", custom: "sunset drive, groovy bassline", exclude: "rap, heavy distortion",
+    brief: { theme: "夏の終わり、海沿いのハイウェイを一人で走りながら、言えなかった想いを思い出す", words: "夕凪, ハイウェイ, サングラス" },
     lyrics: `[Intro]
 
 [Verse 1]
@@ -425,9 +487,16 @@ select,input[type=text],input[type=number]{background:var(--sheet);border:1px so
     saveTimer = setTimeout(() => { try { localStorage.setItem(KEY, JSON.stringify(store)); } catch (e) {} }, 250);
   }
   function normalize(p) {
-    const b = blank();
-    const out = Object.assign(b, p || {});
+    const out = Object.assign(blank(), p || {});
     out.tags = Object.assign(blank().tags, (p && p.tags) || {});
+    out.brief = Object.assign(blank().brief, (p && p.brief) || {});
+    if (!Array.isArray(out.readIgnore)) out.readIgnore = [];
+    const moved = ["shamisen", "koto", "taiko drums"];
+    out.tags.inst = out.tags.inst.filter(t => {
+      if (!moved.includes(t)) return true;
+      if (!out.tags.jp.includes(t)) out.tags.jp.push(t);
+      return false;
+    });
     return out;
   }
   store.projects = store.projects.map(normalize);
@@ -437,8 +506,15 @@ select,input[type=text],input[type=number]{background:var(--sheet);border:1px so
   /* ---------- composition ---------- */
   const splitList = s => (s || "").split(/[,、\n]/).map(x => x.trim()).filter(Boolean);
   function styleText(p) {
-    const parts = [];
-    CATS.forEach(c => parts.push(...(p.tags[c.id] || [])));
+    const parts = [], v = p.tags.vocal;
+    const jpOn = p.jp && !v.includes("instrumental");
+    const gender = v.includes("female vocals") || v.includes("male vocals");
+    CATS.forEach(c => {
+      let list = p.tags[c.id] || [];
+      if (c.id === "vocal" && jpOn) list = list.map(t => (t === "female vocals" || t === "male vocals") ? "Japanese " + t : t);
+      parts.push(...list);
+      if (c.id === "jp" && jpOn && !gender) parts.push("Japanese vocals");
+    });
     if (p.bpmOn) parts.push(p.bpm + " BPM");
     if (p.key) parts.push(p.key);
     parts.push(...splitList(p.custom));
@@ -601,6 +677,108 @@ select,input[type=text],input[type=number]{background:var(--sheet);border:1px so
     return { secs, jpTags, longLines, loose, lyricLines, chars };
   }
 
+  /* ---------- japanese readings ---------- */
+  const READS = [
+    ["今日",["きょう","こんにち"]],["明日",["あした","あす"]],["昨日",["きのう","さくじつ"]],["一日",["いちにち","ついたち"]],
+    ["上手",["じょうず","うわて"]],["下手",["へた","しもて"]],["人気",["にんき","ひとけ"]],["大事",["だいじ","おおごと"]],
+    ["永遠",["えいえん","とわ"]],["運命",["うんめい","さだめ"]],["未来",["みらい","あす"]],["宇宙",["うちゅう","そら"]],
+    ["瞬間",["しゅんかん","とき"]],["本気",["ほんき","マジ"]],["地球",["ちきゅう","ほし"]],["故郷",["ふるさと","こきょう"]],
+    ["最中",["さなか","さいちゅう"]],["身体",["からだ","しんたい"]],["一緒",["いっしょ"]],
+    ["空",["そら","から","あ"]],["方",["かた","ほう"]],["間",["あいだ","ま"]],["何",["なに","なん"]],["心",["こころ","しん"]],
+    ["君",["きみ","くん"]],["私",["わたし","わたくし"]],["後",["あと","うしろ","のち"]],
+    ["辛",["つら","から"]],["抱",["だ","いだ"]],["開",["ひら","あ"]],["行",["い","ゆ"]],["生",["い","う","なま"]],
+    ["優",["やさ","すぐ"]],["描",["えが","か"]],["幸",["しあわ","さいわ"]],["止",["と","や"]],["触",["ふ","さわ"]],["温",["あたた","ぬく"]]
+  ];
+  const KJ = "\\u3400-\\u9FFF\\uF900-\\uFAFF々〆";
+  const readRe = w => new RegExp("(?<![" + KJ + "])" + w + "(?![" + KJ + "])", "g");
+  const isTagLine = l => /^\s*\[[^\]]*\]\s*$/.test(l);
+  function findReads(text, ignore) {
+    const body = text.split("\n").filter(l => !isTagLine(l)).join("\n");
+    const out = [];
+    READS.forEach(([w, cands]) => {
+      if (ignore.includes(w)) return;
+      const re = readRe(w); let m, n = 0, ctx = "";
+      while ((m = re.exec(body))) { if (!n) ctx = (body.slice(m.index + w.length).match(/^[ぁ-ゖー]{0,3}/) || [""])[0]; n++; }
+      if (n) out.push({ w, cands, n, ctx });
+    });
+    return out;
+  }
+  let lastReads = [];
+  $("#reads").addEventListener("click", e => {
+    const b = e.target.closest("[data-read]"); if (!b) return;
+    const r = lastReads[+b.dataset.read], p = cur(); if (!r) return;
+    if (b.dataset.ignore) {
+      p.readIgnore.push(r.w); touch(); renderLyrics();
+      toast(`「${r.w}」はこのままにします`, "元に戻す", () => { p.readIgnore = p.readIgnore.filter(x => x !== r.w); touch(); renderLyrics(); });
+      return;
+    }
+    const prev = ta.value;
+    setLyrics(prev.split("\n").map(l => isTagLine(l) ? l : l.replace(readRe(r.w), b.dataset.kana)).join("\n"));
+    toast(`「${r.w}」を「${b.dataset.kana}」に置き換えました（${r.n}か所）`, "元に戻す", () => setLyrics(prev));
+  });
+
+  /* ---------- lyrics prompt ---------- */
+  const ALL_JA = new Map();
+  CATS.forEach(c => c.items.forEach(([ja, en]) => ALL_JA.set(en, ja)));
+  const POV = { auto: "", boku: "一人称は「僕」", watashi: "一人称は「私」", ore: "一人称は「俺」", atashi: "一人称は「あたし」",
+    third: "三人称（物語として語る）", duo: "男女の掛け合い。パートの頭に [Male Vocal] / [Female Vocal] を置いて分ける" };
+  const LINE_LEN = { short: "7〜11", mid: "10〜16", long: "14〜22" };
+  const ENG = { none: "英語は使わず、日本語だけで書く", some: "英語のフレーズはサビに1〜2か所だけ、短く入れる", more: "英語のフレーズを各セクションに自然に混ぜる（全体の2〜3割まで）" };
+  const linesFor = (name, kind) => /build/i.test(name) ? "2行（盛り上がっていく短いフレーズ）"
+    : /drop/i.test(name) ? "歌詞なし、または短いフレーズを1〜2行"
+    : NO_LYRIC_OK.test(name) ? "歌詞なし（タグだけ置く）"
+    : ({ verse: "4行", pre: "2〜4行", chorus: "4〜6行", bridge: "2〜4行" }[kind] || "2〜4行");
+  function structFor(p) {
+    if (p.brief.struct === "cur") { const s = analyze(p.lyrics).secs; if (s.length) return s.map(x => x.name); }
+    return (TEMPLATES[+p.brief.struct] || TEMPLATES[0]).secs;
+  }
+  function briefText(p) {
+    const b = p.brief, ja = list => list.map(t => ALL_JA.get(t) || t).join("・");
+    const L = ["あなたはプロの作詞家です。AI 作曲サービス Suno で歌わせる、日本語の歌詞を書いてください。", "", "## 曲の情報"];
+    L.push(`- タイトル: ${p.title.trim() || "未定"}`);
+    const g = ja([...p.tags.genre, ...p.tags.jp]); if (g) L.push(`- ジャンル: ${g}`);
+    if (p.tags.mood.length) L.push(`- 雰囲気: ${ja(p.tags.mood)}`);
+    if (p.tags.vocal.length) L.push(`- ボーカル: ${ja(p.tags.vocal)}`);
+    if (p.bpmOn) L.push(`- テンポ: ${p.bpm} BPM`);
+    const st = styleText(p); if (st) L.push(`- Suno のスタイル指定: ${st}`);
+    L.push(`- テーマ: ${b.theme.trim() || "曲の雰囲気に合うテーマを自由に考える"}`);
+    if (POV[b.pov]) L.push(`- 語り手: ${POV[b.pov]}`);
+    const w = splitList(b.words); if (w.length) L.push(`- 必ず入れる言葉: ${w.join("、")}`);
+    L.push("", "## 構成", "次の順番でセクションを書いてください。各セクションの最初の行に、英語のタグを [ ] で囲んで1行だけ置きます。");
+    const seen = new Set();
+    structFor(p).forEach(name => {
+      const kind = kindOf(name) || "verse", key = name.toLowerCase().replace(/\s*\d+$/, "");
+      let note = linesFor(name, kind);
+      if (kind === "chorus" && seen.has(key) && !NO_LYRIC_OK.test(name)) note = "1回目と同じ歌詞（最後のサビは少し変えてもよい）";
+      seen.add(key);
+      L.push(`[${name}] … ${note}`);
+    });
+    L.push("", "## 書き方のルール");
+    L.push("- セクションタグは英語のまま、上の表記どおりに書く（日本語のタグは歌われてしまうため）");
+    L.push(`- 1行はおよそ ${LINE_LEN[b.line]} 文字。同じセクションの行は長さをそろえる`);
+    L.push("- サビには曲の核になるフレーズを入れ、覚えやすく繰り返す");
+    if (b.rhyme) L.push("- 行末の母音をそろえて韻を踏む（特にサビ）");
+    L.push(`- ${ENG[b.eng]}`);
+    if (b.kana) L.push("- 読み方が複数ある漢字（今日、明日、空、辛い、方、間、心 など）はひらがなで書く");
+    L.push("- コーラスや合いの手は ( ) で囲む");
+    L.push("- 歌詞のない区間はタグだけを置き、説明文や記号を入れない");
+    L.push("", "## 出力", "Suno の Lyrics 欄にそのまま貼れるよう、タグと歌詞だけを出力してください。解説は不要です。");
+    if (b.titles) L.push("歌詞のあとに区切り線（---）を入れ、タイトル案を3つ挙げてください。");
+    return L.join("\n");
+  }
+  const bStruct = $("#bStruct");
+  bStruct.innerHTML = `<option value="cur">いまの歌詞のタグ</option>` + TEMPLATES.map((t, i) => `<option value="${i}">${t.name}</option>`).join("");
+  function renderBrief() {
+    const p = cur();
+    bStruct.options[0].textContent = analyze(p.lyrics).secs.length ? "いまの歌詞のタグ" : "いまの歌詞のタグ（なし→J-POP 王道）";
+    $("#briefOut").value = briefText(p);
+  }
+  [["bTheme", "theme", "input"], ["bWords", "words", "input"], ["bPov", "pov", "change"], ["bStruct", "struct", "change"], ["bLine", "line", "change"], ["bEng", "eng", "change"]]
+    .forEach(([id, k, ev]) => $("#" + id).addEventListener(ev, e => { cur().brief[k] = e.target.value; touch(); renderBrief(); }));
+  [["bRhyme", "rhyme"], ["bKana", "kana"], ["bTitles", "titles"]]
+    .forEach(([id, k]) => $("#" + id).addEventListener("change", e => { cur().brief[k] = e.target.checked; touch(); renderBrief(); }));
+  $("#jpOn").addEventListener("change", e => { cur().jp = e.target.checked; touch(); renderStyle(); });
+
   /* ---------- rendering ---------- */
   function meter(el, n, max) {
     const pct = max ? Math.min(100, n / max * 100) : 0;
@@ -622,6 +800,7 @@ select,input[type=text],input[type=number]{background:var(--sheet);border:1px so
     out.placeholder = "上のタグを選ぶと、ここに Suno の「Style of Music」に貼る文字列ができます";
     autosize(out);
     meter($("#styleMeter"), len(s), LIMITS[store.limit].style);
+    renderBrief();
   }
   function renderExclude() {
     const list = splitList(cur().exclude).map(x => x.toLowerCase());
@@ -652,6 +831,12 @@ select,input[type=text],input[type=number]{background:var(--sheet);border:1px so
     if (a.jpTags) notes.push(`日本語のタグが ${a.jpTags} 個あります。英語のタグにすると歌われにくくなります。`);
     if (a.longLines) notes.push(`30文字を超える長い行が ${a.longLines} 行あります。分けると譜割りが安定しやすいです。`);
     if (len(text) > LIMITS[store.limit].lyrics) notes.push("歌詞が文字数の上限を超えています。");
+    lastReads = findReads(text, cur().readIgnore);
+    $("#readsGroup").hidden = !lastReads.length;
+    $("#reads").innerHTML = lastReads.map((r, i) => `<div class="read"><b>${esc(r.w + r.ctx)}</b><span class="n">${r.n}か所</span>` +
+      r.cands.map(c => `<button type="button" class="tagbtn" data-read="${i}" data-kana="${esc(c)}"><span>${esc(c + r.ctx)}</span></button>`).join("") +
+      `<button type="button" class="tagbtn" data-read="${i}" data-ignore="1"><em>このまま</em></button></div>`).join("");
+    renderBrief();
     $("#notes").innerHTML = notes.length ? notes.map(n => `<li>${esc(n)}</li>`).join("") : (text.trim() ? `<li class="ok">構成に気になる点はありません。</li>` : "");
   }
   function renderProjects() {
@@ -664,6 +849,10 @@ select,input[type=text],input[type=number]{background:var(--sheet);border:1px so
     const p = cur();
     $("#title").value = p.title; $("#bpm").value = p.bpm; $("#bpmOn").checked = p.bpmOn; $("#key").value = p.key;
     $("#custom").value = p.custom; $("#exclude").value = p.exclude; ta.value = p.lyrics; $("#limitMode").value = store.limit;
+    $("#jpOn").checked = p.jp;
+    const b = p.brief;
+    $("#bTheme").value = b.theme; $("#bWords").value = b.words; $("#bPov").value = b.pov; $("#bStruct").value = b.struct;
+    $("#bLine").value = b.line; $("#bEng").value = b.eng; $("#bRhyme").checked = b.rhyme; $("#bKana").checked = b.kana; $("#bTitles").checked = b.titles;
     renderTitle();
   }
   function renderTitle() { $("#titleCount").textContent = len(cur().title) + " 文字"; }
@@ -690,7 +879,7 @@ select,input[type=text],input[type=number]{background:var(--sheet);border:1px so
     const p = cur();
     const prev = JSON.stringify({ tags: p.tags, bpm: p.bpm, bpmOn: p.bpmOn, key: p.key });
     const count = { genre: 1, mood: 2, vocal: 1, inst: 2, prod: 1 };
-    CATS.forEach(c => p.tags[c.id] = pick(c.items.filter(i => !NO_RANDOM.has(i[1])), count[c.id]).map(i => i[1]));
+    CATS.forEach(c => p.tags[c.id] = pick(c.items.filter(i => !NO_RANDOM.has(i[1])), count[c.id] || 0).map(i => i[1]));
     p.bpm = 70 + Math.floor(Math.random() * 17) * 5; p.bpmOn = true;
     touch(); fillFields(); renderStyle();
     toast("スタイルをおまかせで組みました", "元に戻す", () => { Object.assign(p, JSON.parse(prev)); touch(); fillFields(); renderStyle(); });
@@ -750,7 +939,7 @@ select,input[type=text],input[type=number]{background:var(--sheet);border:1px so
   document.addEventListener("click", e => {
     const b = e.target.closest("[data-copy]"); if (!b) return;
     const p = cur();
-    const map = { title: [p.title, "タイトル"], style: [styleText(p), "スタイル"], exclude: [p.exclude, "除外スタイル"], lyrics: [p.lyrics, "歌詞"] };
+    const map = { title: [p.title, "タイトル"], style: [styleText(p), "スタイル"], exclude: [p.exclude, "除外スタイル"], lyrics: [p.lyrics, "歌詞"], brief: [briefText(p), "作詞プロンプト"] };
     const [t, w] = map[b.dataset.copy]; copyText(t, w);
   });
   $("#btnCopyAll").addEventListener("click", () => {
