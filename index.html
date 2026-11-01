@@ -432,6 +432,7 @@ a.btn{text-decoration:none;display:inline-block}
         <option value="0">指定なし</option><option value="90">1分30秒以内</option><option value="120">2分以内（音ゲーサイズ）</option><option value="150">2分30秒以内</option><option value="180">3分以内</option>
       </select>
       <button class="btn ghost" id="btnFit" type="button">目標に収める</button>
+      <button class="btn ghost" id="btnShort" type="button">短く終わる工夫を入れる</button>
     </div>
     <div class="strip-scroll"><div class="console" id="console"></div></div>
   </section>
@@ -486,6 +487,7 @@ a.btn{text-decoration:none;display:inline-block}
       <li data-k="exclude"><span class="num">3</span><div><b>Exclude styles</b><span class="state"></span></div><button class="btn" type="button" data-send="exclude">コピー</button></li>
       <li data-k="title"><span class="num">4</span><div><b>Song Title</b><span class="state"></span></div><button class="btn" type="button" data-send="title">コピー</button></li>
     </ol>
+    <p class="hint" id="cropHint"></p>
     <div class="row">
       <a class="btn primary" href="https://suno.com/create" target="_blank" rel="noopener noreferrer">Suno の作成画面を開く ↗</a>
       <button class="btn ghost" id="btnSendReset" type="button">コピー済みの印を消す</button>
@@ -503,7 +505,7 @@ a.btn{text-decoration:none;display:inline-block}
       <li>「日本語の歌として指定する」をオンにすると、スタイルに Japanese vocals（女性・男性ボーカルを選んでいれば Japanese female vocals など）が入る。</li>
       <li>Suno で同じ設定のまま何回か生成すると、毎回ちがうメロディになる。気に入るまで生成し直すのが近道。</li>
       <li>緩急は「タグの演出指定」「スタイルの言葉（dynamic build など）」「歌詞の密度」の3つで作る。静かな所は言葉を少なく、サビは短く強いフレーズに。</li>
-      <li>Suno は長さを厳密には守らない。2分以内にしたいときは、セクションと歌詞を減らし、最後に [End] を置く。それでも長いときは生成後に Suno の編集で切る。</li>
+      <li>Suno は小節数や長さを厳密には守らない。2分以内にしたいときは、セクションを減らして間奏の繰り返しを1回までにし、最後に [End] を置く。確実に収めたいときは、生成後に Crop Song で切る。</li>
       <li>歌わせたくない区間は <code>[Instrumental]</code> や <code>[Guitar Solo]</code> だけを置いて、歌詞を書かない。</li>
     </ul>
   </aside>
@@ -525,7 +527,7 @@ a.btn{text-decoration:none;display:inline-block}
       ["ポップパンク","pop punk"],["メタル","metal"],["EDM","EDM"],["フューチャーベース","future bass"],["ハウス","house"],["ドラムンベース","drum and bass"],
       ["シンセウェイヴ","synthwave"],["Lo-fi ヒップホップ","lo-fi hip hop"],["トラップ","trap"],["R&B","R&B"],["ファンク","funk"],["ジャズ","jazz"],
       ["ボサノバ","bossa nova"],["バラード","ballad"],["フォーク","acoustic folk"],["アイドル","idol pop"],["演歌","enka"],["オーケストラ","orchestral"],["アンビエント","ambient"],
-      ["ハードコア","hardcore techno"],["ガバ","gabber"],["J-CORE","J-core"],["トランスコア","trancecore"],["ハッピーハードコア","happy hardcore"],["ブレイクコア","breakcore"],["ジャングル","jungle"],["リキッドDnB","liquid drum and bass"]
+      ["ハードコア","hardcore techno"],["ガバ","gabber"],["J-CORE","J-core"],["トランスコア","trancecore"],["ハッピーハードコア","happy hardcore"],["ブレイクコア","breakcore"],["ジャングル","jungle"],["リキッドDnB","liquid drum and bass"],["トランス","trance"],["ハンズアップ","hands up"]
     ]},
     { id: "jp", ja: "和・日本らしさ", items: [
       ["歌謡曲","kayokyoku"],["昭和歌謡","Showa-era kayokyoku"],["渋谷系","Shibuya-kei"],["ヴィジュアル系","visual kei"],["アニメOP風","anime opening"],
@@ -533,7 +535,7 @@ a.btn{text-decoration:none;display:inline-block}
     ]},
     { id: "mood", ja: "ムード", items: [
       ["明るい","uplifting"],["爽やか","refreshing"],["エネルギッシュ","energetic"],["切ない","bittersweet"],["ノスタルジック","nostalgic"],["憂鬱","melancholic"],
-      ["エモーショナル","emotional"],["夢見心地","dreamy"],["チル","chill"],["ロマンチック","romantic"],["壮大","epic"],["ダーク","dark"],["攻撃的","aggressive"],["かわいい","cute"]
+      ["エモーショナル","emotional"],["夢見心地","dreamy"],["チル","chill"],["ロマンチック","romantic"],["壮大","epic"],["ダーク","dark"],["攻撃的","aggressive"],["かわいい","cute"],["多幸感","euphoric"]
     ]},
     { id: "vocal", ja: "ボーカル", items: [
       ["女性ボーカル","female vocals"],["男性ボーカル","male vocals"],["デュエット","duet"],["合唱","choir"],["ハモリ多め","vocal harmonies"],["透明感","airy vocals"],
@@ -563,7 +565,7 @@ a.btn{text-decoration:none;display:inline-block}
     ["浮遊感",["floating ethereal pads"]],["水・雨のよう",["water drop plucks","rain ambience"]],["キラキラ",["glittering bell arpeggios"]],["ピアノが綺麗",["glassy emotional piano"]],
     ["切ない",["wistful melody"]],["天使みたいな声",["angelic vocal chops"]],["疾走感",["driving breakbeats"]],["細かく刻む",["chopped amen breaks","rapid snare rolls"]],
     ["ドラムが暴れる",["glitchy drum edits","stuttering breaks"]],["深い低音",["deep sub bass"]],["轟音・ノイズ",["shoegaze guitar wall"]],["急に止まる",["sudden silence breaks"]],
-    ["一気に開ける",["euphoric drops"]],["夜明けっぽい",["dawn-like atmosphere"]]
+    ["一気に開ける",["euphoric drops"]],["手を上げたくなる",["hands-up anthem lead"]],["多幸感",["euphoric supersaw chords"]],["夜明けっぽい",["dawn-like atmosphere"]]
   ];
   const TEMPLATES = [
     { name: "J-POP 王道", secs: ["Intro","Verse 1","Pre-Chorus","Chorus","Verse 2","Pre-Chorus","Chorus","Bridge","Chorus","Outro"] },
@@ -571,6 +573,8 @@ a.btn{text-decoration:none;display:inline-block}
     { name: "サビ始まり", secs: ["Chorus","Verse 1","Pre-Chorus","Chorus","Instrumental","Chorus","End"] },
     { name: "EDM", secs: ["Intro","Verse 1","Build-up","Drop","Break","Verse 2","Build-up","Drop","Outro"] },
     { name: "ヒップホップ", secs: ["Intro","Verse 1","Hook","Verse 2","Hook","Verse 3","Hook","Outro"] },
+    { name: "ハンズアップ2分", bpm: 149, secs: ["Intro: mid-energy, 8 bars","Build-up: rising tension, 8 bars","Drop: powerful, 16 bars","Break: soft, piano breakdown, 8 bars","Build-up: snare roll build, 8 bars","Drop: explosive, anthem lead, 16 bars","End"],
+      text: "[Intro: mid-energy, 8 bars]\n\n[Build-up: rising tension, 8 bars]\n[Riser]\n\n[Drop: powerful, 16 bars]\n[Air Horn]\n\n[Break: soft, piano breakdown, 8 bars]\n\n[Build-up: snare roll build, 8 bars]\n[Shout]\nSomebody scream!\n\n[Drop: explosive, anthem lead, 16 bars]\n[Air Horn]\n\n[End]\n" },
     { name: "音ゲー2分", bpm: 172, secs: ["Intro: very soft, 8 bars","Build-up: mid-energy, rising tension, 8 bars","Drop: explosive, 16 bars","Break: very soft, sudden stop, 8 bars","Build-up: rising tension, 8 bars","Drop: explosive, 16 bars","Outro: soft, fade out, 4 bars","End"],
       text: "[Intro: very soft, 8 bars]\n[Vocal Chop]\n\n[Build-up: mid-energy, rising tension, 8 bars]\n[Riser]\n\n[Shout]\nSomebody scream!\n\n[Drop: explosive, 16 bars]\n[Air Horn]\n\n[Break: very soft, sudden stop, 8 bars]\n\n[Build-up: rising tension, 8 bars]\n[Riser]\n\n[Drop: explosive, 16 bars]\n[Air Horn]\n\n[Outro: soft, fade out, 4 bars]\n\n[End]\n" }
   ];
@@ -592,6 +596,7 @@ a.btn{text-decoration:none;display:inline-block}
     ["ガバホップ","ヒップホップのノリとガバの歪んだキックを合わせた歌もの。",["gabber","J-core","energetic","cute","female vocals","rap","synth","808 bass","half-time groove"],160,["gabba hop","chanted hook","distorted kick"]],
     ["ダーク和ハードコア","読経のような声と不穏な空気が続く、暗いハードコア。",["hardcore techno","dark","aggressive","traditional Japanese","taiko drums","synth","reverb-heavy"],175,["Buddhist chant samples","industrial textures","eerie atmosphere"]],
     ["清涼ブレイクコア","静かでクールな空気の中を、細かく刻んだブレイクが走り抜ける。",["breakcore","liquid drum and bass","dreamy","melancholic","airy vocals","piano","synth","amen break","vocal chops","air horns","reverb-heavy","wide stereo"],172,["crisp clean highs","glittering bell arpeggios","sparse arrangement","sudden silence breaks"]],
+    ["ハンズアップ","手を上げたくなる多幸感。ピアノで落としてから主旋律が全開で戻ってくる。",["hands up","trance","J-core","euphoric","uplifting","energetic","synth","four-on-the-floor","piano","catchy hook","polished production"],149,["supersaw anthem lead","offbeat bass","snare roll build-up","piano breakdown","hands-up climax"]],
     ["アイドル","コールを入れたくなる、元気でかわいいアイドルポップ。",["idol pop","future bass","cute","energetic","uplifting","female vocals","vocal harmonies","synth","catchy hook","polished production"],160,["call and response chant"]]
   ].map(([name, summary, t, bpm, extra]) => sanitizeIdea({ name, summary, tags: { any: t }, bpm, extra }, "preset"));
 
@@ -1289,6 +1294,11 @@ a.btn{text-decoration:none;display:inline-block}
         : sent.has(k) ? "コピー済み" : max ? `${n.toLocaleString()} / ${max.toLocaleString()} 文字` : `${n} 文字`;
     });
   }
+  function renderCrop() {
+    const t = cur().target;
+    $("#cropHint").textContent = "長くなりすぎたら: Suno で曲の「…」→ Edit → Crop Song で残す範囲を選ぶと、短くした曲が新しく保存されます（Pro / Premier、PC 版）。"
+      + (t ? `目標は ${fmtSec(t)} なので、最後のドロップが終わる所（${fmtSec(t)} より前）で切ってください。` : "");
+  }
   $("#steps").addEventListener("click", e => {
     const b = e.target.closest("[data-send]"); if (!b) return;
     const k = b.dataset.send; copyText(sendValue(k).trim(), SEND_NAME[k]);
@@ -1301,7 +1311,7 @@ a.btn{text-decoration:none;display:inline-block}
   const ENERGY_JA = ["とても静か", "静か", "中くらい", "力強い", "最高潮"];
   const ARR = [["ピアノと歌だけ","piano and vocals only"],["アコースティック","stripped-back acoustic"],["ドラム抜き","no drums"],["ハーフタイム","half-time feel"],
     ["倍テン","double-time drums"],["盛り上げていく","rising tension"],["落ちサビ→全開","soft start into full band"],["転調（上げ）","key change up"],
-    ["一瞬止める","sudden stop"],["合唱を重ねる","with choir"],["掛け合い","call and response"],["アカペラ","a cappella"],["フェードアウト","fade out"]];
+    ["一瞬止める","sudden stop"],["ピアノのブレイクダウン","piano breakdown"],["スネアロールで溜める","snare roll build"],["主旋律を全開で","anthem lead"],["合唱を重ねる","with choir"],["掛け合い","call and response"],["アカペラ","a cappella"],["フェードアウト","fade out"]];
   function parseTag(name) {
     const i = name.indexOf(":"), base = (i < 0 ? name : name.slice(0, i)).trim();
     const mods = i < 0 ? [] : name.slice(i + 1).split(",").map(x => x.trim()).filter(Boolean);
@@ -1332,16 +1342,19 @@ a.btn{text-decoration:none;display:inline-block}
     { id: "contrast", name: "静と動", desc: "Aメロはドラム抜きで静かに、サビで一気に爆発" },
     { id: "ochisabi", name: "落ちサビ→大サビ", desc: "最後のサビを静かに始めて、途中から全開に" },
     { id: "keychange", name: "ラスサビ転調", desc: "最後のサビで半音〜全音上げる" },
-    { id: "stop", name: "ためて爆発", desc: "最後のサビの直前で一瞬止めてから入る" }
+    { id: "stop", name: "ためて爆発", desc: "最後のサビの直前で一瞬止めてから入る" },
+    { id: "handzup", name: "ハンズアップ型", desc: "ピアノで一度落とし、スネアロールで溜めて、主旋律を全開で戻す" }
   ];
   function planFor(secs, type) {
-    const cs = secs.map((s, i) => s.kind === "chorus" ? i : -1).filter(i => i >= 0), lastC = cs.length ? cs[cs.length - 1] : -1;
+    const isPeak = s => s.kind === "chorus" || /drop/i.test(s.base);
+    const cs = secs.map((s, i) => isPeak(s) ? i : -1).filter(i => i >= 0), lastC = cs.length ? cs[cs.length - 1] : -1;
     let vN = 0;
     return secs.map((s, i) => {
       const k = s.kind, last = i === lastC;
       let e = { edge: 2, verse: 2, pre: 3, chorus: 4, bridge: 2, inst: 3 }[k] || 3, a = "";
       if (k === "verse" && ++vN > 1) e = 3;
       if (k === "edge" && i === secs.length - 1) e = 1;
+      if (/drop/i.test(s.base)) e = 4;
       if (k === "pre") a = "rising tension";
       if (last) e = 5;
       if (type === "build" && k === "bridge") a = "half-time feel";
@@ -1349,6 +1362,12 @@ a.btn{text-decoration:none;display:inline-block}
       if (type === "ochisabi") { if (last) a = "soft start into full band"; if (k === "bridge") e = 2; }
       if (type === "keychange" && last) a = "key change up";
       if (type === "stop" && i === lastC - 1) a = "sudden stop";
+      if (type === "handzup") {
+        if (k === "edge" && i === 0) e = 3;
+        if ((k === "bridge" || /break/i.test(s.base)) && i < lastC) { e = 2; a = "piano breakdown"; }
+        if (k === "pre" && i === lastC - 1) a = "snare roll build";
+        if (last) a = "anthem lead";
+      }
       return { e, a };
     });
   }
@@ -1361,7 +1380,7 @@ a.btn{text-decoration:none;display:inline-block}
     if (!secs.length) { toast("先に LYRICS に [Verse] や [Chorus] のタグを入れてください"); return; }
     const prev = ta.value, edits = new Map();
     if (b.dataset.dyn === "reset") secs.forEach((s, i) => edits.set(i, t => { t.energy = 0; t.arr = ""; }));
-    else planFor(secs, b.dataset.dyn).forEach((pl, i) => edits.set(i, t => { t.energy = pl.e; t.arr = pl.a; }));
+    else planFor(secs, b.dataset.dyn).forEach((pl, i) => { if (!/^end\b/i.test(secs[i].base)) edits.set(i, t => { t.energy = pl.e; t.arr = pl.a; }); });
     rewriteSections(edits);
     if (ta.value !== prev) toast(b.dataset.dyn === "reset" ? "盛り上がりと演出の指定を外しました" : `「${b.textContent}」をタグに書き込みました`, "元に戻す", () => setLyrics(prev));
   });
@@ -1384,7 +1403,7 @@ a.btn{text-decoration:none;display:inline-block}
     $("#btnFit").disabled = !p.target;
   }
   document.querySelectorAll("[data-target-select]").forEach(sel => sel.addEventListener("change", e => {
-    cur().target = +e.target.value; touch(); renderLen(analyze(ta.value).secs); renderBrief(); renderAltPrompt();
+    cur().target = +e.target.value; touch(); renderLen(analyze(ta.value).secs); renderCrop(); renderBrief(); renderAltPrompt();
   }));
   $("#btnFit").addEventListener("click", () => {
     const p = cur(), secs = analyze(ta.value).secs; if (!p.target || !secs.length) return;
@@ -1397,10 +1416,20 @@ a.btn{text-decoration:none;display:inline-block}
     if (after > p.target) toast(`これ以上は短くできませんでした（${fmtSec(after)}）。セクションを減らしてください`, "元に戻す", () => setLyrics(prev));
     else toast(`小節数を減らして ${fmtSec(after)} にしました`, "元に戻す", () => setLyrics(prev));
   });
+  $("#btnShort").addEventListener("click", () => {
+    const secs = analyze(ta.value).secs; if (!secs.length) { toast("先に構成のタグを入れてください"); return; }
+    const prev = ta.value, edits = new Map();
+    secs.forEach((s, i) => { if (s.kind === "edge" && !/^end\b/i.test(s.base) && !s.lines) edits.set(i, t => { t.bars = Math.min(barsOf(s, t) || 4, 4); }); });
+    rewriteSections(edits);
+    let v = ta.value.replace(/\s*\[Fade Out[^\]]*\]\s*$/i, "\n").trimEnd();
+    if (!/\[End\]$/i.test(v)) v += "\n\n[End]";
+    setLyrics(v + "\n");
+    toast(ta.value === prev ? "もう短く終わる形になっています" : "イントロ・アウトロを4小節にして、最後に [End] を置きました", ta.value === prev ? null : "元に戻す", ta.value === prev ? null : () => setLyrics(prev));
+  });
   const KIND_VAR = { verse: "--sec-verse", pre: "--sec-pre", chorus: "--sec-chorus", bridge: "--sec-bridge", inst: "--sec-inst", edge: "--muted" };
   function renderDyn(secs) {
     const box = $("#console");
-    renderLen(secs);
+    renderLen(secs); renderCrop();
     if (!secs.length) { box.innerHTML = `<p class="dyn-empty">LYRICS に [Verse] や [Chorus] のタグを入れるか構成テンプレを選ぶと、ここにセクションが並び、盛り上がりを調整できます。</p>`; return; }
     box.innerHTML = secs.map((s, i) => {
       const t = parseTag(s.name), nm = shortName(s.base, s.kind);
