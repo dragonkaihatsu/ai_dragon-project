@@ -494,6 +494,10 @@ a.btn{text-decoration:none;display:inline-block}
             <option value="none">入れない</option><option value="some">サビに少し</option><option value="more">多め</option>
           </select></div>
         </div>
+        <div class="f"><span class="lbl">歌詞のエッセンス</span>
+          <div class="feel-chips" id="essChips"></div>
+          <div class="row"><button class="btn ghost" id="btnEssTanaka" type="button">田中秀和さんの曲で多い雰囲気をまとめて選ぶ</button></div>
+          <p class="hint" id="essNote"></p></div>
         <label class="check" for="bRhyme"><input type="checkbox" id="bRhyme"> 韻を踏む（特にサビ）</label>
         <label class="check" for="bKana"><input type="checkbox" id="bKana"> 読みが複数ある漢字はひらがなで書かせる</label>
         <label class="check" for="bTitles"><input type="checkbox" id="bTitles"> タイトル案も出してもらう</label>
@@ -682,7 +686,7 @@ a.btn{text-decoration:none;display:inline-block}
   const KEY = "tracksheet.v1";
   const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
   const blank = () => ({ id: uid(), title: "", tags: { genre: [], jp: [], mood: [], vocal: [], inst: [], prod: [] }, jp: true, bpm: 100, bpmOn: false, key: "", custom: "", exclude: "", lyrics: "", readIgnore: [],
-    brief: { theme: "", words: "", pov: "auto", struct: "cur", line: "mid", eng: "some", rhyme: true, kana: true, titles: true },
+    brief: { theme: "", words: "", pov: "auto", struct: "cur", line: "mid", eng: "some", rhyme: true, kana: true, titles: true, essence: [] },
     idea: { image: "", ref: "", feel: "" }, ideas: [], target: 0, harmony: { key: -1, prog: 0 }, updated: Date.now() });
   const sample = () => Object.assign(blank(), {
     sample: true, title: "夕凪ハイウェイ",
@@ -756,8 +760,11 @@ a.btn{text-decoration:none;display:inline-block}
   let saveTimer;
   function save() {
     clearTimeout(saveTimer);
-    saveTimer = setTimeout(() => { try { localStorage.setItem(KEY, JSON.stringify(store)); } catch (e) {} }, 250);
+    saveTimer = setTimeout(flush, 250);
   }
+  function flush() { clearTimeout(saveTimer); try { localStorage.setItem(KEY, JSON.stringify(store)); } catch (e) {} }
+  window.addEventListener("pagehide", flush);
+  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden") flush(); });
   function normalize(p) {
     const out = Object.assign(blank(), p || {});
     out.tags = Object.assign(blank().tags, (p && p.tags) || {});
@@ -1013,6 +1020,36 @@ a.btn{text-decoration:none;display:inline-block}
     third: "三人称（物語として語る）", duo: "男女の掛け合い。パートの頭に [Male Vocal] / [Female Vocal] を置いて分ける" };
   const LINE_LEN = { short: "7〜11", mid: "10〜16", long: "14〜22" };
   const ENG = { none: "英語は使わず、日本語だけで書く", some: "英語のフレーズはサビに1〜2か所だけ、短く入れる", more: "英語のフレーズを各セクションに自然に混ぜる（全体の2〜3割まで）" };
+  const ESSENCE = [
+    { id: "dream", ja: "夢とステージ", rule: "夢や憧れ、ステージに立つまでの一歩を、まっすぐで前向きな言葉で描く" },
+    { id: "daily", ja: "日常のときめき", rule: "曜日・季節・暦・放課後など、日常の小さな出来事をきらきらした言葉に変える" },
+    { id: "play", ja: "言葉遊び・語呂", rule: "語呂合わせ、ひらがなとカタカナの遊び、擬音、早口になる言葉の連なりを入れて、口に出して楽しい歌詞にする" },
+    { id: "call", ja: "掛け声・コール", rule: "サビ前やサビに、みんなで一緒に叫べる短い掛け声や合いの手を ( ) で入れる" },
+    { id: "hot", ja: "青春の熱さ", rule: "勝負やスポーツのような熱さを、勢いのある動詞と短く言い切るフレーズで出す" },
+    { id: "eng", ja: "英語の決めフレーズ", rule: "サビの頭か終わりに、覚えやすい短い英語の決めフレーズを置く" },
+    { id: "cheer", ja: "背中を押す", rule: "聴いている人に「きみ」と語りかけ、背中を押す言葉で締める" },
+    { id: "bitter", ja: "一滴の切なさ", rule: "明るい曲の中に一行だけ不安や切なさを混ぜ、そこから前を向く" },
+    { id: "girl", ja: "女の子の等身大", rule: "女の子の目線で、照れ・強がり・本音が入り混じる等身大の気持ちを書く" }
+  ];
+  const TANAKA_ESS = ["dream", "daily", "play", "call", "eng", "bitter"];
+  const essBox = $("#essChips");
+  essBox.innerHTML = ESSENCE.map(e => `<button type="button" class="chip" data-ess="${e.id}" title="${esc(e.rule)}">${esc(e.ja)}</button>`).join("");
+  function renderEss() {
+    const sel = cur().brief.essence;
+    essBox.querySelectorAll("[data-ess]").forEach(b => b.setAttribute("aria-pressed", String(sel.includes(b.dataset.ess))));
+    $("#essNote").textContent = sel.length ? "選んだ雰囲気: " + ESSENCE.filter(e => sel.includes(e.id)).map(e => e.rule).join(" ／ ") : "選ぶと、その雰囲気で書くよう作詞プロンプトに入ります。";
+  }
+  essBox.addEventListener("click", e => {
+    const b = e.target.closest("[data-ess]"); if (!b) return;
+    const list = cur().brief.essence, id = b.dataset.ess, i = list.indexOf(id);
+    if (i >= 0) list.splice(i, 1); else list.push(id);
+    touch(); renderEss(); renderBrief();
+  });
+  $("#btnEssTanaka").addEventListener("click", () => {
+    const br = cur().brief, prev = [...br.essence];
+    br.essence = [...TANAKA_ESS]; touch(); renderEss(); renderBrief();
+    toast("アイドル・アニソン系の雰囲気をまとめて選びました", "元に戻す", () => { br.essence = prev; touch(); renderEss(); renderBrief(); });
+  });
   const linesFor = (name, kind) => /build/i.test(name) ? "2行（盛り上がっていく短いフレーズ）"
     : /drop/i.test(name) ? "歌詞なし、または短いフレーズを1〜2行"
     : NO_LYRIC_OK.test(name) ? "歌詞なし（タグだけ置く）"
@@ -1043,7 +1080,10 @@ a.btn{text-decoration:none;display:inline-block}
       seen.add(key);
       L.push(`[${name}] … ${note}`);
     });
+    const ess = ESSENCE.filter(e => (b.essence || []).includes(e.id));
+    if (ess.length) { L.push("", "## 歌詞の雰囲気"); ess.forEach(e => L.push(`- ${e.rule}`)); }
     L.push("", "## 書き方のルール");
+    L.push("- 既存の曲の歌詞やフレーズは使わず、すべて新しく書く");
     L.push("- セクションタグは英語のまま、上の表記どおりに書く（日本語のタグは歌われてしまうため。: のあとの演出指定もそのまま残す）");
     L.push("- 静かなセクションは言葉数を少なく、盛り上がるセクションは力強く短いフレーズにして、緩急をつける");
     L.push(`- 1行はおよそ ${LINE_LEN[b.line]} 文字。同じセクションの行は長さをそろえる`);
@@ -1652,6 +1692,7 @@ a.btn{text-decoration:none;display:inline-block}
     $("#iImage").value = p.idea.image; $("#iRef").value = p.idea.ref; $("#iFeel").value = p.idea.feel;
     const b = p.brief;
     $("#bTheme").value = b.theme; $("#bWords").value = b.words; $("#bPov").value = b.pov; $("#bStruct").value = b.struct;
+    renderEss();
     $("#bLine").value = b.line; $("#bEng").value = b.eng; $("#bRhyme").checked = b.rhyme; $("#bKana").checked = b.kana; $("#bTitles").checked = b.titles;
     renderTitle();
   }
