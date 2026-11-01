@@ -497,7 +497,8 @@ a.btn{text-decoration:none;display:inline-block}
       ["J-POP","J-pop"],["シティポップ","city pop"],["アニソン","anime"],["ボカロ","vocaloid"],["ロック","rock"],["J-ROCK","Japanese rock"],
       ["ポップパンク","pop punk"],["メタル","metal"],["EDM","EDM"],["フューチャーベース","future bass"],["ハウス","house"],["ドラムンベース","drum and bass"],
       ["シンセウェイヴ","synthwave"],["Lo-fi ヒップホップ","lo-fi hip hop"],["トラップ","trap"],["R&B","R&B"],["ファンク","funk"],["ジャズ","jazz"],
-      ["ボサノバ","bossa nova"],["バラード","ballad"],["フォーク","acoustic folk"],["アイドル","idol pop"],["演歌","enka"],["オーケストラ","orchestral"],["アンビエント","ambient"]
+      ["ボサノバ","bossa nova"],["バラード","ballad"],["フォーク","acoustic folk"],["アイドル","idol pop"],["演歌","enka"],["オーケストラ","orchestral"],["アンビエント","ambient"],
+      ["ハードコア","hardcore techno"],["ガバ","gabber"],["J-CORE","J-core"],["トランスコア","trancecore"],["ハッピーハードコア","happy hardcore"],["ブレイクコア","breakcore"]
     ]},
     { id: "jp", ja: "和・日本らしさ", items: [
       ["歌謡曲","kayokyoku"],["昭和歌謡","Showa-era kayokyoku"],["渋谷系","Shibuya-kei"],["ヴィジュアル系","visual kei"],["アニメOP風","anime opening"],
@@ -548,6 +549,10 @@ a.btn{text-decoration:none;display:inline-block}
     ["宇宙・近未来","広い宇宙を漂うような、きらめくシンセサウンド。",["synthwave","ambient","dreamy","epic","airy vocals","synth","wide stereo","reverb-heavy"],110,["outer space","arpeggiated synths"]],
     ["和風ファンタジー","神社の奥に広がる異世界のような、壮大な和のサウンド。",["orchestral","traditional Japanese","koto","shakuhachi","taiko drums","epic","dreamy","female vocals","airy vocals","strings","wide stereo"],96,["ancient shrine","mystical"]],
     ["昭和レトロ","ストリングスとブラスが華やかな、昭和の歌謡曲。",["Showa-era kayokyoku","nostalgic","romantic","female vocals","brass section","strings","organ","analog warmth"],120,["retro 70s","disco strings"]],
+    ["ハードコアレイブ","90年代のオールドスクールなレイブを、ガバキックで今の音に鳴らす。",["hardcore techno","gabber","J-core","energetic","aggressive","synth","punchy drums","90s"],170,["oldschool hardcore rave","hoover synth","rave stabs","breakbeat fills","MC hype shouts"]],
+    ["トランスコア","歪んだキックの上で、きらびやかなトランスのリードが鳴る。",["trancecore","gabber","J-core","uplifting","energetic","epic","synth","four-on-the-floor","polished production"],180,["euphoric supersaw lead","distorted kick","rave piano"]],
+    ["ガバホップ","ヒップホップのノリとガバの歪んだキックを合わせた歌もの。",["gabber","J-core","energetic","cute","female vocals","rap","synth","808 bass","half-time groove"],160,["gabba hop","chanted hook","distorted kick"]],
+    ["ダーク和ハードコア","読経のような声と不穏な空気が続く、暗いハードコア。",["hardcore techno","dark","aggressive","traditional Japanese","taiko drums","synth","reverb-heavy"],175,["Buddhist chant samples","industrial textures","eerie atmosphere"]],
     ["アイドル","コールを入れたくなる、元気でかわいいアイドルポップ。",["idol pop","future bass","cute","energetic","uplifting","female vocals","vocal harmonies","synth","catchy hook","polished production"],160,["call and response chant"]]
   ].map(([name, summary, t, bpm, extra]) => sanitizeIdea({ name, summary, tags: { any: t }, bpm, extra }, "preset"));
 
