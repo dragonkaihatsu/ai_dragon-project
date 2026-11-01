@@ -217,6 +217,21 @@ a.btn{text-decoration:none;display:inline-block}
 .feel-chips .chip{font-size:12px;padding:3px 8px}
 .idea .struct{font-family:var(--f-mono);font-size:11px;color:var(--muted);line-height:1.6}
 
+/* harmony */
+.harm-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:24px;align-items:start}
+@media (max-width:960px){.harm-grid{grid-template-columns:minmax(0,1fr)}}
+.progs{display:flex;flex-direction:column;gap:6px}
+.prog{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;border:1px solid var(--rule);border-radius:4px;background:var(--sheet);padding:8px 10px;cursor:pointer}
+.prog b{font-size:13px}
+.prog small{font-size:11.5px;color:var(--muted)}
+.prog[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 3px 0 0 var(--accent)}
+.prog .who{font-size:10.5px;color:var(--accent);font-family:var(--f-mono)}
+.chords{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,104px),1fr));gap:6px}
+.chord{border:1px solid var(--rule);border-radius:4px;padding:10px 8px;background:var(--sunk);display:flex;flex-direction:column;gap:2px;min-width:0}
+.chord b{font-family:var(--f-mono);font-size:17px;font-weight:600;overflow-wrap:anywhere}
+.chord span{font-family:var(--f-mono);font-size:11px;color:var(--muted)}
+.harm-words{font-family:var(--f-mono);font-size:12px;background:var(--sunk);border:1px dashed var(--muted);border-radius:4px;padding:8px 10px;overflow-wrap:anywhere}
+
 /* tips + footer */
 .tips{background:var(--sheet);border:1px solid var(--rule);border-radius:6px;padding:16px 20px}
 .tips h2{font-size:13px;letter-spacing:.1em;margin:0 0 8px;color:var(--muted)}
@@ -231,7 +246,7 @@ a.btn{text-decoration:none;display:inline-block}
 .panel .cols > div{display:flex;flex-direction:column;gap:8px;min-width:0}
 
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:10px 16px;border-radius:6px;font-size:14px;display:flex;gap:14px;align-items:center;z-index:20;max-width:calc(100% - 32px);box-shadow:0 6px 24px rgba(0,0,0,.2)}
-.toast button{background:none;border:none;color:var(--tape);font-weight:700;cursor:pointer;padding:0;font-size:14px}
+.toast button{background:none;border:none;color:var(--tape);font-weight:700;cursor:pointer;padding:0;font-size:14px;white-space:nowrap;flex:none}
 @media (prefers-reduced-motion: reduce){*{transition:none!important}}
 </style>
 
@@ -437,6 +452,29 @@ a.btn{text-decoration:none;display:inline-block}
     <div class="strip-scroll"><div class="console" id="console"></div></div>
   </section>
 
+  <section class="sheet" aria-labelledby="harmTape">
+    <div class="tape" id="harmTape">HARMONY<small>コード進行</small></div>
+    <p class="hint">進行とキーを選ぶと実際のコードを表示します。Suno はコードを正確には守らないので、進行の雰囲気を英語にして STYLE に足すのが基本です。歌詞へのコード書き込みは、効くこともある実験的な方法です。</p>
+    <div class="harm-grid">
+      <div class="progs" id="progs"></div>
+      <div class="form">
+        <div class="row">
+          <label class="field-inline" for="hKey">キー</label>
+          <select id="hKey"></select>
+          <span class="hint" id="hKeyNote"></span>
+        </div>
+        <div class="chords" id="chords"></div>
+        <p class="hint" id="progDesc"></p>
+        <div class="f"><span class="lbl">STYLE に足す言葉</span><div class="harm-words" id="harmWords"></div></div>
+        <div class="row">
+          <button class="btn primary" id="btnHarmStyle" type="button">STYLE に足す</button>
+          <button class="btn ghost" id="btnHarmLyrics" type="button">歌詞のカーソル位置に書き込む（実験的）</button>
+          <button class="btn ghost" id="btnHarmCopy" type="button">コードをコピー</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <section class="sheet" aria-labelledby="briefTape">
     <div class="tape" id="briefTape">PROMPT<small>作詞プロンプト</small></div>
     <p class="hint">ChatGPT や Claude などの AI に、Suno 用の日本語の歌詞を書いてもらうための指示文を作ります。上で選んだスタイルと構成が自動で入ります。できた歌詞は LYRICS に貼り付けてください。</p>
@@ -527,7 +565,7 @@ a.btn{text-decoration:none;display:inline-block}
       ["ポップパンク","pop punk"],["メタル","metal"],["EDM","EDM"],["フューチャーベース","future bass"],["ハウス","house"],["ドラムンベース","drum and bass"],
       ["シンセウェイヴ","synthwave"],["Lo-fi ヒップホップ","lo-fi hip hop"],["トラップ","trap"],["R&B","R&B"],["ファンク","funk"],["ジャズ","jazz"],
       ["ボサノバ","bossa nova"],["バラード","ballad"],["フォーク","acoustic folk"],["アイドル","idol pop"],["演歌","enka"],["オーケストラ","orchestral"],["アンビエント","ambient"],
-      ["ハードコア","hardcore techno"],["ガバ","gabber"],["J-CORE","J-core"],["トランスコア","trancecore"],["ハッピーハードコア","happy hardcore"],["ブレイクコア","breakcore"],["ジャングル","jungle"],["リキッドDnB","liquid drum and bass"],["トランス","trance"],["ハンズアップ","hands up"]
+      ["ハードコア","hardcore techno"],["ガバ","gabber"],["J-CORE","J-core"],["トランスコア","trancecore"],["ハッピーハードコア","happy hardcore"],["ブレイクコア","breakcore"],["ジャングル","jungle"],["リキッドDnB","liquid drum and bass"],["トランス","trance"],["ハンズアップ","hands up"],["フューチャーファンク","future funk"],["フレンチハウス","french house"]
     ]},
     { id: "jp", ja: "和・日本らしさ", items: [
       ["歌謡曲","kayokyoku"],["昭和歌謡","Showa-era kayokyoku"],["渋谷系","Shibuya-kei"],["ヴィジュアル系","visual kei"],["アニメOP風","anime opening"],
@@ -551,7 +589,8 @@ a.btn{text-decoration:none;display:inline-block}
       ["パンチのあるドラム","punchy drums"],["4つ打ち","four-on-the-floor"],["ハーフタイム","half-time groove"],["ミニマル","minimal"],
       ["80年代","80s"],["90年代","90s"],["キャッチーなフック","catchy hook"],
       ["だんだん盛り上がる","dynamic build"],["サビで爆発","explosive chorus"],["静と動の対比","quiet-loud dynamics"],["転調あり","key change"],
-      ["アーメンブレイク","amen break"],["ボーカルチョップ","vocal chops"],["エアホーン","air horns"],["煽りボイス","hype vocal samples"]
+      ["アーメンブレイク","amen break"],["ボーカルチョップ","vocal chops"],["エアホーン","air horns"],["煽りボイス","hype vocal samples"],
+      ["おしゃれなコード","jazzy chord progressions"],["augコード","augmented chords"],["急な転調","sudden key change"]
     ]}
   ];
   const NO_RANDOM = new Set(["instrumental","rap","choir","duet"]);
@@ -565,7 +604,7 @@ a.btn{text-decoration:none;display:inline-block}
     ["浮遊感",["floating ethereal pads"]],["水・雨のよう",["water drop plucks","rain ambience"]],["キラキラ",["glittering bell arpeggios"]],["ピアノが綺麗",["glassy emotional piano"]],
     ["切ない",["wistful melody"]],["天使みたいな声",["angelic vocal chops"]],["疾走感",["driving breakbeats"]],["細かく刻む",["chopped amen breaks","rapid snare rolls"]],
     ["ドラムが暴れる",["glitchy drum edits","stuttering breaks"]],["深い低音",["deep sub bass"]],["轟音・ノイズ",["shoegaze guitar wall"]],["急に止まる",["sudden silence breaks"]],
-    ["一気に開ける",["euphoric drops"]],["手を上げたくなる",["hands-up anthem lead"]],["多幸感",["euphoric supersaw chords"]],["夜明けっぽい",["dawn-like atmosphere"]]
+    ["一気に開ける",["euphoric drops"]],["コードがおしゃれ",["jazzy extended chords"]],["半音で動く",["chromatic chord movement"]],["急に転調する",["sudden key change before the chorus"]],["ベースが歌う",["melodic slap bass"]],["ブラスが華やか",["punchy brass hits"]],["手を上げたくなる",["hands-up anthem lead"]],["多幸感",["euphoric supersaw chords"]],["夜明けっぽい",["dawn-like atmosphere"]]
   ];
   const TEMPLATES = [
     { name: "J-POP 王道", secs: ["Intro","Verse 1","Pre-Chorus","Chorus","Verse 2","Pre-Chorus","Chorus","Bridge","Chorus","Outro"] },
@@ -597,6 +636,7 @@ a.btn{text-decoration:none;display:inline-block}
     ["ダーク和ハードコア","読経のような声と不穏な空気が続く、暗いハードコア。",["hardcore techno","dark","aggressive","traditional Japanese","taiko drums","synth","reverb-heavy"],175,["Buddhist chant samples","industrial textures","eerie atmosphere"]],
     ["清涼ブレイクコア","静かでクールな空気の中を、細かく刻んだブレイクが走り抜ける。",["breakcore","liquid drum and bass","dreamy","melancholic","airy vocals","piano","synth","amen break","vocal chops","air horns","reverb-heavy","wide stereo"],172,["crisp clean highs","glittering bell arpeggios","sparse arrangement","sudden silence breaks"]],
     ["ハンズアップ","手を上げたくなる多幸感。ピアノで落としてから主旋律が全開で戻ってくる。",["hands up","trance","J-core","euphoric","uplifting","energetic","synth","four-on-the-floor","piano","catchy hook","polished production"],149,["supersaw anthem lead","offbeat bass","snare roll build-up","piano breakdown","hands-up climax"]],
+    ["コード感クラブポップ","複雑でおしゃれなコードを、4つ打ちとスラップベースでキャッチーに踊らせる。",["house","future funk","Shibuya-kei","J-pop","uplifting","energetic","female vocals","vocal harmonies","piano","slap bass","brass section","synth","four-on-the-floor","catchy hook","jazzy chord progressions","augmented chords","sudden key change"],128,["chromatic chord movement","sidechained synth chords","punchy brass hits"]],
     ["アイドル","コールを入れたくなる、元気でかわいいアイドルポップ。",["idol pop","future bass","cute","energetic","uplifting","female vocals","vocal harmonies","synth","catchy hook","polished production"],160,["call and response chant"]]
   ].map(([name, summary, t, bpm, extra]) => sanitizeIdea({ name, summary, tags: { any: t }, bpm, extra }, "preset"));
 
@@ -643,7 +683,7 @@ a.btn{text-decoration:none;display:inline-block}
   const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
   const blank = () => ({ id: uid(), title: "", tags: { genre: [], jp: [], mood: [], vocal: [], inst: [], prod: [] }, jp: true, bpm: 100, bpmOn: false, key: "", custom: "", exclude: "", lyrics: "", readIgnore: [],
     brief: { theme: "", words: "", pov: "auto", struct: "cur", line: "mid", eng: "some", rhyme: true, kana: true, titles: true },
-    idea: { image: "", ref: "", feel: "" }, ideas: [], target: 0, updated: Date.now() });
+    idea: { image: "", ref: "", feel: "" }, ideas: [], target: 0, harmony: { key: -1, prog: 0 }, updated: Date.now() });
   const sample = () => Object.assign(blank(), {
     sample: true, title: "夕凪ハイウェイ",
     tags: { genre: ["city pop"], mood: ["nostalgic","bittersweet"], vocal: ["female vocals","airy vocals"], inst: ["rhodes piano","slap bass","brass section"], prod: ["80s","analog warmth"] },
@@ -725,6 +765,7 @@ a.btn{text-decoration:none;display:inline-block}
     if (!Array.isArray(out.readIgnore)) out.readIgnore = [];
     out.idea = Object.assign({ image: "", ref: "", feel: "" }, (p && p.idea) || {});
     if (!Array.isArray(out.ideas)) out.ideas = [];
+    out.harmony = Object.assign({ key: -1, prog: 0 }, (p && p.harmony) || {});
     const moved = ["shamisen", "koto", "taiko drums"];
     out.tags.inst = out.tags.inst.filter(t => {
       if (!moved.includes(t)) return true;
@@ -1458,6 +1499,84 @@ a.btn{text-decoration:none;display:inline-block}
     else rewriteSections(new Map([[+sel.dataset.i, t => { t.arr = sel.value; }]]));
   });
 
+  /* ---------- harmony ---------- */
+  const PROGS = [
+    { name: "王道進行", deg: "IVM7 V7 IIIm7 VIm", desc: "J-POP でいちばん多い、切なくて前向きな進行。サビで使うと一気にキャッチーになる。", words: ["emotional J-pop chord progression"] },
+    { name: "丸サ進行", deg: "IVM7 III7 VIm7 Vm7 I7", desc: "都会的でおしゃれ。シティポップやフューチャーファンク、ハウスと相性がいい。", words: ["jazzy city pop chord progression", "smooth seventh chords"] },
+    { name: "小室進行", deg: "VIm IV V I", desc: "マイナーから始まる疾走感。クラブ系・トランス系の定番。", words: ["driving minor-key dance progression"] },
+    { name: "カノン進行", deg: "I V VIm IIIm IV I IV V", desc: "ベースが順に下りていく、安心感のある進行。", words: ["descending bass progression"] },
+    { name: "aug クリシェ", deg: "I Iaug I6 I7", tanaka: true, desc: "主音の上の音が半音ずつ上がっていく。曲の入りがきらっと動き出す。", words: ["augmented chord cliché", "chromatic rising inner line"] },
+    { name: "aug の分数コード", deg: "I Iaug/#IV IVM7 IIIaug/bVII", tanaka: true, desc: "偶数小節で aug の分数コードが鳴り、ふわっと浮く。このあと IIIm7 や VIm7 へ進むことが多い。", words: ["augmented slash chords", "floating unexpected harmony"] },
+    { name: "半音で下りる", deg: "#IVm7b5 IVm6 IIIm7 VI7b9", tanaka: true, desc: "半音ずつしっとり下りていく、歌もので多い流れ。", words: ["chromatic descending chords", "bittersweet jazzy harmony"] },
+    { name: "sus から解決", deg: "IIm7 IIm7/V V7b9 IM7 IIIm7/VI VIm7", tanaka: true, desc: "浮いたコードが動いて、気持ちよく解決する。", words: ["suspended chords resolving", "lush jazz voicings"] },
+    { name: "短3度上へ", deg: "I IIIm7 Vm7 VI7b9", tanaka: true, desc: "マイナーが短3度上のマイナーへ動く、意外性のある流れ。", words: ["unexpected minor third chord shifts"] },
+    { name: "サビ前で転調", deg: "IVM7 V7 IIIm7 VI7 | bVIM7 bVII7", desc: "Bメロ終わりで ♭VI→♭VII を鳴らして、一段上のキーのサビへ飛び込む。", words: ["sudden key change before the chorus", "modulating pre-chorus"] }
+  ];
+  const NOTE_S = ["C","C♯","D","D♯","E","F","F♯","G","G♯","A","A♯","B"];
+  const NOTE_F = ["C","D♭","D","E♭","E","F","G♭","G","A♭","A","B♭","B"];
+  const KEY_LIST = [[0,"C"],[1,"D♭"],[2,"D"],[3,"E♭"],[4,"E"],[5,"F"],[6,"F♯"],[7,"G"],[8,"A♭"],[9,"A"],[10,"B♭"],[11,"B"]];
+  const FLAT_KEYS = new Set([1, 3, 5, 8, 10]);
+  const DEG = { I: 0, II: 2, III: 4, IV: 5, V: 7, VI: 9, VII: 11 };
+  function realize(tok, root, ascii) {
+    const m = tok.match(/^([#b]?)(VII|VI|V|IV|III|II|I)(.*?)(?:\/([#b]?)(VII|VI|V|IV|III|II|I))?$/);
+    if (!m) return tok;
+    const nm = (acc, d) => {
+      const pc = (root + DEG[d] + (acc === "#" ? 1 : acc === "b" ? -1 : 0) + 12) % 12;
+      const list = acc === "b" ? NOTE_F : acc === "#" ? NOTE_S : FLAT_KEYS.has(root) ? NOTE_F : NOTE_S;
+      return list[pc];
+    };
+    let q = m[3].replace(/^M7/, "maj7");
+    let out = nm(m[1], m[2]) + q + (m[5] ? "/" + nm(m[4], m[5]) : "");
+    out = out.replace(/b(?=\d)/g, "♭").replace(/#(?=\d)/g, "♯");
+    return ascii ? out.replace(/♭/g, "b").replace(/♯/g, "#") : out;
+  }
+  const degLabel = t => t.replace(/b/g, "♭").replace(/#/g, "♯").replace(/♭(?=\d)/g, "♭");
+  function keyFromStyle() {
+    const k = (cur().key || "").replace(" major", "");
+    const hit = KEY_LIST.find(([, n]) => n === k);
+    return hit ? hit[0] : 0;
+  }
+  const harmKey = () => cur().harmony.key >= 0 ? cur().harmony.key : keyFromStyle();
+  function progChords(ascii) {
+    const pr = PROGS[cur().harmony.prog] || PROGS[0], root = harmKey();
+    return pr.deg.split(" ").map(t => t === "|" ? "|" : realize(t, root, ascii));
+  }
+  $("#hKey").innerHTML = KEY_LIST.map(([v, n]) => `<option value="${v}">${n} メジャー</option>`).join("");
+  $("#progs").innerHTML = PROGS.map((pr, i) => `<button type="button" class="prog" data-prog="${i}">
+      <b>${esc(pr.name)}</b><small class="mono">${esc(degLabel(pr.deg))}</small>${pr.tanaka ? `<span class="who">田中秀和さんの曲でよく話題になる進行</span>` : ""}</button>`).join("");
+  function renderHarmony() {
+    const p = cur(), pr = PROGS[p.harmony.prog] || PROGS[0], root = harmKey();
+    $("#hKey").value = String(root);
+    $("#hKeyNote").textContent = p.harmony.key < 0 ? "（STYLE のキーに合わせています）" : "";
+    document.querySelectorAll("#progs .prog").forEach(b => b.setAttribute("aria-pressed", String(+b.dataset.prog === p.harmony.prog)));
+    const toks = pr.deg.split(" ");
+    let shift = 0;
+    $("#chords").innerHTML = toks.map(t => {
+      if (t === "|") { shift = 1; return ""; }
+      return `<div class="chord"><b>${esc(realize(t, root))}</b><span>${esc(degLabel(t))}</span></div>`;
+    }).join("");
+    $("#progDesc").textContent = pr.desc + (shift ? " ｜ のあとが転調のきっかけになるコードです。" : "");
+    $("#harmWords").textContent = pr.words.join(", ");
+  }
+  $("#progs").addEventListener("click", e => { const b = e.target.closest("[data-prog]"); if (!b) return; cur().harmony.prog = +b.dataset.prog; touch(); renderHarmony(); });
+  $("#hKey").addEventListener("change", e => { cur().harmony.key = +e.target.value; touch(); renderHarmony(); });
+  $("#btnHarmStyle").addEventListener("click", () => {
+    const p = cur(), pr = PROGS[p.harmony.prog] || PROGS[0], list = splitList(p.custom), prev = p.custom;
+    const add = pr.words.filter(w => !list.some(x => x.toLowerCase() === w.toLowerCase()));
+    if (!add.length) { toast("もう STYLE に入っています"); return; }
+    p.custom = [...list, ...add].join(", "); $("#custom").value = p.custom; touch(); renderStyle();
+    toast(`「${pr.name}」の雰囲気を STYLE に足しました`, "元に戻す", () => { p.custom = prev; $("#custom").value = prev; touch(); renderStyle(); });
+  });
+  $("#btnHarmLyrics").addEventListener("click", () => {
+    const line = `[Chord Progression: ${progChords(true).filter(c => c !== "|").join(" - ")}]`;
+    const v = ta.value, c = ta.selectionStart;
+    const before = v.slice(0, c), pre = before && !before.endsWith("\n") ? "\n" : "";
+    const prev = v;
+    setLyrics(before + pre + line + "\n" + v.slice(c), before.length + pre.length + line.length + 1);
+    toast("コードを歌詞に書き込みました。[Chorus] などのタグのすぐ下に置くと、そのセクションのヒントになります", "元に戻す", () => setLyrics(prev));
+  });
+  $("#btnHarmCopy").addEventListener("click", () => copyText(progChords(false).join(" "), "コード進行"));
+
   /* ---------- rendering ---------- */
   function meter(el, n, max) {
     const pct = max ? Math.min(100, n / max * 100) : 0;
@@ -1537,13 +1656,13 @@ a.btn{text-decoration:none;display:inline-block}
     renderTitle();
   }
   function renderTitle() { $("#titleCount").textContent = len(cur().title) + " 文字"; renderSend(); }
-  function renderAll() { renderProjects(); fillFields(); renderStyle(); renderExclude(); renderLyrics(); renderExport(); renderIdeas(); renderAltPrompt(); }
+  function renderAll() { renderProjects(); fillFields(); renderStyle(); renderExclude(); renderLyrics(); renderExport(); renderIdeas(); renderAltPrompt(); renderHarmony(); }
 
   /* ---------- field events ---------- */
   $("#title").addEventListener("input", e => { const p = cur(); p.title = e.target.value; delete p.sample; touch(); renderTitle(); clearTimeout(renderProjects._t); renderProjects._t = setTimeout(renderProjects, 400); });
   $("#bpm").addEventListener("input", e => { cur().bpm = +e.target.value; touch(); renderStyle(); renderDyn(analyze(ta.value).secs); });
   $("#bpmOn").addEventListener("change", e => { cur().bpmOn = e.target.checked; touch(); renderStyle(); renderDyn(analyze(ta.value).secs); });
-  $("#key").addEventListener("change", e => { cur().key = e.target.value; touch(); renderStyle(); });
+  $("#key").addEventListener("change", e => { cur().key = e.target.value; touch(); renderStyle(); renderHarmony(); });
   $("#custom").addEventListener("input", e => { cur().custom = e.target.value; touch(); renderStyle(); });
   $("#exclude").addEventListener("input", e => { cur().exclude = e.target.value; touch(); renderExclude(); });
   let lyrT;
