@@ -208,6 +208,15 @@ a.btn{text-decoration:none;display:inline-block}
 .ch select{font-size:11.5px;padding:3px 2px;width:100%}
 .dyn-empty{flex:1;border:1px dashed var(--rule);border-radius:4px;padding:16px;font-size:13px;color:var(--muted);margin:0}
 
+/* length + feel */
+.dyn-head{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;font-size:13px}
+.dyn-head .len b{font-family:var(--f-mono);font-size:20px;font-weight:600;margin:0 4px}
+.dyn-head .len[data-over] b{color:var(--bad)}
+.ch .secs{font-size:10.5px;text-align:center;color:var(--muted);font-family:var(--f-mono)}
+.feel-chips{display:flex;flex-wrap:wrap;gap:5px}
+.feel-chips .chip{font-size:12px;padding:3px 8px}
+.idea .struct{font-family:var(--f-mono);font-size:11px;color:var(--muted);line-height:1.6}
+
 /* tips + footer */
 .tips{background:var(--sheet);border:1px solid var(--rule);border-radius:6px;padding:16px 20px}
 .tips h2{font-size:13px;letter-spacing:.1em;margin:0 0 8px;color:var(--muted)}
@@ -292,6 +301,14 @@ a.btn{text-decoration:none;display:inline-block}
         <div class="f"><label class="lbl" for="iRef">雰囲気を合わせたい曲</label>
           <input type="text" id="iRef" class="textin" placeholder="例: 曲名とアーティスト名（複数でも可）" autocomplete="off">
           <p class="hint">Suno のスタイルには曲名やアーティスト名を書けません。その曲のジャンル・年代・楽器・声の質感・音作りを言葉に置き換えて提案します。</p></div>
+        <div class="f"><label class="lbl" for="iFeel">参考曲を聴いた感想</label>
+          <textarea id="iFeel" placeholder="例: 静かでひんやりしているのに、ドラムだけ細かく暴れている。サビ前に一瞬音が消えて、そこから一気に開けるのが好き"></textarea>
+          <p class="hint">感じたことをそのまま書いてください。音色・楽器・リズム・ミックスの言葉に置き換えて提案に使います。下の言葉を押すと、STYLE の自由入力に英語で足せます。</p>
+          <div class="feel-chips" id="feelChips"></div></div>
+        <div class="f"><label class="lbl" for="iTarget">曲の長さの目標</label>
+          <select id="iTarget" data-target-select>
+            <option value="0">指定なし</option><option value="90">1分30秒以内</option><option value="120">2分以内（音ゲーサイズ）</option><option value="150">2分30秒以内</option><option value="180">3分以内</option>
+          </select></div>
         <div class="f" id="iImgWrap" hidden><label class="lbl" for="iImg">イメージ画像（任意）</label>
           <div class="row"><input type="file" id="iImg" accept="image/*"><img id="iThumb" class="thumb" alt="選んだ画像" hidden></div></div>
         <div class="askrow">
@@ -377,6 +394,7 @@ a.btn{text-decoration:none;display:inline-block}
       <div class="toolbar">
         <div class="tagrow" id="secTags"><span>セクション</span></div>
         <div class="tagrow" id="cueTags"><span>歌い方</span></div>
+        <div class="tagrow" id="fxTags"><span>ネタ・煽り</span></div>
       </div>
 
       <textarea id="lyrics" spellcheck="false" aria-label="歌詞"></textarea>
@@ -407,6 +425,14 @@ a.btn{text-decoration:none;display:inline-block}
     <div class="tape" id="dynTape">DYNAMICS<small>展開・緩急</small></div>
     <p class="hint">セクションごとに盛り上がりの大きさ（5段階）と演出を選ぶと、歌詞のタグに書き込みます（例: <span class="mono">[Chorus: explosive, key change up]</span>）。Suno はタグをヒントとして使うので毎回その通りになるとは限りません。何回か生成して聴き比べてください。</p>
     <div class="templates" id="dynPatterns"><span>展開パターン</span></div>
+    <div class="dyn-head">
+      <span class="len" id="lenEst"></span>
+      <label class="field-inline" for="dTarget">目標</label>
+      <select id="dTarget" data-target-select>
+        <option value="0">指定なし</option><option value="90">1分30秒以内</option><option value="120">2分以内（音ゲーサイズ）</option><option value="150">2分30秒以内</option><option value="180">3分以内</option>
+      </select>
+      <button class="btn ghost" id="btnFit" type="button">目標に収める</button>
+    </div>
     <div class="strip-scroll"><div class="console" id="console"></div></div>
   </section>
 
@@ -477,6 +503,7 @@ a.btn{text-decoration:none;display:inline-block}
       <li>「日本語の歌として指定する」をオンにすると、スタイルに Japanese vocals（女性・男性ボーカルを選んでいれば Japanese female vocals など）が入る。</li>
       <li>Suno で同じ設定のまま何回か生成すると、毎回ちがうメロディになる。気に入るまで生成し直すのが近道。</li>
       <li>緩急は「タグの演出指定」「スタイルの言葉（dynamic build など）」「歌詞の密度」の3つで作る。静かな所は言葉を少なく、サビは短く強いフレーズに。</li>
+      <li>Suno は長さを厳密には守らない。2分以内にしたいときは、セクションと歌詞を減らし、最後に [End] を置く。それでも長いときは生成後に Suno の編集で切る。</li>
       <li>歌わせたくない区間は <code>[Instrumental]</code> や <code>[Guitar Solo]</code> だけを置いて、歌詞を書かない。</li>
     </ul>
   </aside>
@@ -498,7 +525,7 @@ a.btn{text-decoration:none;display:inline-block}
       ["ポップパンク","pop punk"],["メタル","metal"],["EDM","EDM"],["フューチャーベース","future bass"],["ハウス","house"],["ドラムンベース","drum and bass"],
       ["シンセウェイヴ","synthwave"],["Lo-fi ヒップホップ","lo-fi hip hop"],["トラップ","trap"],["R&B","R&B"],["ファンク","funk"],["ジャズ","jazz"],
       ["ボサノバ","bossa nova"],["バラード","ballad"],["フォーク","acoustic folk"],["アイドル","idol pop"],["演歌","enka"],["オーケストラ","orchestral"],["アンビエント","ambient"],
-      ["ハードコア","hardcore techno"],["ガバ","gabber"],["J-CORE","J-core"],["トランスコア","trancecore"],["ハッピーハードコア","happy hardcore"],["ブレイクコア","breakcore"]
+      ["ハードコア","hardcore techno"],["ガバ","gabber"],["J-CORE","J-core"],["トランスコア","trancecore"],["ハッピーハードコア","happy hardcore"],["ブレイクコア","breakcore"],["ジャングル","jungle"],["リキッドDnB","liquid drum and bass"]
     ]},
     { id: "jp", ja: "和・日本らしさ", items: [
       ["歌謡曲","kayokyoku"],["昭和歌謡","Showa-era kayokyoku"],["渋谷系","Shibuya-kei"],["ヴィジュアル系","visual kei"],["アニメOP風","anime opening"],
@@ -521,7 +548,8 @@ a.btn{text-decoration:none;display:inline-block}
       ["高音質","polished production"],["Lo-fi","lo-fi"],["アナログ感","analog warmth"],["リバーブ深め","reverb-heavy"],["ワイドなステレオ","wide stereo"],
       ["パンチのあるドラム","punchy drums"],["4つ打ち","four-on-the-floor"],["ハーフタイム","half-time groove"],["ミニマル","minimal"],
       ["80年代","80s"],["90年代","90s"],["キャッチーなフック","catchy hook"],
-      ["だんだん盛り上がる","dynamic build"],["サビで爆発","explosive chorus"],["静と動の対比","quiet-loud dynamics"],["転調あり","key change"]
+      ["だんだん盛り上がる","dynamic build"],["サビで爆発","explosive chorus"],["静と動の対比","quiet-loud dynamics"],["転調あり","key change"],
+      ["アーメンブレイク","amen break"],["ボーカルチョップ","vocal chops"],["エアホーン","air horns"],["煽りボイス","hype vocal samples"]
     ]}
   ];
   const NO_RANDOM = new Set(["instrumental","rap","choir","duet"]);
@@ -529,12 +557,22 @@ a.btn{text-decoration:none;display:inline-block}
   const EXCLUDES = [["ラップ","rap"],["EDM","EDM"],["激しい歪み","heavy distortion"],["オートチューン","autotune"],["シャウト","screaming"],["語り","spoken word"],["男性ボーカル","male vocals"],["女性ボーカル","female vocals"],["Lo-fi","lo-fi"]];
   const SEC_TAGS = [["Intro","イントロ"],["Verse","Aメロ"],["Pre-Chorus","Bメロ"],["Chorus","サビ"],["Post-Chorus","後サビ"],["Bridge","Cメロ"],["Instrumental","間奏"],["Guitar Solo","ソロ"],["Break","ブレイク"],["Build-up","ビルド"],["Drop","ドロップ"],["Hook","フック"],["Outro","アウトロ"],["Fade Out","フェードアウト"],["End","終わり"]];
   const CUE_TAGS = [["Whisper","ささやき"],["Spoken Word","語り"],["Female Vocal","女声"],["Male Vocal","男声"],["Harmony","ハモリ"],["Choir","合唱"],["Belting","張り上げ"],["Ad-lib","アドリブ"]];
+  const FX_TAGS = [["Air Horn","パーティーホーン"],["Shout","煽り","Somebody scream!"],["Siren","サイレン"],["Rewind","巻き戻し"],["Riser","ライザー"],["Vocal Chop","ボイスチョップ"],["Crowd Cheer","歓声"],["Silence","無音"]];
+  const FEEL_WORDS = [
+    ["清涼感",["crisp clean highs","airy pads"]],["透明感",["crystalline textures"]],["静寂",["sparse arrangement","spacious silence"]],["クール",["cool detached mood"]],
+    ["浮遊感",["floating ethereal pads"]],["水・雨のよう",["water drop plucks","rain ambience"]],["キラキラ",["glittering bell arpeggios"]],["ピアノが綺麗",["glassy emotional piano"]],
+    ["切ない",["wistful melody"]],["天使みたいな声",["angelic vocal chops"]],["疾走感",["driving breakbeats"]],["細かく刻む",["chopped amen breaks","rapid snare rolls"]],
+    ["ドラムが暴れる",["glitchy drum edits","stuttering breaks"]],["深い低音",["deep sub bass"]],["轟音・ノイズ",["shoegaze guitar wall"]],["急に止まる",["sudden silence breaks"]],
+    ["一気に開ける",["euphoric drops"]],["夜明けっぽい",["dawn-like atmosphere"]]
+  ];
   const TEMPLATES = [
     { name: "J-POP 王道", secs: ["Intro","Verse 1","Pre-Chorus","Chorus","Verse 2","Pre-Chorus","Chorus","Bridge","Chorus","Outro"] },
     { name: "シンプル", secs: ["Verse 1","Chorus","Verse 2","Chorus","Bridge","Chorus","End"] },
     { name: "サビ始まり", secs: ["Chorus","Verse 1","Pre-Chorus","Chorus","Instrumental","Chorus","End"] },
     { name: "EDM", secs: ["Intro","Verse 1","Build-up","Drop","Break","Verse 2","Build-up","Drop","Outro"] },
-    { name: "ヒップホップ", secs: ["Intro","Verse 1","Hook","Verse 2","Hook","Verse 3","Hook","Outro"] }
+    { name: "ヒップホップ", secs: ["Intro","Verse 1","Hook","Verse 2","Hook","Verse 3","Hook","Outro"] },
+    { name: "音ゲー2分", bpm: 172, secs: ["Intro: very soft, 8 bars","Build-up: mid-energy, rising tension, 8 bars","Drop: explosive, 16 bars","Break: very soft, sudden stop, 8 bars","Build-up: rising tension, 8 bars","Drop: explosive, 16 bars","Outro: soft, fade out, 4 bars","End"],
+      text: "[Intro: very soft, 8 bars]\n[Vocal Chop]\n\n[Build-up: mid-energy, rising tension, 8 bars]\n[Riser]\n\n[Shout]\nSomebody scream!\n\n[Drop: explosive, 16 bars]\n[Air Horn]\n\n[Break: very soft, sudden stop, 8 bars]\n\n[Build-up: rising tension, 8 bars]\n[Riser]\n\n[Drop: explosive, 16 bars]\n[Air Horn]\n\n[Outro: soft, fade out, 4 bars]\n\n[End]\n" }
   ];
   const PRESETS = [
     ["夜のドライブ","街の灯りが流れていく、大人っぽいシティポップ。",["city pop","nostalgic","romantic","chill","female vocals","rhodes piano","slap bass","synth","80s","analog warmth"],108,["night drive","neon city lights"]],
@@ -553,6 +591,7 @@ a.btn{text-decoration:none;display:inline-block}
     ["トランスコア","歪んだキックの上で、きらびやかなトランスのリードが鳴る。",["trancecore","gabber","J-core","uplifting","energetic","epic","synth","four-on-the-floor","polished production"],180,["euphoric supersaw lead","distorted kick","rave piano"]],
     ["ガバホップ","ヒップホップのノリとガバの歪んだキックを合わせた歌もの。",["gabber","J-core","energetic","cute","female vocals","rap","synth","808 bass","half-time groove"],160,["gabba hop","chanted hook","distorted kick"]],
     ["ダーク和ハードコア","読経のような声と不穏な空気が続く、暗いハードコア。",["hardcore techno","dark","aggressive","traditional Japanese","taiko drums","synth","reverb-heavy"],175,["Buddhist chant samples","industrial textures","eerie atmosphere"]],
+    ["清涼ブレイクコア","静かでクールな空気の中を、細かく刻んだブレイクが走り抜ける。",["breakcore","liquid drum and bass","dreamy","melancholic","airy vocals","piano","synth","amen break","vocal chops","air horns","reverb-heavy","wide stereo"],172,["crisp clean highs","glittering bell arpeggios","sparse arrangement","sudden silence breaks"]],
     ["アイドル","コールを入れたくなる、元気でかわいいアイドルポップ。",["idol pop","future bass","cute","energetic","uplifting","female vocals","vocal harmonies","synth","catchy hook","polished production"],160,["call and response chant"]]
   ].map(([name, summary, t, bpm, extra]) => sanitizeIdea({ name, summary, tags: { any: t }, bpm, extra }, "preset"));
 
@@ -584,7 +623,8 @@ a.btn{text-decoration:none;display:inline-block}
       name: str(x.name, 40) || "無題の案", summary: str(x.summary, 200), why: str(x.why, 240), src,
       tags, bpm: bpm >= 50 && bpm <= 200 ? bpm : null, key: k.key,
       extra: [...new Set(extra)].slice(0, 6),
-      exclude: (Array.isArray(x.exclude) ? x.exclude : []).map(t => str(t, 40)).filter(Boolean).slice(0, 5)
+      exclude: (Array.isArray(x.exclude) ? x.exclude : []).map(t => str(t, 40)).filter(Boolean).slice(0, 5),
+      structure: (Array.isArray(x.structure) ? x.structure : []).map(t => str(t, 80).replace(/^\[|\]$/g, "").trim()).filter(Boolean).slice(0, 20)
     };
   }
   function sanitizeList(raw, src) {
@@ -598,7 +638,7 @@ a.btn{text-decoration:none;display:inline-block}
   const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
   const blank = () => ({ id: uid(), title: "", tags: { genre: [], jp: [], mood: [], vocal: [], inst: [], prod: [] }, jp: true, bpm: 100, bpmOn: false, key: "", custom: "", exclude: "", lyrics: "", readIgnore: [],
     brief: { theme: "", words: "", pov: "auto", struct: "cur", line: "mid", eng: "some", rhyme: true, kana: true, titles: true },
-    idea: { image: "", ref: "" }, ideas: [], updated: Date.now() });
+    idea: { image: "", ref: "", feel: "" }, ideas: [], target: 0, updated: Date.now() });
   const sample = () => Object.assign(blank(), {
     sample: true, title: "夕凪ハイウェイ",
     tags: { genre: ["city pop"], mood: ["nostalgic","bittersweet"], vocal: ["female vocals","airy vocals"], inst: ["rhodes piano","slap bass","brass section"], prod: ["80s","analog warmth"] },
@@ -678,7 +718,7 @@ a.btn{text-decoration:none;display:inline-block}
     out.tags = Object.assign(blank().tags, (p && p.tags) || {});
     out.brief = Object.assign(blank().brief, (p && p.brief) || {});
     if (!Array.isArray(out.readIgnore)) out.readIgnore = [];
-    out.idea = Object.assign({ image: "", ref: "" }, (p && p.idea) || {});
+    out.idea = Object.assign({ image: "", ref: "", feel: "" }, (p && p.idea) || {});
     if (!Array.isArray(out.ideas)) out.ideas = [];
     const moved = ["shamisen", "koto", "taiko drums"];
     out.tags.inst = out.tags.inst.filter(t => {
@@ -787,6 +827,12 @@ a.btn{text-decoration:none;display:inline-block}
     b.innerHTML = `<code>[${en}]</code><em>${ja}</em>`;
     $("#cueTags").appendChild(b);
   });
+  FX_TAGS.forEach(([en, ja, line]) => {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "tagbtn"; b.dataset.tag = en; if (line) b.dataset.line = line;
+    b.innerHTML = `<code>[${en}]</code><em>${ja}${line ? "：" + line : ""}</em>`;
+    $("#fxTags").appendChild(b);
+  });
   TEMPLATES.forEach((t, i) => {
     const b = document.createElement("button");
     b.type = "button"; b.className = "btn ghost"; b.dataset.tpl = i; b.textContent = t.name;
@@ -818,6 +864,11 @@ a.btn{text-decoration:none;display:inline-block}
   }
   $("#secTags").addEventListener("click", e => { const b = e.target.closest(".tagbtn"); if (b) insertTag(b.dataset.tag, true); });
   $("#cueTags").addEventListener("click", e => { const b = e.target.closest(".tagbtn"); if (b) insertTag(b.dataset.tag, false); });
+  $("#fxTags").addEventListener("click", e => {
+    const b = e.target.closest(".tagbtn"); if (!b) return;
+    insertTag(b.dataset.tag, false);
+    if (b.dataset.line) { const v = ta.value, c = ta.selectionStart, add = b.dataset.line + "\n"; setLyrics(v.slice(0, c) + add + v.slice(c), c + add.length); }
+  });
 
   function arm(btn, armedText, fn) {
     if (btn.dataset.armed) {
@@ -830,11 +881,13 @@ a.btn{text-decoration:none;display:inline-block}
   $("#templates").addEventListener("click", e => {
     const b = e.target.closest("[data-tpl]"); if (!b) return;
     const t = TEMPLATES[+b.dataset.tpl];
-    const text = t.secs.map(s => `[${s}]\n`).join("\n");
+    const text = t.text || t.secs.map(s => `[${s}]\n`).join("\n");
     const apply = () => {
-      const prev = ta.value;
+      const prev = ta.value, p = cur(), pb = { bpm: p.bpm, bpmOn: p.bpmOn };
+      const syncBpm = () => { touch(); fillFields(); renderStyle(); renderDyn(analyze(ta.value).secs); };
       setLyrics(text, text.indexOf("\n") + 1);
-      if (prev.trim()) toast(`「${t.name}」で書き換えました`, "元に戻す", () => setLyrics(prev));
+      if (t.bpm) { p.bpm = t.bpm; p.bpmOn = true; syncBpm(); }
+      if (prev.trim() || t.bpm) toast(`「${t.name}」で書き換えました${t.bpm ? `（BPM を ${t.bpm} に設定）` : ""}`, "元に戻す", () => { setLyrics(prev); if (t.bpm) { Object.assign(p, pb); syncBpm(); } });
     };
     if (!ta.value.trim()) apply(); else arm(b, "上書きする？", apply);
   });
@@ -934,6 +987,7 @@ a.btn{text-decoration:none;display:inline-block}
     L.push(`- テーマ: ${b.theme.trim() || "曲の雰囲気に合うテーマを自由に考える"}`);
     if (POV[b.pov]) L.push(`- 語り手: ${POV[b.pov]}`);
     const w = splitList(b.words); if (w.length) L.push(`- 必ず入れる言葉: ${w.join("、")}`);
+    if (p.target) L.push(`- 曲の長さ: ${fmtSec(p.target)} 以内。歌詞は少なめにし、指定した小節数（bars）に収まる量にする`);
     L.push("", "## 構成", "次の順番でセクションを書いてください。各セクションの最初の行に、英語のタグを [ ] で囲んで1行だけ置きます。");
     const seen = new Set();
     structFor(p).forEach(name => {
@@ -977,10 +1031,14 @@ a.btn{text-decoration:none;display:inline-block}
       "あなたは音楽プロデューサーです。AI 作曲サービス Suno で曲を作るためのスタイル案を3つ提案してください。",
       "", "## 依頼者のイメージ", p.idea.image.trim() || "（特になし）",
       "", "## 雰囲気を合わせたい参考曲", p.idea.ref.trim() || "（特になし）",
+      "", "## 参考曲を聴いた依頼者の感想", p.idea.feel.trim() || "（特になし）",
+      p.target ? `\n## 曲の長さ\n${p.target} 秒以内（${fmtSec(p.target)}）。` : "",
       hasImage ? "\n添付した画像の情景・色・空気感もイメージとして読み取ってください。" : "",
       "", "## ルール",
       "- 参考曲がある場合は、その曲のジャンル、年代、テンポ感、リズム、楽器編成、ボーカルの声質、音作りを分析して取り入れる。よく知らない曲なら推測で決めつけず、why にそう書いてイメージから考える。",
       "- Suno はスタイルに曲名やアーティスト名を書けないので、tags・extra・exclude に固有名詞を入れない。",
+      "- 感想に出てくる言葉（例: 清涼感、静寂、クール）は、そのまま使わず、具体的な音色・楽器・リズム・ミックスの英語に置き換えて tags と extra に反映する。summary や why で、どの感想をどの音にしたかが分かるようにする。",
+      "- structure には、曲の構成を Suno のセクションタグとして順番に並べる（[ ] は付けない）。各タグに盛り上がり（very soft / soft / mid-energy / powerful / explosive）、必要なら演出、小節数を \"Drop: explosive, 16 bars\" の形で書く。合計の長さは 1小節 = 240 ÷ BPM 秒で計算し、長さの指定があれば必ず収める。効果音や煽りは \"Air Horn\" \"Shout\" \"Riser\" のような独立したタグとして入れてよい。",
       "- 3案は方向性を変える（1: イメージと参考曲に忠実、2: 少しアレンジ、3: 意外性のある解釈）。",
       "- tags の値は下の語彙リストの英語表記からだけ選ぶ。カテゴリごとに0〜3個。",
       "- 語彙リストにない要素は extra に短い英語のフレーズで入れる（最大5個。例: \"night drive\", \"gated reverb snare\"）。",
@@ -989,7 +1047,7 @@ a.btn{text-decoration:none;display:inline-block}
       "- name・summary・why は日本語。",
       "", "## 語彙リスト", vocab,
       "", "## 出力", "次の形の JSON だけを返してください。",
-      '{"proposals":[{"name":"案の名前（短く）","summary":"どんな曲になるか（1〜2文）","why":"イメージや参考曲のどこを取り入れたか（1文）","tags":{"genre":[],"jp":[],"mood":[],"vocal":[],"inst":[],"prod":[]},"bpm":100,"key":"","extra":[],"exclude":[]}]}'
+      '{"proposals":[{"name":"案の名前（短く）","summary":"どんな曲になるか（1〜2文）","why":"イメージや参考曲のどこを取り入れたか（1文）","tags":{"genre":[],"jp":[],"mood":[],"vocal":[],"inst":[],"prod":[]},"bpm":100,"key":"","extra":[],"exclude":[],"structure":["Intro: very soft, 8 bars","Drop: explosive, 16 bars"]}]}'
     ].filter(l => l !== "").join("\n").replace(/\n## /g, "\n\n## ");
   }
   const presetBox = $("#presets");
@@ -1020,8 +1078,9 @@ a.btn{text-decoration:none;display:inline-block}
         <div class="mini">${mini.map(m => `<span>${esc(m)}</span>`).join("")}</div>
         <code>${esc(st)}</code>
         ${x.exclude.length ? `<p class="why">除外: ${esc(x.exclude.join(", "))}</p>` : ""}
+        ${(x.structure || []).length ? `<p class="struct">${x.structure.map(t => esc("[" + t + "]")).join(" → ")}</p>` : ""}
         <div class="foot"><span class="mono hint">${len(st)} 文字</span>
-          <span class="row" style="gap:6px"><button class="btn ghost" type="button" data-drop="${i}">外す</button><button class="btn primary" type="button" data-apply="${i}">この案を使う</button></span></div>
+          <span class="row" style="gap:6px"><button class="btn ghost" type="button" data-drop="${i}">外す</button>${(x.structure || []).length ? `<button class="btn ghost" type="button" data-struct="${i}">構成を LYRICS へ</button>` : ""}<button class="btn primary" type="button" data-apply="${i}">この案を使う</button></span></div>
       </article>`;
     }).join("");
   }
@@ -1029,6 +1088,15 @@ a.btn{text-decoration:none;display:inline-block}
     const p = cur();
     const d = e.target.closest("[data-drop]");
     if (d) { p.ideas.splice(+d.dataset.drop, 1); touch(); renderIdeas(); return; }
+    const st = e.target.closest("[data-struct]");
+    if (st) {
+      const x = p.ideas[+st.dataset.struct]; if (!x || !x.structure.length) return;
+      const prev = ta.value;
+      setLyrics(x.structure.map(t => `[${t}]\n`).join("\n"));
+      $("#lyricsTape").scrollIntoView({ block: "start" });
+      toast(`「${x.name}」の構成を LYRICS に入れました`, "元に戻す", () => setLyrics(prev));
+      return;
+    }
     const a = e.target.closest("[data-apply]"); if (!a) return;
     const x = p.ideas[+a.dataset.apply]; if (!x) return;
     const prev = JSON.stringify({ tags: p.tags, bpm: p.bpm, bpmOn: p.bpmOn, key: p.key, custom: p.custom, exclude: p.exclude, brief: p.brief });
@@ -1046,6 +1114,20 @@ a.btn{text-decoration:none;display:inline-block}
   function renderAltPrompt() { $("#altPrompt").value = ideaPrompt(cur(), false); }
   $("#iImage").addEventListener("input", e => { cur().idea.image = e.target.value; touch(); renderAltPrompt(); });
   $("#iRef").addEventListener("input", e => { cur().idea.ref = e.target.value; touch(); renderAltPrompt(); });
+  $("#iFeel").addEventListener("input", e => { cur().idea.feel = e.target.value; touch(); renderAltPrompt(); });
+  const feelBox = $("#feelChips");
+  feelBox.innerHTML = FEEL_WORDS.map(([ja, en], i) => `<button type="button" class="chip" data-feel="${i}" title="${esc(en.join(", "))}">${esc(ja)}</button>`).join("");
+  function renderFeel() {
+    const have = new Set(splitList(cur().custom).map(x => x.toLowerCase()));
+    feelBox.querySelectorAll("[data-feel]").forEach(b => b.setAttribute("aria-pressed", FEEL_WORDS[+b.dataset.feel][1].every(x => have.has(x.toLowerCase()))));
+  }
+  feelBox.addEventListener("click", e => {
+    const b = e.target.closest("[data-feel]"); if (!b) return;
+    const p = cur(), words = FEEL_WORDS[+b.dataset.feel][1], list = splitList(p.custom);
+    const on = words.every(w => list.some(x => x.toLowerCase() === w.toLowerCase()));
+    const next = on ? list.filter(x => !words.some(w => w.toLowerCase() === x.toLowerCase())) : [...list, ...words.filter(w => !list.some(x => x.toLowerCase() === w.toLowerCase()))];
+    p.custom = next.join(", "); $("#custom").value = p.custom; touch(); renderStyle();
+  });
   $("#btnAltApply").addEventListener("click", () => {
     const txt = $("#altPaste").value.trim(); if (!txt) { toast("AI の回答を貼り付けてください"); return; }
     let data = null;
@@ -1100,7 +1182,7 @@ a.btn{text-decoration:none;display:inline-block}
   btnAsk.addEventListener("click", async () => {
     if (!sampleFn) return;
     const p = cur();
-    if (!p.idea.image.trim() && !p.idea.ref.trim() && !imgFile) { setStatus("イメージか参考曲を入力してください。", "bad"); $("#iImage").focus(); return; }
+    if (!p.idea.image.trim() && !p.idea.ref.trim() && !p.idea.feel.trim() && !imgFile) { setStatus("イメージ・参考曲・感想のどれかを入力してください。", "bad"); $("#iImage").focus(); return; }
     askCtl = new AbortController();
     btnAsk.disabled = true; btnStop.hidden = false;
     setStatus("考えています…（30秒〜1分ほどかかります）");
@@ -1223,16 +1305,17 @@ a.btn{text-decoration:none;display:inline-block}
   function parseTag(name) {
     const i = name.indexOf(":"), base = (i < 0 ? name : name.slice(0, i)).trim();
     const mods = i < 0 ? [] : name.slice(i + 1).split(",").map(x => x.trim()).filter(Boolean);
-    const t = { base, energy: 0, arr: "", rest: [] };
+    const t = { base, energy: 0, arr: "", rest: [], bars: 0 };
     mods.forEach(x => {
-      const l = x.toLowerCase(), ei = ENERGY.indexOf(l), ai = ARR.find(a => a[1].toLowerCase() === l);
-      if (ei >= 0 && !t.energy) t.energy = ei + 1;
+      const l = x.toLowerCase(), ei = ENERGY.indexOf(l), ai = ARR.find(a => a[1].toLowerCase() === l), bm = l.match(/^(\d{1,3})\s*bars?$/);
+      if (bm && !t.bars) t.bars = +bm[1];
+      else if (ei >= 0 && !t.energy) t.energy = ei + 1;
       else if (ai && !t.arr) t.arr = ai[1];
       else t.rest.push(x);
     });
     return t;
   }
-  const buildTag = t => { const m = [t.energy ? ENERGY[t.energy - 1] : "", t.arr, ...t.rest].filter(Boolean); return `[${t.base}${m.length ? ": " + m.join(", ") : ""}]`; };
+  const buildTag = t => { const m = [t.energy ? ENERGY[t.energy - 1] : "", t.arr, ...t.rest, t.bars ? t.bars + " bars" : ""].filter(Boolean); return `[${t.base}${m.length ? ": " + m.join(", ") : ""}]`; };
   function rewriteSections(edits) { // edits: Map index -> fn(tag)
     const a = analyze(ta.value); let v = ta.value;
     [...edits.keys()].sort((x, y) => y - x).forEach(i => {
@@ -1282,19 +1365,56 @@ a.btn{text-decoration:none;display:inline-block}
     rewriteSections(edits);
     if (ta.value !== prev) toast(b.dataset.dyn === "reset" ? "盛り上がりと演出の指定を外しました" : `「${b.textContent}」をタグに書き込みました`, "元に戻す", () => setLyrics(prev));
   });
+  function barsOf(s, t) {
+    if (t.bars) return t.bars;
+    const b = s.base.toLowerCase();
+    if (/^end\b|fade/.test(b)) return 0;
+    if (s.lines) return Math.max(4, Math.ceil(s.lines * 2 / 4) * 4);
+    return { edge: 8, verse: 16, pre: 8, chorus: 16, bridge: 8, inst: 8 }[s.kind] || 8;
+  }
+  const curBpm = () => cur().bpmOn ? cur().bpm : 120;
+  const fmtSec = x => `${Math.floor(x / 60)}:${String(Math.round(x % 60)).padStart(2, "0")}`;
+  function songSeconds(secs) { const bpm = curBpm(); return secs.reduce((n, s) => n + barsOf(s, parseTag(s.name)), 0) * 240 / bpm; }
+  function renderLen(secs) {
+    const p = cur(), el = $("#lenEst"), sec = songSeconds(secs);
+    document.querySelectorAll("[data-target-select]").forEach(sel => sel.value = String(p.target || 0));
+    if (!secs.length) { el.textContent = ""; delete el.dataset.over; return; }
+    el.innerHTML = `推定の長さ<b>${fmtSec(sec)}</b><span class="hint">（${p.bpmOn ? "" : "BPM 未指定のため "}${curBpm()} BPM・4/4 で計算）</span>`;
+    if (p.target && sec > p.target) el.dataset.over = "1"; else delete el.dataset.over;
+    $("#btnFit").disabled = !p.target;
+  }
+  document.querySelectorAll("[data-target-select]").forEach(sel => sel.addEventListener("change", e => {
+    cur().target = +e.target.value; touch(); renderLen(analyze(ta.value).secs); renderBrief(); renderAltPrompt();
+  }));
+  $("#btnFit").addEventListener("click", () => {
+    const p = cur(), secs = analyze(ta.value).secs; if (!p.target || !secs.length) return;
+    const now = songSeconds(secs);
+    if (now <= p.target) { toast(`もう目標の ${fmtSec(p.target)} に収まっています`); return; }
+    const f = p.target / now, prev = ta.value, edits = new Map();
+    secs.forEach((s, i) => { const b = barsOf(s, parseTag(s.name)); if (b) edits.set(i, t => { t.bars = Math.max(4, Math.floor(b * f / 4) * 4); }); });
+    rewriteSections(edits);
+    let after = songSeconds(analyze(ta.value).secs);
+    if (after > p.target) toast(`これ以上は短くできませんでした（${fmtSec(after)}）。セクションを減らしてください`, "元に戻す", () => setLyrics(prev));
+    else toast(`小節数を減らして ${fmtSec(after)} にしました`, "元に戻す", () => setLyrics(prev));
+  });
   const KIND_VAR = { verse: "--sec-verse", pre: "--sec-pre", chorus: "--sec-chorus", bridge: "--sec-bridge", inst: "--sec-inst", edge: "--muted" };
   function renderDyn(secs) {
     const box = $("#console");
+    renderLen(secs);
     if (!secs.length) { box.innerHTML = `<p class="dyn-empty">LYRICS に [Verse] や [Chorus] のタグを入れるか構成テンプレを選ぶと、ここにセクションが並び、盛り上がりを調整できます。</p>`; return; }
     box.innerHTML = secs.map((s, i) => {
       const t = parseTag(s.name), nm = shortName(s.base, s.kind);
       const lv = [1, 2, 3, 4, 5].map(n => `<button type="button" data-i="${i}" data-lv="${n}" aria-pressed="${t.energy >= n}" aria-label="${esc(nm)} の盛り上がり ${n}（${ENERGY_JA[n - 1]}）"></button>`).join("");
+      const bars = barsOf(s, t), bpmSec = bars * 240 / curBpm();
+      const bopts = `<option value="">自動（${bars}小節）</option>` + [4, 8, 12, 16, 24, 32].map(n => `<option value="${n}"${t.bars === n ? " selected" : ""}>${n}小節</option>`).join("");
       const opts = `<option value="">演出なし</option>` + ARR.map(([ja, en]) => `<option value="${esc(en)}"${t.arr === en ? " selected" : ""}>${ja}</option>`).join("");
       return `<div class="ch" style="--c:var(${KIND_VAR[s.kind] || "--muted"})" title="${esc("[" + s.name + "]")}">
         <div class="lv">${lv}</div>
         <span class="elabel">${t.energy ? ENERGY_JA[t.energy - 1] : "指定なし"}</span>
         <b>${esc(nm)}</b>
         <select data-i="${i}" aria-label="${esc(nm)} の演出">${opts}</select>
+        <select data-i="${i}" data-bars="1" aria-label="${esc(nm)} の小節数">${bopts}</select>
+        <span class="secs">${bars ? "約" + Math.round(bpmSec) + "秒" : "—"}</span>
       </div>`;
     }).join("");
   }
@@ -1305,7 +1425,8 @@ a.btn{text-decoration:none;display:inline-block}
   });
   $("#console").addEventListener("change", e => {
     const sel = e.target.closest("select[data-i]"); if (!sel) return;
-    rewriteSections(new Map([[+sel.dataset.i, t => { t.arr = sel.value; }]]));
+    if (sel.dataset.bars) rewriteSections(new Map([[+sel.dataset.i, t => { t.bars = +sel.value || 0; }]]));
+    else rewriteSections(new Map([[+sel.dataset.i, t => { t.arr = sel.value; }]]));
   });
 
   /* ---------- rendering ---------- */
@@ -1329,7 +1450,7 @@ a.btn{text-decoration:none;display:inline-block}
     out.placeholder = "上のタグを選ぶと、ここに Suno の「Style of Music」に貼る文字列ができます";
     autosize(out);
     meter($("#styleMeter"), len(s), LIMITS[store.limit].style);
-    renderBrief(); renderSend();
+    renderBrief(); renderSend(); renderFeel();
   }
   function renderExclude() {
     const list = splitList(cur().exclude).map(x => x.toLowerCase());
@@ -1380,7 +1501,7 @@ a.btn{text-decoration:none;display:inline-block}
     $("#title").value = p.title; $("#bpm").value = p.bpm; $("#bpmOn").checked = p.bpmOn; $("#key").value = p.key;
     $("#custom").value = p.custom; $("#exclude").value = p.exclude; ta.value = p.lyrics; $("#limitMode").value = store.limit;
     $("#jpOn").checked = p.jp;
-    $("#iImage").value = p.idea.image; $("#iRef").value = p.idea.ref;
+    $("#iImage").value = p.idea.image; $("#iRef").value = p.idea.ref; $("#iFeel").value = p.idea.feel;
     const b = p.brief;
     $("#bTheme").value = b.theme; $("#bWords").value = b.words; $("#bPov").value = b.pov; $("#bStruct").value = b.struct;
     $("#bLine").value = b.line; $("#bEng").value = b.eng; $("#bRhyme").checked = b.rhyme; $("#bKana").checked = b.kana; $("#bTitles").checked = b.titles;
@@ -1391,8 +1512,8 @@ a.btn{text-decoration:none;display:inline-block}
 
   /* ---------- field events ---------- */
   $("#title").addEventListener("input", e => { const p = cur(); p.title = e.target.value; delete p.sample; touch(); renderTitle(); clearTimeout(renderProjects._t); renderProjects._t = setTimeout(renderProjects, 400); });
-  $("#bpm").addEventListener("input", e => { cur().bpm = +e.target.value; touch(); renderStyle(); });
-  $("#bpmOn").addEventListener("change", e => { cur().bpmOn = e.target.checked; touch(); renderStyle(); });
+  $("#bpm").addEventListener("input", e => { cur().bpm = +e.target.value; touch(); renderStyle(); renderDyn(analyze(ta.value).secs); });
+  $("#bpmOn").addEventListener("change", e => { cur().bpmOn = e.target.checked; touch(); renderStyle(); renderDyn(analyze(ta.value).secs); });
   $("#key").addEventListener("change", e => { cur().key = e.target.value; touch(); renderStyle(); });
   $("#custom").addEventListener("input", e => { cur().custom = e.target.value; touch(); renderStyle(); });
   $("#exclude").addEventListener("input", e => { cur().exclude = e.target.value; touch(); renderExclude(); });
