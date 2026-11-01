@@ -1,0 +1,778 @@
+<title>トラックシート</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=JetBrains+Mono:wght@400;600&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap">
+<style>
+/* Layout: a studio track sheet — two sheets taped to the desk (STYLE / LYRICS), each headed by a masking-tape channel label; the lyrics sheet ends in a tape-timeline strip of song sections. */
+:root{
+  --paper:#E8EBF1; --sheet:#FBFCFE; --sunk:#F1F3F8; --ink:#151A2E; --muted:#596080; --rule:#CBD1DE;
+  --accent:#2B3CCB; --accent-ink:#FFFFFF; --tape:#F3C431; --tape-ink:#2A2208;
+  --ok:#17804F; --warn:#9A6200; --bad:#C0322B;
+  --sec-verse:#9AA6F2; --sec-pre:#C6AAF2; --sec-chorus:#F3C431; --sec-bridge:#7DCFC6; --sec-inst:#C3C9D8; --sec-edge:#DEE2EB; --strip-ink:#151A2E;
+  --f-display:"Dela Gothic One","Zen Kaku Gothic New","Hiragino Sans",sans-serif;
+  --f-body:"Zen Kaku Gothic New","Hiragino Sans","Noto Sans JP","Yu Gothic",system-ui,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#10121A; --sheet:#181B26; --sunk:#13151F; --ink:#E6E8F2; --muted:#9CA2BD; --rule:#2D3245;
+    --accent:#8C99FF; --accent-ink:#0D0F1A; --tape:#E8B923; --tape-ink:#221B04;
+    --ok:#4CC38A; --warn:#E3A53A; --bad:#F06A60;
+    --sec-verse:#8E9BEF; --sec-pre:#B99DEB; --sec-chorus:#E8B923; --sec-bridge:#6CC2B8; --sec-inst:#959CB2; --sec-edge:#B8BED0; --strip-ink:#10121A;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#10121A; --sheet:#181B26; --sunk:#13151F; --ink:#E6E8F2; --muted:#9CA2BD; --rule:#2D3245;
+  --accent:#8C99FF; --accent-ink:#0D0F1A; --tape:#E8B923; --tape-ink:#221B04;
+  --ok:#4CC38A; --warn:#E3A53A; --bad:#F06A60;
+  --sec-verse:#8E9BEF; --sec-pre:#B99DEB; --sec-chorus:#E8B923; --sec-bridge:#6CC2B8; --sec-inst:#959CB2; --sec-edge:#B8BED0; --strip-ink:#10121A;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1320px;margin:0 auto;padding-block:20px 72px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:20px}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+
+/* top bar */
+.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px 24px}
+.brand{display:flex;flex-direction:column;gap:2px}
+.brand h1{font-family:var(--f-display);font-weight:400;font-size:28px;line-height:1.1;margin:0;letter-spacing:.02em}
+.brand p{margin:0;color:var(--muted);font-size:13px}
+.controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.field-inline{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
+select,input[type=text],input[type=number]{background:var(--sheet);border:1px solid var(--rule);border-radius:4px;padding:6px 8px;font-size:14px;min-width:0}
+#proj{max-width:240px}
+
+.btn{border:1px solid var(--ink);background:var(--sheet);color:var(--ink);padding:6px 12px;border-radius:4px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;line-height:1.4}
+.btn:hover{background:var(--sunk)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.ghost{border-color:var(--rule);font-weight:500}
+.btn[data-armed]{background:var(--bad);border-color:var(--bad);color:#fff}
+
+/* title row */
+.titlebar{display:flex;flex-wrap:wrap;gap:12px;align-items:center;background:var(--sheet);border:1px solid var(--rule);border-radius:6px;padding:12px 16px}
+.titlebar label{font-size:12px;font-weight:700;letter-spacing:.08em;color:var(--muted)}
+#title{flex:1 1 260px;font-size:20px;font-weight:700;border:none;border-bottom:2px solid var(--rule);border-radius:0;background:transparent;padding:4px 2px}
+#title:focus{border-bottom-color:var(--accent);outline:none}
+
+/* sheets */
+.grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:20px;align-items:start}
+@media (max-width:960px){.grid{grid-template-columns:minmax(0,1fr)}}
+.sheet{background:var(--sheet);border:1px solid var(--rule);border-radius:6px;padding:28px 20px 20px;display:flex;flex-direction:column;gap:22px;min-width:0;position:relative}
+.tape{position:absolute;top:-12px;left:18px;background:var(--tape);color:var(--tape-ink);font-family:var(--f-display);font-size:15px;padding:3px 14px 4px;transform:rotate(-1.5deg);letter-spacing:.06em;box-shadow:0 1px 0 rgba(0,0,0,.08)}
+.tape small{font-family:var(--f-body);font-weight:700;font-size:11px;margin-left:8px;letter-spacing:.04em}
+.sheet-head{display:flex;justify-content:flex-end;flex-wrap:wrap;gap:8px}
+
+.group{display:flex;flex-direction:column;gap:8px}
+.group h3{margin:0;font-size:12px;letter-spacing:.1em;color:var(--muted);font-weight:700;display:flex;gap:8px;align-items:baseline}
+.group h3 .count{font-family:var(--f-mono);font-weight:400;letter-spacing:0}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{display:inline-flex;align-items:baseline;gap:6px;padding:4px 9px;border:1px solid var(--rule);border-radius:3px;background:transparent;font-size:13px;cursor:pointer;line-height:1.5}
+.chip small{font-family:var(--f-mono);font-size:10.5px;color:var(--muted)}
+.chip:hover{border-color:var(--muted)}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.chip[aria-pressed="true"] small{color:inherit;opacity:.8}
+.chip.ex[aria-pressed="true"]{background:var(--bad);border-color:var(--bad);color:#fff}
+
+.row{display:flex;flex-wrap:wrap;gap:16px;align-items:center}
+.bpm{display:flex;align-items:center;gap:10px;flex:1 1 260px}
+.bpm input[type=range]{flex:1;accent-color:var(--accent);min-width:0}
+.bpm output{font-family:var(--f-mono);font-size:14px;min-width:4.5em;text-align:right}
+.check{display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer}
+.check input{accent-color:var(--accent);width:16px;height:16px}
+.textin{width:100%}
+.hint{font-size:12px;color:var(--muted);margin:0}
+
+/* output */
+.out{display:flex;flex-direction:column;gap:8px;background:var(--sunk);border:1px dashed var(--muted);border-radius:4px;padding:12px}
+.out-head{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.out-head b{font-size:12px;letter-spacing:.1em;color:var(--muted)}
+.out textarea{width:100%;border:none;background:transparent;resize:none;font-family:var(--f-mono);font-size:13px;line-height:1.6;padding:0;min-height:3.2em;overflow:hidden}
+.out textarea:focus{outline:none}
+.meter{display:flex;align-items:center;gap:10px;font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.meter .bar{flex:1;height:4px;background:var(--rule);border-radius:2px;overflow:hidden}
+.meter .bar i{display:block;height:100%;width:0;background:var(--accent);transition:width .2s}
+.meter[data-state="warn"] .bar i{background:var(--warn)} .meter[data-state="warn"]{color:var(--warn)}
+.meter[data-state="over"] .bar i{background:var(--bad)} .meter[data-state="over"]{color:var(--bad);font-weight:600}
+
+/* lyrics */
+.toolbar{display:flex;flex-direction:column;gap:8px}
+.tagrow{display:flex;flex-wrap:wrap;gap:5px;align-items:center}
+.tagrow > span{font-size:11px;color:var(--muted);font-weight:700;letter-spacing:.08em;margin-right:4px;min-width:3.5em}
+.tagbtn{border:1px solid var(--rule);background:var(--sheet);border-radius:3px;padding:3px 7px;font-size:12px;cursor:pointer;display:inline-flex;gap:5px;align-items:baseline}
+.tagbtn code{font-family:var(--f-mono);font-size:11.5px}
+.tagbtn em{font-style:normal;color:var(--muted);font-size:11px}
+.tagbtn:hover{border-color:var(--accent)}
+.tagbtn[data-kind="chorus"] code{background:linear-gradient(transparent 55%,var(--tape) 55%);color:var(--ink)}
+#lyrics{width:100%;min-height:460px;resize:vertical;background:var(--sunk);border:1px solid var(--rule);border-radius:4px;padding:14px 16px;font-size:15px;line-height:1.85}
+#lyrics:focus{border-color:var(--accent);outline:none}
+.templates{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.templates > span{font-size:11px;color:var(--muted);font-weight:700;letter-spacing:.08em;margin-right:4px}
+
+/* section strip */
+.strip-wrap{display:flex;flex-direction:column;gap:10px}
+.strip-scroll{overflow-x:auto;padding-bottom:4px}
+.strip{display:flex;gap:3px;min-height:56px}
+.blk{flex-basis:0;min-width:58px;border:none;border-radius:2px;padding:6px 7px;text-align:left;cursor:pointer;color:var(--strip-ink);display:flex;flex-direction:column;justify-content:space-between;gap:2px;overflow:hidden}
+.blk b{font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.blk span{font-size:10.5px;font-family:var(--f-mono);opacity:.75;white-space:nowrap}
+.blk[data-kind="verse"]{background:var(--sec-verse)} .blk[data-kind="pre"]{background:var(--sec-pre)}
+.blk[data-kind="chorus"]{background:var(--sec-chorus)} .blk[data-kind="bridge"]{background:var(--sec-bridge)}
+.blk[data-kind="inst"]{background:var(--sec-inst)} .blk[data-kind="edge"]{background:var(--sec-edge)}
+.blk:hover{filter:brightness(1.06)}
+.strip-empty{flex:1;border:1px dashed var(--rule);border-radius:2px;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--muted);padding:8px;text-align:center}
+.legend{display:flex;flex-wrap:wrap;gap:12px;font-size:11px;color:var(--muted)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px;vertical-align:-1px}
+.stats{display:flex;flex-wrap:wrap;gap:6px 20px;font-size:12px;color:var(--muted)}
+.stats b{font-family:var(--f-mono);font-size:15px;color:var(--ink);font-weight:600;margin-right:3px}
+.notes{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px;font-size:13px}
+.notes li{display:flex;gap:8px;align-items:baseline}
+.notes li::before{content:"";flex:none;width:7px;height:7px;border-radius:50%;background:var(--warn);transform:translateY(-1px)}
+.notes li.ok::before{background:var(--ok)}
+
+/* tips + footer */
+.tips{background:var(--sheet);border:1px solid var(--rule);border-radius:6px;padding:16px 20px}
+.tips h2{font-size:13px;letter-spacing:.1em;margin:0 0 8px;color:var(--muted)}
+.tips ul{margin:0;padding-left:1.2em;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:6px 28px;font-size:13px}
+.tips code{font-family:var(--f-mono);font-size:12px;background:var(--sunk);padding:0 4px;border-radius:2px}
+
+/* data / fallback panels */
+.panel{background:var(--sheet);border:1px solid var(--ink);border-radius:6px;padding:16px 20px;display:flex;flex-direction:column;gap:12px}
+.panel h2{margin:0;font-size:16px}
+.panel textarea{width:100%;min-height:140px;font-family:var(--f-mono);font-size:12px;background:var(--sunk);border:1px solid var(--rule);border-radius:4px;padding:10px}
+.panel .cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+.panel .cols > div{display:flex;flex-direction:column;gap:8px;min-width:0}
+
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:10px 16px;border-radius:6px;font-size:14px;display:flex;gap:14px;align-items:center;z-index:20;max-width:calc(100% - 32px);box-shadow:0 6px 24px rgba(0,0,0,.2)}
+.toast button{background:none;border:none;color:var(--tape);font-weight:700;cursor:pointer;padding:0;font-size:14px}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <h1>トラックシート</h1>
+      <p>Suno で曲を作るための、スタイル指定と歌詞のノート</p>
+    </div>
+    <div class="controls">
+      <label class="field-inline" for="proj">曲</label>
+      <select id="proj" aria-label="保存した曲"></select>
+      <button class="btn ghost" id="btnNew" type="button">新規</button>
+      <button class="btn ghost" id="btnDup" type="button">複製</button>
+      <button class="btn ghost" id="btnDel" type="button">削除</button>
+      <button class="btn ghost" id="btnData" type="button" aria-expanded="false">読み込み・書き出し</button>
+      <label class="field-inline" for="limitMode">文字数上限</label>
+      <select id="limitMode">
+        <option value="new">v4.5 以降（1000 / 5000）</option>
+        <option value="old">v4 以前（200 / 3000）</option>
+      </select>
+      <button class="btn primary" id="btnCopyAll" type="button">全部コピー</button>
+    </div>
+  </header>
+
+  <section class="panel" id="dataPanel" hidden>
+    <h2>読み込み・書き出し</h2>
+    <p class="hint">保存はこのブラウザ内だけです。別の端末に移すときや控えを残すときは、JSON をコピーして保管してください。</p>
+    <div class="cols">
+      <div>
+        <b>書き出し（全曲）</b>
+        <textarea id="exportBox" readonly aria-label="書き出し JSON"></textarea>
+        <div class="row"><button class="btn" id="btnExportCopy" type="button">JSON をコピー</button></div>
+      </div>
+      <div>
+        <b>読み込み</b>
+        <textarea id="importBox" placeholder="書き出した JSON をここに貼り付け" aria-label="読み込む JSON"></textarea>
+        <div class="row">
+          <button class="btn" id="btnImport" type="button">貼り付けた内容を追加</button>
+          <label class="btn ghost" for="importFile">ファイルを選ぶ</label>
+          <input type="file" id="importFile" accept=".json,application/json" hidden>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="fallbackPanel" hidden>
+    <h2>手動でコピーしてください</h2>
+    <p class="hint">この環境では自動コピーが使えませんでした。下の文字は選択済みです。</p>
+    <textarea id="fallbackBox" readonly aria-label="コピー用テキスト"></textarea>
+    <div class="row"><button class="btn" id="btnFallbackClose" type="button">閉じる</button></div>
+  </section>
+
+  <div class="titlebar">
+    <label for="title">SONG TITLE</label>
+    <input type="text" id="title" placeholder="曲のタイトル" autocomplete="off">
+    <span class="mono hint" id="titleCount"></span>
+    <button class="btn ghost" data-copy="title" type="button">コピー</button>
+  </div>
+
+  <main class="grid">
+    <!-- STYLE SHEET -->
+    <section class="sheet" aria-labelledby="styleTape">
+      <div class="tape" id="styleTape">STYLE<small>スタイル</small></div>
+      <div class="sheet-head">
+        <button class="btn ghost" id="btnRandom" type="button">おまかせで組む</button>
+        <button class="btn ghost" id="btnClearStyle" type="button">選択をクリア</button>
+      </div>
+
+      <div id="catGroups" class="group-list" style="display:flex;flex-direction:column;gap:18px"></div>
+
+      <div class="group">
+        <h3>テンポとキー</h3>
+        <div class="row">
+          <div class="bpm">
+            <label class="check" for="bpmOn"><input type="checkbox" id="bpmOn"> BPM を指定</label>
+            <input type="range" id="bpm" min="50" max="200" step="1" aria-label="BPM">
+            <output id="bpmOut" for="bpm" class="mono"></output>
+          </div>
+          <select id="key" aria-label="キー"></select>
+        </div>
+      </div>
+
+      <div class="group">
+        <h3><label for="custom">自由入力</label></h3>
+        <input type="text" id="custom" class="textin" placeholder="例: sunset drive, groovy bassline（カンマ区切り）" autocomplete="off">
+      </div>
+
+      <div class="out">
+        <div class="out-head"><b>STYLE OF MUSIC</b><button class="btn" data-copy="style" type="button">コピー</button></div>
+        <textarea id="styleOut" readonly rows="2" aria-label="スタイル（Suno に貼る文字列）"></textarea>
+        <div class="meter" id="styleMeter"><div class="bar"><i></i></div><span></span></div>
+      </div>
+
+      <div class="group">
+        <h3><label for="exclude">除外するスタイル</label><span class="count">Exclude Styles</span></h3>
+        <div class="chips" id="excludeChips"></div>
+        <input type="text" id="exclude" class="textin" placeholder="入れたくない要素（カンマ区切り）" autocomplete="off">
+        <div class="row" style="justify-content:space-between"><span class="hint mono" id="excludeCount"></span><button class="btn ghost" data-copy="exclude" type="button">除外をコピー</button></div>
+      </div>
+    </section>
+
+    <!-- LYRICS SHEET -->
+    <section class="sheet" aria-labelledby="lyricsTape">
+      <div class="tape" id="lyricsTape">LYRICS<small>歌詞</small></div>
+      <div class="sheet-head">
+        <button class="btn" data-copy="lyrics" type="button">歌詞をコピー</button>
+      </div>
+
+      <div class="templates" id="templates"><span>構成テンプレ</span></div>
+
+      <div class="toolbar">
+        <div class="tagrow" id="secTags"><span>セクション</span></div>
+        <div class="tagrow" id="cueTags"><span>歌い方</span></div>
+      </div>
+
+      <textarea id="lyrics" spellcheck="false" aria-label="歌詞"></textarea>
+      <div class="meter" id="lyricsMeter"><div class="bar"><i></i></div><span></span></div>
+
+      <div class="strip-wrap">
+        <div class="group"><h3>曲の構成<span class="count" id="secCount"></span></h3></div>
+        <div class="strip-scroll"><div class="strip" id="strip"></div></div>
+        <div class="legend">
+          <span><i style="background:var(--sec-edge)"></i>イントロ・アウトロ</span>
+          <span><i style="background:var(--sec-verse)"></i>Verse（Aメロ）</span>
+          <span><i style="background:var(--sec-pre)"></i>Pre-Chorus（Bメロ）</span>
+          <span><i style="background:var(--sec-chorus)"></i>Chorus（サビ）</span>
+          <span><i style="background:var(--sec-bridge)"></i>Bridge（Cメロ）</span>
+          <span><i style="background:var(--sec-inst)"></i>間奏・ソロ</span>
+        </div>
+        <div class="stats" id="stats"></div>
+        <ul class="notes" id="notes"></ul>
+      </div>
+    </section>
+  </main>
+
+  <aside class="tips">
+    <h2>日本語で作るときのコツ</h2>
+    <ul>
+      <li>読み間違えやすい漢字は、ひらがなやカタカナで書くと狙った読みになりやすい。</li>
+      <li>セクションタグは英語で <code>[Verse]</code> <code>[Chorus]</code> のように書く。日本語のタグは歌われてしまうことがある。</li>
+      <li><code>( )</code> で囲んだ行はコーラスや合いの手として歌われやすい。</li>
+      <li>スタイルは先頭の要素ほど効きやすい。いちばん大事なジャンルを最初に置く。</li>
+      <li>1行を短めにすると譜割りが安定する。サビは同じ文字数の行をそろえると覚えやすい。</li>
+      <li>歌わせたくない区間は <code>[Instrumental]</code> や <code>[Guitar Solo]</code> だけを置いて、歌詞を書かない。</li>
+    </ul>
+  </aside>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite" hidden><span id="toastMsg"></span><button id="toastAct" type="button" hidden></button></div>
+
+<script>
+(() => {
+  "use strict";
+  const $ = (s, r = document) => r.querySelector(s);
+  const len = s => [...(s || "")].length;
+
+  /* ---------- vocabulary ---------- */
+  const CATS = [
+    { id: "genre", ja: "ジャンル", items: [
+      ["J-POP","J-pop"],["シティポップ","city pop"],["アニソン","anime"],["ボカロ","vocaloid"],["ロック","rock"],["J-ROCK","Japanese rock"],
+      ["ポップパンク","pop punk"],["メタル","metal"],["EDM","EDM"],["フューチャーベース","future bass"],["ハウス","house"],["ドラムンベース","drum and bass"],
+      ["シンセウェイヴ","synthwave"],["Lo-fi ヒップホップ","lo-fi hip hop"],["トラップ","trap"],["R&B","R&B"],["ファンク","funk"],["ジャズ","jazz"],
+      ["ボサノバ","bossa nova"],["バラード","ballad"],["フォーク","acoustic folk"],["アイドル","idol pop"],["演歌","enka"],["オーケストラ","orchestral"],["アンビエント","ambient"]
+    ]},
+    { id: "mood", ja: "ムード", items: [
+      ["明るい","uplifting"],["爽やか","refreshing"],["エネルギッシュ","energetic"],["切ない","bittersweet"],["ノスタルジック","nostalgic"],["憂鬱","melancholic"],
+      ["エモーショナル","emotional"],["夢見心地","dreamy"],["チル","chill"],["ロマンチック","romantic"],["壮大","epic"],["ダーク","dark"],["攻撃的","aggressive"],["かわいい","cute"]
+    ]},
+    { id: "vocal", ja: "ボーカル", items: [
+      ["女性ボーカル","female vocals"],["男性ボーカル","male vocals"],["デュエット","duet"],["合唱","choir"],["ハモリ多め","vocal harmonies"],["透明感","airy vocals"],
+      ["ウィスパー","whispery vocals"],["ファルセット","falsetto"],["力強い","powerful vocals"],["ハスキー","husky voice"],["ラップ","rap"],["インスト","instrumental"]
+    ]},
+    { id: "inst", ja: "楽器", items: [
+      ["ピアノ","piano"],["エレピ","rhodes piano"],["アコギ","acoustic guitar"],["エレキ","electric guitar"],["シンセ","synth"],["ストリングス","strings"],
+      ["ヴァイオリン","violin"],["ブラス","brass section"],["サックス","saxophone"],["スラップベース","slap bass"],["808","808 bass"],["オルガン","organ"],
+      ["チップチューン","chiptune"],["三味線","shamisen"],["琴","koto"],["和太鼓","taiko drums"]
+    ]},
+    { id: "prod", ja: "サウンド・制作", items: [
+      ["高音質","polished production"],["Lo-fi","lo-fi"],["アナログ感","analog warmth"],["リバーブ深め","reverb-heavy"],["ワイドなステレオ","wide stereo"],
+      ["パンチのあるドラム","punchy drums"],["4つ打ち","four-on-the-floor"],["ハーフタイム","half-time groove"],["ミニマル","minimal"],
+      ["80年代","80s"],["90年代","90s"],["キャッチーなフック","catchy hook"]
+    ]}
+  ];
+  const NO_RANDOM = new Set(["instrumental","rap","choir","duet"]);
+  const KEYS = ["","C major","G major","D major","A major","E major","F major","B♭ major","E♭ major","A minor","E minor","B minor","F♯ minor","D minor","G minor","C minor"];
+  const EXCLUDES = [["ラップ","rap"],["EDM","EDM"],["激しい歪み","heavy distortion"],["オートチューン","autotune"],["シャウト","screaming"],["語り","spoken word"],["男性ボーカル","male vocals"],["女性ボーカル","female vocals"],["Lo-fi","lo-fi"]];
+  const SEC_TAGS = [["Intro","イントロ"],["Verse","Aメロ"],["Pre-Chorus","Bメロ"],["Chorus","サビ"],["Post-Chorus","後サビ"],["Bridge","Cメロ"],["Instrumental","間奏"],["Guitar Solo","ソロ"],["Break","ブレイク"],["Build-up","ビルド"],["Drop","ドロップ"],["Hook","フック"],["Outro","アウトロ"],["Fade Out","フェードアウト"],["End","終わり"]];
+  const CUE_TAGS = [["Whisper","ささやき"],["Spoken Word","語り"],["Female Vocal","女声"],["Male Vocal","男声"],["Harmony","ハモリ"],["Choir","合唱"],["Belting","張り上げ"],["Ad-lib","アドリブ"]];
+  const TEMPLATES = [
+    { name: "J-POP 王道", secs: ["Intro","Verse 1","Pre-Chorus","Chorus","Verse 2","Pre-Chorus","Chorus","Bridge","Chorus","Outro"] },
+    { name: "シンプル", secs: ["Verse 1","Chorus","Verse 2","Chorus","Bridge","Chorus","End"] },
+    { name: "サビ始まり", secs: ["Chorus","Verse 1","Pre-Chorus","Chorus","Instrumental","Chorus","End"] },
+    { name: "EDM", secs: ["Intro","Verse 1","Build-up","Drop","Break","Verse 2","Build-up","Drop","Outro"] },
+    { name: "ヒップホップ", secs: ["Intro","Verse 1","Hook","Verse 2","Hook","Verse 3","Hook","Outro"] }
+  ];
+  const LIMITS = { new: { style: 1000, exclude: 1000, lyrics: 5000 }, old: { style: 200, exclude: 200, lyrics: 3000 } };
+
+  /* ---------- storage ---------- */
+  const KEY = "tracksheet.v1";
+  const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
+  const blank = () => ({ id: uid(), title: "", tags: { genre: [], mood: [], vocal: [], inst: [], prod: [] }, bpm: 100, bpmOn: false, key: "", custom: "", exclude: "", lyrics: "", updated: Date.now() });
+  const sample = () => Object.assign(blank(), {
+    sample: true, title: "夕凪ハイウェイ",
+    tags: { genre: ["city pop"], mood: ["nostalgic","bittersweet"], vocal: ["female vocals","airy vocals"], inst: ["rhodes piano","slap bass","brass section"], prod: ["80s","analog warmth"] },
+    bpm: 104, bpmOn: true, key: "F major", custom: "sunset drive, groovy bassline", exclude: "rap, heavy distortion",
+    lyrics: `[Intro]
+
+[Verse 1]
+ガラスごしの ゆうやけが
+ほどけてゆく 午後六時
+ラジオから ながれる声
+あの夏を まだおぼえてる
+
+[Pre-Chorus]
+ブレーキふむたび 胸がなる
+帰り道は いつも遠回り
+
+[Chorus]
+夕凪ハイウェイ 走りぬけて
+言えなかった ことば 風にのせて
+(ララ ラララ)
+海がひかる 一瞬だけ
+きみの横顔 わすれないよ
+
+[Verse 2]
+助手席の 空いたシート
+置きわすれた サングラス
+信号待ち ふと笑えば
+あの日の歌が また流れる
+
+[Pre-Chorus]
+アクセルふむたび 遠ざかる
+それでもいいと 思えたんだ
+
+[Chorus]
+夕凪ハイウェイ 走りぬけて
+言えなかった ことば 風にのせて
+(ララ ラララ)
+海がひかる 一瞬だけ
+きみの横顔 わすれないよ
+
+[Guitar Solo]
+
+[Bridge]
+[Whisper]
+夜が来る その前に
+もう一度だけ 名前を呼ぶよ
+
+[Chorus]
+夕凪ハイウェイ どこまでも
+とどかなくても 歌にのせて
+海がひかる この瞬間を
+ずっとずっと わすれないよ
+
+[Outro]
+[Fade Out]`
+  });
+
+  function load() {
+    try {
+      const d = JSON.parse(localStorage.getItem(KEY));
+      if (d && Array.isArray(d.projects) && d.projects.length) return d;
+    } catch (e) {}
+    return null;
+  }
+  let store = load();
+  if (!store) { const s = sample(); store = { projects: [s], currentId: s.id, limit: "new" }; }
+  let saveTimer;
+  function save() {
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => { try { localStorage.setItem(KEY, JSON.stringify(store)); } catch (e) {} }, 250);
+  }
+  function normalize(p) {
+    const b = blank();
+    const out = Object.assign(b, p || {});
+    out.tags = Object.assign(blank().tags, (p && p.tags) || {});
+    return out;
+  }
+  store.projects = store.projects.map(normalize);
+  const cur = () => store.projects.find(p => p.id === store.currentId) || store.projects[0];
+  const touch = () => { const p = cur(); p.updated = Date.now(); save(); };
+
+  /* ---------- composition ---------- */
+  const splitList = s => (s || "").split(/[,、\n]/).map(x => x.trim()).filter(Boolean);
+  function styleText(p) {
+    const parts = [];
+    CATS.forEach(c => parts.push(...(p.tags[c.id] || [])));
+    if (p.bpmOn) parts.push(p.bpm + " BPM");
+    if (p.key) parts.push(p.key);
+    parts.push(...splitList(p.custom));
+    return [...new Set(parts)].join(", ");
+  }
+  const label = p => (p.title || "無題の曲") + (p.sample ? "（サンプル）" : "");
+
+  /* ---------- UI: static builds ---------- */
+  const catWrap = $("#catGroups");
+  CATS.forEach(c => {
+    const g = document.createElement("div");
+    g.className = "group";
+    g.innerHTML = `<h3>${c.ja}<span class="count" data-count="${c.id}"></span></h3><div class="chips"></div>`;
+    const box = g.querySelector(".chips");
+    c.items.forEach(([ja, en]) => {
+      const b = document.createElement("button");
+      b.type = "button"; b.className = "chip"; b.dataset.cat = c.id; b.dataset.tag = en;
+      b.innerHTML = `<span>${ja}</span><small>${en}</small>`;
+      box.appendChild(b);
+    });
+    catWrap.appendChild(g);
+  });
+  catWrap.addEventListener("click", e => {
+    const b = e.target.closest(".chip"); if (!b) return;
+    const p = cur(), list = p.tags[b.dataset.cat], t = b.dataset.tag;
+    const i = list.indexOf(t);
+    if (i >= 0) list.splice(i, 1); else list.push(t);
+    touch(); renderStyle();
+  });
+
+  KEYS.forEach(k => { const o = document.createElement("option"); o.value = k; o.textContent = k ? "Key: " + k : "キー指定なし"; $("#key").appendChild(o); });
+
+  const exWrap = $("#excludeChips");
+  EXCLUDES.forEach(([ja, en]) => {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "chip ex"; b.dataset.tag = en;
+    b.innerHTML = `<span>${ja}</span><small>${en}</small>`;
+    exWrap.appendChild(b);
+  });
+  exWrap.addEventListener("click", e => {
+    const b = e.target.closest(".chip"); if (!b) return;
+    const p = cur(), list = splitList(p.exclude), t = b.dataset.tag;
+    const i = list.findIndex(x => x.toLowerCase() === t.toLowerCase());
+    if (i >= 0) list.splice(i, 1); else list.push(t);
+    p.exclude = list.join(", "); $("#exclude").value = p.exclude;
+    touch(); renderExclude();
+  });
+
+  const kindOf = name => {
+    const n = name.toLowerCase();
+    if (/intro|outro|fade|^end\b|イントロ|アウトロ/.test(n)) return "edge";
+    if (/pre-?chorus|build|bメロ/.test(n)) return "pre";
+    if (/instrumental|solo|break|drop|interlude|間奏|ソロ/.test(n)) return "inst";
+    if (/chorus|hook|refrain|サビ/.test(n)) return "chorus";
+    if (/verse|aメロ/.test(n)) return "verse";
+    if (/bridge|cメロ/.test(n)) return "bridge";
+    return null;
+  };
+  const shortName = (name, kind) => {
+    const n = name.toLowerCase(), num = (name.match(/\d+/) || [""])[0];
+    if (kind === "edge") return /intro|イントロ/.test(n) ? "イントロ" : /fade/.test(n) ? "FO" : /end/.test(n) ? "終" : "アウトロ";
+    if (kind === "inst") return /solo|ソロ/.test(n) ? "ソロ" : /drop/.test(n) ? "ドロップ" : /break/.test(n) ? "ブレイク" : "間奏";
+    if (kind === "pre") return /build/.test(n) ? "ビルド" : "Bメロ";
+    if (kind === "chorus") return /hook/.test(n) ? "フック" : /post/.test(n) ? "後サビ" : "サビ";
+    if (kind === "verse") return "Aメロ" + num;
+    if (kind === "bridge") return "Cメロ";
+    return name;
+  };
+  const NO_LYRIC_OK = /intro|outro|fade|end|instrumental|solo|break|drop|build|interlude|間奏|ソロ|イントロ|アウトロ/i;
+
+  SEC_TAGS.forEach(([en, ja]) => {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "tagbtn"; b.dataset.tag = en; b.dataset.section = "1"; b.dataset.kind = kindOf(en) || "";
+    b.innerHTML = `<code>[${en}]</code><em>${ja}</em>`;
+    $("#secTags").appendChild(b);
+  });
+  CUE_TAGS.forEach(([en, ja]) => {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "tagbtn"; b.dataset.tag = en;
+    b.innerHTML = `<code>[${en}]</code><em>${ja}</em>`;
+    $("#cueTags").appendChild(b);
+  });
+  TEMPLATES.forEach((t, i) => {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "btn ghost"; b.dataset.tpl = i; b.textContent = t.name;
+    b.title = t.secs.join(" → ");
+    $("#templates").appendChild(b);
+  });
+
+  /* ---------- lyrics editing ---------- */
+  const ta = $("#lyrics");
+  function setLyrics(v, caret) {
+    ta.value = v; cur().lyrics = v; touch(); renderLyrics();
+    if (caret != null) { ta.focus(); ta.setSelectionRange(caret, caret); }
+  }
+  function insertTag(tag, isSection) {
+    const v = ta.value, s = ta.selectionStart, e = ta.selectionEnd;
+    if (isSection && tag === "Verse") {
+      const n = (v.match(/^\s*\[Verse\s*\d*[^\]]*\]\s*$/gim) || []).length;
+      tag = "Verse " + (n + 1);
+    }
+    const before = v.slice(0, s), after = v.slice(e);
+    let pre = "";
+    if (before.length) {
+      if (isSection) pre = before.endsWith("\n\n") ? "" : before.endsWith("\n") ? "\n" : "\n\n";
+      else pre = before.endsWith("\n") ? "" : "\n";
+    }
+    const ins = pre + "[" + tag + "]\n";
+    const post = after.length && !after.startsWith("\n") ? "\n" : "";
+    setLyrics(before + ins + post + after, before.length + ins.length);
+  }
+  $("#secTags").addEventListener("click", e => { const b = e.target.closest(".tagbtn"); if (b) insertTag(b.dataset.tag, true); });
+  $("#cueTags").addEventListener("click", e => { const b = e.target.closest(".tagbtn"); if (b) insertTag(b.dataset.tag, false); });
+
+  function arm(btn, armedText, fn) {
+    if (btn.dataset.armed) {
+      clearTimeout(btn._t); delete btn.dataset.armed; btn.textContent = btn.dataset.orig; fn();
+    } else {
+      btn.dataset.orig = btn.textContent; btn.dataset.armed = "1"; btn.textContent = armedText;
+      btn._t = setTimeout(() => { delete btn.dataset.armed; btn.textContent = btn.dataset.orig; }, 3200);
+    }
+  }
+  $("#templates").addEventListener("click", e => {
+    const b = e.target.closest("[data-tpl]"); if (!b) return;
+    const t = TEMPLATES[+b.dataset.tpl];
+    const text = t.secs.map(s => `[${s}]\n`).join("\n");
+    const apply = () => {
+      const prev = ta.value;
+      setLyrics(text, text.indexOf("\n") + 1);
+      if (prev.trim()) toast(`「${t.name}」で書き換えました`, "元に戻す", () => setLyrics(prev));
+    };
+    if (!ta.value.trim()) apply(); else arm(b, "上書きする？", apply);
+  });
+
+  function jumpTo(offset) {
+    const lineEnd = ta.value.indexOf("\n", offset);
+    const caret = lineEnd < 0 ? ta.value.length : lineEnd + 1;
+    ta.focus(); ta.setSelectionRange(caret, caret);
+    const line = ta.value.slice(0, offset).split("\n").length - 1;
+    const lh = parseFloat(getComputedStyle(ta).lineHeight) || 28;
+    ta.scrollTop = Math.max(0, line * lh - lh * 2);
+  }
+
+  function analyze(text) {
+    const secs = []; let curSec = null, offset = 0, jpTags = 0, longLines = 0, loose = 0, lyricLines = 0, chars = 0;
+    text.split("\n").forEach(line => {
+      const m = line.match(/^\s*\[([^\]]+)\]\s*$/);
+      if (m) {
+        const name = m[1].trim(), kind = kindOf(name);
+        if (/[^\x00-\x7F]/.test(name)) jpTags++;
+        if (kind) { curSec = { name, kind, lines: 0, chars: 0, offset }; secs.push(curSec); }
+      } else if (line.trim()) {
+        const n = len(line.replace(/\s/g, ""));
+        lyricLines++; chars += n;
+        if (curSec) { curSec.lines++; curSec.chars += n; } else loose++;
+        if (n > 30) longLines++;
+      }
+      offset += line.length + 1;
+    });
+    return { secs, jpTags, longLines, loose, lyricLines, chars };
+  }
+
+  /* ---------- rendering ---------- */
+  function meter(el, n, max) {
+    const pct = max ? Math.min(100, n / max * 100) : 0;
+    el.querySelector("i").style.width = pct + "%";
+    el.querySelector("span").textContent = `${n.toLocaleString()} / ${max.toLocaleString()} 文字`;
+    el.dataset.state = n > max ? "over" : n > max * .9 ? "warn" : "";
+  }
+  function autosize(el) { el.style.height = "auto"; el.style.height = el.scrollHeight + "px"; }
+
+  function renderStyle() {
+    const p = cur();
+    document.querySelectorAll("#catGroups .chip").forEach(b => b.setAttribute("aria-pressed", p.tags[b.dataset.cat].includes(b.dataset.tag)));
+    CATS.forEach(c => { const n = p.tags[c.id].length; $(`[data-count="${c.id}"]`).textContent = n ? n + " 個選択" : ""; });
+    $("#bpmOut").textContent = p.bpmOn ? p.bpm + " BPM" : "指定なし";
+    $("#bpm").disabled = !p.bpmOn;
+    const s = styleText(p);
+    const out = $("#styleOut");
+    out.value = s || "";
+    out.placeholder = "上のタグを選ぶと、ここに Suno の「Style of Music」に貼る文字列ができます";
+    autosize(out);
+    meter($("#styleMeter"), len(s), LIMITS[store.limit].style);
+  }
+  function renderExclude() {
+    const list = splitList(cur().exclude).map(x => x.toLowerCase());
+    exWrap.querySelectorAll(".chip").forEach(b => b.setAttribute("aria-pressed", list.includes(b.dataset.tag.toLowerCase())));
+    const n = len(cur().exclude), max = LIMITS[store.limit].exclude;
+    $("#excludeCount").textContent = `${n} / ${max} 文字`;
+  }
+  const esc = s => s.replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  function renderLyrics() {
+    const text = ta.value, a = analyze(text);
+    meter($("#lyricsMeter"), len(text), LIMITS[store.limit].lyrics);
+    const strip = $("#strip");
+    if (!a.secs.length) {
+      strip.innerHTML = `<div class="strip-empty">[Verse] や [Chorus] などのタグを入れると、ここに曲の流れが表示されます</div>`;
+    } else {
+      strip.innerHTML = a.secs.map((s, i) =>
+        `<button type="button" class="blk" data-kind="${s.kind}" data-i="${i}" style="flex-grow:${Math.max(1, s.lines)}" title="${esc(s.name)}：${s.lines}行 / ${s.chars}文字"><b>${esc(shortName(s.name, s.kind))}</b><span>${s.lines ? s.lines + "行" : "—"}</span></button>`
+      ).join("");
+      strip.querySelectorAll(".blk").forEach(b => b.addEventListener("click", () => jumpTo(a.secs[+b.dataset.i].offset)));
+    }
+    $("#secCount").textContent = a.secs.length ? a.secs.length + " セクション" : "";
+    $("#stats").innerHTML = `<span><b>${a.lyricLines}</b>行</span><span><b>${a.chars.toLocaleString()}</b>文字（空白除く）</span><span><b>${a.secs.filter(s => s.kind === "chorus").length}</b>回のサビ</span>`;
+
+    const notes = [];
+    if (text.trim() && !a.secs.length) notes.push("セクションタグがありません。[Verse] や [Chorus] を入れると構成が安定します。");
+    if (a.loose && a.secs.length) notes.push(`最初のタグより前に歌詞が ${a.loose} 行あります。`);
+    a.secs.forEach(s => { if (!s.lines && !NO_LYRIC_OK.test(s.name)) notes.push(`[${s.name}] に歌詞がありません。`); });
+    if (a.jpTags) notes.push(`日本語のタグが ${a.jpTags} 個あります。英語のタグにすると歌われにくくなります。`);
+    if (a.longLines) notes.push(`30文字を超える長い行が ${a.longLines} 行あります。分けると譜割りが安定しやすいです。`);
+    if (len(text) > LIMITS[store.limit].lyrics) notes.push("歌詞が文字数の上限を超えています。");
+    $("#notes").innerHTML = notes.length ? notes.map(n => `<li>${esc(n)}</li>`).join("") : (text.trim() ? `<li class="ok">構成に気になる点はありません。</li>` : "");
+  }
+  function renderProjects() {
+    const sel = $("#proj");
+    const list = [...store.projects].sort((a, b) => b.updated - a.updated);
+    sel.innerHTML = list.map(p => `<option value="${p.id}">${esc(label(p))}</option>`).join("");
+    sel.value = cur().id;
+  }
+  function fillFields() {
+    const p = cur();
+    $("#title").value = p.title; $("#bpm").value = p.bpm; $("#bpmOn").checked = p.bpmOn; $("#key").value = p.key;
+    $("#custom").value = p.custom; $("#exclude").value = p.exclude; ta.value = p.lyrics; $("#limitMode").value = store.limit;
+    renderTitle();
+  }
+  function renderTitle() { $("#titleCount").textContent = len(cur().title) + " 文字"; }
+  function renderAll() { renderProjects(); fillFields(); renderStyle(); renderExclude(); renderLyrics(); renderExport(); }
+
+  /* ---------- field events ---------- */
+  $("#title").addEventListener("input", e => { const p = cur(); p.title = e.target.value; delete p.sample; touch(); renderTitle(); clearTimeout(renderProjects._t); renderProjects._t = setTimeout(renderProjects, 400); });
+  $("#bpm").addEventListener("input", e => { cur().bpm = +e.target.value; touch(); renderStyle(); });
+  $("#bpmOn").addEventListener("change", e => { cur().bpmOn = e.target.checked; touch(); renderStyle(); });
+  $("#key").addEventListener("change", e => { cur().key = e.target.value; touch(); renderStyle(); });
+  $("#custom").addEventListener("input", e => { cur().custom = e.target.value; touch(); renderStyle(); });
+  $("#exclude").addEventListener("input", e => { cur().exclude = e.target.value; touch(); renderExclude(); });
+  let lyrT;
+  ta.addEventListener("input", () => { cur().lyrics = ta.value; touch(); clearTimeout(lyrT); lyrT = setTimeout(renderLyrics, 120); });
+  $("#limitMode").addEventListener("change", e => { store.limit = e.target.value; save(); renderStyle(); renderExclude(); renderLyrics(); });
+
+  $("#btnClearStyle").addEventListener("click", e => arm(e.currentTarget, "クリアする？", () => {
+    const p = cur(); const prev = JSON.stringify(p.tags);
+    CATS.forEach(c => p.tags[c.id] = []); touch(); renderStyle();
+    toast("選択をクリアしました", "元に戻す", () => { p.tags = JSON.parse(prev); touch(); renderStyle(); });
+  }));
+  const pick = (arr, n) => { const a = [...arr], out = []; while (out.length < n && a.length) out.push(a.splice(Math.floor(Math.random() * a.length), 1)[0]); return out; };
+  $("#btnRandom").addEventListener("click", () => {
+    const p = cur();
+    const prev = JSON.stringify({ tags: p.tags, bpm: p.bpm, bpmOn: p.bpmOn, key: p.key });
+    const count = { genre: 1, mood: 2, vocal: 1, inst: 2, prod: 1 };
+    CATS.forEach(c => p.tags[c.id] = pick(c.items.filter(i => !NO_RANDOM.has(i[1])), count[c.id]).map(i => i[1]));
+    p.bpm = 70 + Math.floor(Math.random() * 17) * 5; p.bpmOn = true;
+    touch(); fillFields(); renderStyle();
+    toast("スタイルをおまかせで組みました", "元に戻す", () => { Object.assign(p, JSON.parse(prev)); touch(); fillFields(); renderStyle(); });
+  });
+
+  /* ---------- projects ---------- */
+  $("#proj").addEventListener("change", e => { store.currentId = e.target.value; save(); renderAll(); });
+  $("#btnNew").addEventListener("click", () => { const p = blank(); store.projects.push(p); store.currentId = p.id; save(); renderAll(); $("#title").focus(); });
+  $("#btnDup").addEventListener("click", () => {
+    const src = cur(), p = normalize(JSON.parse(JSON.stringify(src)));
+    p.id = uid(); p.title = (src.title || "無題の曲") + " のコピー"; delete p.sample; p.updated = Date.now();
+    store.projects.push(p); store.currentId = p.id; save(); renderAll(); toast("複製しました");
+  });
+  $("#btnDel").addEventListener("click", e => arm(e.currentTarget, "削除する？", () => {
+    const gone = cur(), idx = store.projects.indexOf(gone);
+    store.projects.splice(idx, 1);
+    if (!store.projects.length) store.projects.push(blank());
+    store.currentId = [...store.projects].sort((a, b) => b.updated - a.updated)[0].id;
+    save(); renderAll();
+    toast(`「${label(gone)}」を削除しました`, "元に戻す", () => { store.projects.push(gone); store.currentId = gone.id; save(); renderAll(); });
+  }));
+
+  /* ---------- data panel ---------- */
+  function renderExport() { if (!$("#dataPanel").hidden) $("#exportBox").value = JSON.stringify({ app: "tracksheet", version: 1, projects: store.projects }, null, 2); }
+  $("#btnData").addEventListener("click", e => {
+    const panel = $("#dataPanel"); panel.hidden = !panel.hidden;
+    e.currentTarget.setAttribute("aria-expanded", String(!panel.hidden)); renderExport();
+  });
+  $("#btnExportCopy").addEventListener("click", () => copyText($("#exportBox").value, "書き出し JSON"));
+  function importText(txt) {
+    let d;
+    try { d = JSON.parse(txt); } catch (e) { toast("JSON として読めませんでした。書き出した内容をそのまま貼り付けてください"); return; }
+    const list = Array.isArray(d) ? d : Array.isArray(d.projects) ? d.projects : (d && typeof d === "object" ? [d] : []);
+    const added = list.filter(x => x && typeof x === "object").map(x => { const p = normalize(x); p.id = uid(); p.updated = Date.now(); return p; });
+    if (!added.length) { toast("読み込める曲が見つかりませんでした"); return; }
+    store.projects.push(...added); store.currentId = added[0].id; save(); renderAll();
+    $("#importBox").value = ""; toast(`${added.length} 曲を追加しました`);
+  }
+  $("#btnImport").addEventListener("click", () => importText($("#importBox").value));
+  $("#importFile").addEventListener("change", e => {
+    const f = e.target.files[0]; if (!f) return;
+    const r = new FileReader(); r.onload = () => importText(String(r.result)); r.readAsText(f); e.target.value = "";
+  });
+
+  /* ---------- copy ---------- */
+  function copyText(text, what) {
+    if (!text) { toast(`${what}が空です`); return; }
+    const fallback = () => {
+      const panel = $("#fallbackPanel"), box = $("#fallbackBox");
+      panel.hidden = false; box.value = text; panel.scrollIntoView({ block: "nearest" }); box.focus(); box.select();
+    };
+    try {
+      navigator.clipboard.writeText(text).then(() => toast(`${what}をコピーしました`), fallback);
+    } catch (e) { fallback(); }
+  }
+  $("#btnFallbackClose").addEventListener("click", () => { $("#fallbackPanel").hidden = true; });
+  document.addEventListener("click", e => {
+    const b = e.target.closest("[data-copy]"); if (!b) return;
+    const p = cur();
+    const map = { title: [p.title, "タイトル"], style: [styleText(p), "スタイル"], exclude: [p.exclude, "除外スタイル"], lyrics: [p.lyrics, "歌詞"] };
+    const [t, w] = map[b.dataset.copy]; copyText(t, w);
+  });
+  $("#btnCopyAll").addEventListener("click", () => {
+    const p = cur();
+    const parts = [["Title", p.title], ["Style of Music", styleText(p)], ["Exclude Styles", p.exclude], ["Lyrics", p.lyrics]]
+      .filter(([, v]) => v && v.trim()).map(([k, v]) => `■ ${k}\n${v.trim()}`);
+    copyText(parts.join("\n\n"), "全項目");
+  });
+
+  /* ---------- toast ---------- */
+  let toastT;
+  function toast(msg, actLabel, fn) {
+    const el = $("#toast"), act = $("#toastAct");
+    $("#toastMsg").textContent = msg;
+    act.hidden = !actLabel;
+    act.textContent = actLabel || "";
+    act.onclick = fn ? () => { el.hidden = true; fn(); } : null;
+    el.hidden = false;
+    clearTimeout(toastT); toastT = setTimeout(() => { el.hidden = true; }, actLabel ? 6000 : 2400);
+  }
+
+  window.addEventListener("resize", () => autosize($("#styleOut")));
+  renderAll();
+})();
+</script>
