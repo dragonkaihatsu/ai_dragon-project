@@ -155,6 +155,33 @@ select,input[type=text],input[type=number]{background:var(--sheet);border:1px so
 .pair{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
 #briefOut{min-height:440px;overflow:auto;resize:vertical;font-size:12.5px;line-height:1.75}
 
+/* idea sheet */
+.idea-grid{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:24px;align-items:start}
+@media (max-width:960px){.idea-grid{grid-template-columns:minmax(0,1fr)}}
+.presets{display:flex;flex-wrap:wrap;gap:6px}
+.presets .chip{font-weight:500}
+.askrow{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.status{font-size:13px;color:var(--muted)}
+.status[data-tone="bad"]{color:var(--bad)}
+.thumb{max-height:72px;max-width:120px;border-radius:3px;border:1px solid var(--rule);object-fit:cover}
+details.alt{border-top:1px solid var(--rule);padding-top:12px}
+details.alt summary{cursor:pointer;font-size:13px;font-weight:700}
+details.alt[open] summary{margin-bottom:10px}
+details.alt .inner{display:flex;flex-direction:column;gap:8px}
+details.alt textarea{width:100%;min-height:110px;font-family:var(--f-mono);font-size:12px;background:var(--sunk);border:1px solid var(--rule);border-radius:4px;padding:8px;resize:vertical}
+.ideas{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,280px),1fr));gap:12px}
+.idea{border:1px solid var(--rule);border-radius:4px;padding:14px;display:flex;flex-direction:column;gap:8px;background:var(--sheet);min-width:0}
+.idea header{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.idea h4{margin:0;font-size:16px;text-wrap:balance}
+.idea .src{font-size:10.5px;color:var(--muted);font-family:var(--f-mono);white-space:nowrap}
+.idea p{margin:0;font-size:13px}
+.idea .why{color:var(--muted);font-size:12px}
+.idea .mini{display:flex;flex-wrap:wrap;gap:4px}
+.idea .mini span{font-size:11px;border:1px solid var(--rule);border-radius:2px;padding:0 5px}
+.idea code{font-family:var(--f-mono);font-size:11.5px;background:var(--sunk);padding:8px;border-radius:3px;word-break:break-word;line-height:1.55}
+.idea .foot{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:auto;flex-wrap:wrap}
+.ideas-empty{border:1px dashed var(--rule);border-radius:4px;padding:16px;font-size:13px;color:var(--muted);margin:0}
+
 /* tips + footer */
 .tips{background:var(--sheet);border:1px solid var(--rule);border-radius:6px;padding:16px 20px}
 .tips h2{font-size:13px;letter-spacing:.1em;margin:0 0 8px;color:var(--muted)}
@@ -229,6 +256,44 @@ select,input[type=text],input[type=number]{background:var(--sheet);border:1px so
     <span class="mono hint" id="titleCount"></span>
     <button class="btn ghost" data-copy="title" type="button">コピー</button>
   </div>
+
+  <section class="sheet" aria-labelledby="ideaTape">
+    <div class="tape" id="ideaTape">IDEA<small>イメージから決める</small></div>
+    <div class="idea-grid">
+      <div class="form">
+        <div class="f"><label class="lbl" for="iImage">イメージ・情景</label>
+          <textarea id="iImage" placeholder="例: 雨上がりの夜の街を一人で歩く。さみしいけど、少しだけ前向きな気持ち"></textarea></div>
+        <div class="f"><label class="lbl" for="iRef">雰囲気を合わせたい曲</label>
+          <input type="text" id="iRef" class="textin" placeholder="例: 曲名とアーティスト名（複数でも可）" autocomplete="off">
+          <p class="hint">Suno のスタイルには曲名やアーティスト名を書けません。その曲のジャンル・年代・楽器・声の質感・音作りを言葉に置き換えて提案します。</p></div>
+        <div class="f" id="iImgWrap" hidden><label class="lbl" for="iImg">イメージ画像（任意）</label>
+          <div class="row"><input type="file" id="iImg" accept="image/*"><img id="iThumb" class="thumb" alt="選んだ画像" hidden></div></div>
+        <div class="askrow">
+          <button class="btn primary" id="btnAsk" type="button" disabled>Claude に提案してもらう</button>
+          <button class="btn ghost" id="btnStop" type="button" hidden>止める</button>
+          <span class="status" id="askStatus" role="status"></span>
+        </div>
+        <details class="alt" id="altBox">
+          <summary>ほかの AI チャットで提案してもらう</summary>
+          <div class="inner">
+            <p class="hint">下の指示文を ChatGPT や Claude などに貼り付け、返ってきた JSON を下の欄に貼ると、案として並びます。</p>
+            <textarea id="altPrompt" readonly aria-label="提案用プロンプト"></textarea>
+            <div class="row"><button class="btn" data-copy="idea" type="button">指示文をコピー</button></div>
+            <textarea id="altPaste" placeholder="AI の回答（JSON）をここに貼り付け" aria-label="AI の回答"></textarea>
+            <div class="row"><button class="btn" id="btnAltApply" type="button">回答を案として並べる</button></div>
+          </div>
+        </details>
+      </div>
+      <div class="group">
+        <h3>情景から選ぶ<span class="count">すぐ使える組み合わせ</span></h3>
+        <div class="presets" id="presets"></div>
+      </div>
+    </div>
+    <div class="group">
+      <h3>スタイル案<span class="count" id="ideaCount"></span></h3>
+      <div class="ideas" id="ideas"></div>
+    </div>
+  </section>
 
   <main class="grid">
     <!-- STYLE SHEET -->
@@ -363,6 +428,7 @@ select,input[type=text],input[type=number]{background:var(--sheet);border:1px so
   "use strict";
   const $ = (s, r = document) => r.querySelector(s);
   const len = s => [...(s || "")].length;
+  const esc = s => s.replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 
   /* ---------- vocabulary ---------- */
   const CATS = [
@@ -407,17 +473,71 @@ select,input[type=text],input[type=number]{background:var(--sheet);border:1px so
     { name: "EDM", secs: ["Intro","Verse 1","Build-up","Drop","Break","Verse 2","Build-up","Drop","Outro"] },
     { name: "ヒップホップ", secs: ["Intro","Verse 1","Hook","Verse 2","Hook","Verse 3","Hook","Outro"] }
   ];
+  const PRESETS = [
+    ["夜のドライブ","街の灯りが流れていく、大人っぽいシティポップ。",["city pop","nostalgic","romantic","chill","female vocals","rhodes piano","slap bass","synth","80s","analog warmth"],108,["night drive","neon city lights"]],
+    ["雨の夜","雨音のなかで静かに沈む、ローファイなジャズ。",["lo-fi hip hop","jazz","melancholic","chill","whispery vocals","piano","rhodes piano","lo-fi","reverb-heavy"],78,["rainy night","vinyl crackle"]],
+    ["夏の青春","まぶしい夏空の下を全力で走るギターポップ。",["J-pop","refreshing","uplifting","energetic","female vocals","vocal harmonies","electric guitar","acoustic guitar","punchy drums","catchy hook"],150,["summer anthem","bright guitar riff"]],
+    ["卒業・旅立ち","ピアノで始まり、最後のサビで大きく広がるバラード。",["J-pop","ballad","bittersweet","emotional","uplifting","vocal harmonies","piano","strings","polished production"],84,["graduation song","builds to a big final chorus"]],
+    ["失恋","ひとりの部屋で聴く、余白の多いバラード。",["ballad","R&B","melancholic","emotional","female vocals","airy vocals","piano","acoustic guitar","minimal","reverb-heavy"],72,["heartbreak","soft piano intro"]],
+    ["冬の夜","雪の街を歩く、きらきらしたウィンターソング。",["J-pop","ballad","romantic","dreamy","bittersweet","airy vocals","piano","strings","wide stereo","reverb-heavy"],88,["winter night","sleigh bells"]],
+    ["夏祭り","太鼓と三味線が鳴る、にぎやかな和ポップ。",["J-pop","matsuri festival rhythm","shamisen","taiko drums","energetic","uplifting","female vocals","brass section","catchy hook"],140,["festival chant","hand claps"]],
+    ["決戦・バトル","アニメの最終決戦のような、速くて熱いロック。",["Japanese rock","metal","anime opening","epic","aggressive","powerful vocals","electric guitar","strings","punchy drums","polished production"],172,["boss battle","double kick drums"]],
+    ["休日のカフェ","日曜の朝に似合う、やわらかいボサノバ。",["bossa nova","jazz","chill","romantic","female vocals","whispery vocals","acoustic guitar","piano","saxophone","analog warmth","minimal"],92,["sunday morning cafe"]],
+    ["宇宙・近未来","広い宇宙を漂うような、きらめくシンセサウンド。",["synthwave","ambient","dreamy","epic","airy vocals","synth","wide stereo","reverb-heavy"],110,["outer space","arpeggiated synths"]],
+    ["和風ファンタジー","神社の奥に広がる異世界のような、壮大な和のサウンド。",["orchestral","traditional Japanese","koto","shakuhachi","taiko drums","epic","dreamy","female vocals","airy vocals","strings","wide stereo"],96,["ancient shrine","mystical"]],
+    ["昭和レトロ","ストリングスとブラスが華やかな、昭和の歌謡曲。",["Showa-era kayokyoku","nostalgic","romantic","female vocals","brass section","strings","organ","analog warmth"],120,["retro 70s","disco strings"]],
+    ["アイドル","コールを入れたくなる、元気でかわいいアイドルポップ。",["idol pop","future bass","cute","energetic","uplifting","female vocals","vocal harmonies","synth","catchy hook","polished production"],160,["call and response chant"]]
+  ].map(([name, summary, t, bpm, extra]) => sanitizeIdea({ name, summary, tags: { any: t }, bpm, extra }, "preset"));
+
+  function normKey(k) {
+    let s = String(k || "").trim();
+    if (!s) return { key: "" };
+    s = s.replace(/^([A-Ga-g])b(?=\s|m|$)/, "$1♭").replace(/^([A-Ga-g])#/, "$1♯").replace(/\s*(maj|major)$/i, " major").replace(/\s*(min|minor|m)$/i, " minor");
+    s = s.charAt(0).toUpperCase() + s.slice(1);
+    const hit = KEYS.find(x => x && x.toLowerCase() === s.toLowerCase());
+    return hit ? { key: hit } : { key: "", extra: s };
+  }
+  function sanitizeIdea(x, src) {
+    const lookup = new Map();
+    CATS.forEach(c => c.items.forEach(([, en]) => lookup.set(en.toLowerCase(), [c.id, en])));
+    const tags = {}; CATS.forEach(c => tags[c.id] = []);
+    const extra = [];
+    const str = (v, n) => String(v == null ? "" : v).trim().slice(0, n);
+    const all = x.tags && typeof x.tags === "object" ? Object.values(x.tags).flat() : [];
+    all.forEach(t => {
+      const raw = str(t, 60); if (!raw) return;
+      const hit = lookup.get(raw.toLowerCase());
+      if (hit) { if (!tags[hit[0]].includes(hit[1])) tags[hit[0]].push(hit[1]); }
+      else extra.push(raw);
+    });
+    (Array.isArray(x.extra) ? x.extra : []).forEach(t => { const v = str(t, 60); if (v) extra.push(v); });
+    const k = normKey(x.key); if (k.extra) extra.push(k.extra);
+    const bpm = Math.round(Number(x.bpm));
+    return {
+      name: str(x.name, 40) || "無題の案", summary: str(x.summary, 200), why: str(x.why, 240), src,
+      tags, bpm: bpm >= 50 && bpm <= 200 ? bpm : null, key: k.key,
+      extra: [...new Set(extra)].slice(0, 6),
+      exclude: (Array.isArray(x.exclude) ? x.exclude : []).map(t => str(t, 40)).filter(Boolean).slice(0, 5)
+    };
+  }
+  function sanitizeList(raw, src) {
+    const arr = Array.isArray(raw) ? raw : raw && Array.isArray(raw.proposals) ? raw.proposals : [];
+    return arr.filter(x => x && typeof x === "object").slice(0, 6).map(x => sanitizeIdea(x, src));
+  }
   const LIMITS = { new: { style: 1000, exclude: 1000, lyrics: 5000 }, old: { style: 200, exclude: 200, lyrics: 3000 } };
 
   /* ---------- storage ---------- */
   const KEY = "tracksheet.v1";
   const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
   const blank = () => ({ id: uid(), title: "", tags: { genre: [], jp: [], mood: [], vocal: [], inst: [], prod: [] }, jp: true, bpm: 100, bpmOn: false, key: "", custom: "", exclude: "", lyrics: "", readIgnore: [],
-    brief: { theme: "", words: "", pov: "auto", struct: "cur", line: "mid", eng: "some", rhyme: true, kana: true, titles: true }, updated: Date.now() });
+    brief: { theme: "", words: "", pov: "auto", struct: "cur", line: "mid", eng: "some", rhyme: true, kana: true, titles: true },
+    idea: { image: "", ref: "" }, ideas: [], updated: Date.now() });
   const sample = () => Object.assign(blank(), {
     sample: true, title: "夕凪ハイウェイ",
     tags: { genre: ["city pop"], mood: ["nostalgic","bittersweet"], vocal: ["female vocals","airy vocals"], inst: ["rhodes piano","slap bass","brass section"], prod: ["80s","analog warmth"] },
     bpm: 104, bpmOn: true, key: "F major", custom: "sunset drive, groovy bassline", exclude: "rap, heavy distortion",
+    idea: { image: "夏の終わりの夕方、海沿いのハイウェイを窓を開けて走る。少し切ないけど前向きな気持ち", ref: "" },
+    ideas: [PRESETS[0], PRESETS[2]],
     brief: { theme: "夏の終わり、海沿いのハイウェイを一人で走りながら、言えなかった想いを思い出す", words: "夕凪, ハイウェイ, サングラス" },
     lyrics: `[Intro]
 
@@ -491,6 +611,8 @@ select,input[type=text],input[type=number]{background:var(--sheet);border:1px so
     out.tags = Object.assign(blank().tags, (p && p.tags) || {});
     out.brief = Object.assign(blank().brief, (p && p.brief) || {});
     if (!Array.isArray(out.readIgnore)) out.readIgnore = [];
+    out.idea = Object.assign({ image: "", ref: "" }, (p && p.idea) || {});
+    if (!Array.isArray(out.ideas)) out.ideas = [];
     const moved = ["shamisen", "koto", "taiko drums"];
     out.tags.inst = out.tags.inst.filter(t => {
       if (!moved.includes(t)) return true;
@@ -777,7 +899,161 @@ select,input[type=text],input[type=number]{background:var(--sheet);border:1px so
     .forEach(([id, k, ev]) => $("#" + id).addEventListener(ev, e => { cur().brief[k] = e.target.value; touch(); renderBrief(); }));
   [["bRhyme", "rhyme"], ["bKana", "kana"], ["bTitles", "titles"]]
     .forEach(([id, k]) => $("#" + id).addEventListener("change", e => { cur().brief[k] = e.target.checked; touch(); renderBrief(); }));
-  $("#jpOn").addEventListener("change", e => { cur().jp = e.target.checked; touch(); renderStyle(); });
+  $("#jpOn").addEventListener("change", e => { cur().jp = e.target.checked; touch(); renderStyle(); renderIdeas(); });
+
+  /* ---------- ideas: image / reference song -> style ---------- */
+  function ideaPrompt(p, hasImage) {
+    const vocab = CATS.map(c => `${c.id}: ${c.items.map(i => i[1]).join(", ")}`).join("\n");
+    return [
+      "あなたは音楽プロデューサーです。AI 作曲サービス Suno で曲を作るためのスタイル案を3つ提案してください。",
+      "", "## 依頼者のイメージ", p.idea.image.trim() || "（特になし）",
+      "", "## 雰囲気を合わせたい参考曲", p.idea.ref.trim() || "（特になし）",
+      hasImage ? "\n添付した画像の情景・色・空気感もイメージとして読み取ってください。" : "",
+      "", "## ルール",
+      "- 参考曲がある場合は、その曲のジャンル、年代、テンポ感、リズム、楽器編成、ボーカルの声質、音作りを分析して取り入れる。よく知らない曲なら推測で決めつけず、why にそう書いてイメージから考える。",
+      "- Suno はスタイルに曲名やアーティスト名を書けないので、tags・extra・exclude に固有名詞を入れない。",
+      "- 3案は方向性を変える（1: イメージと参考曲に忠実、2: 少しアレンジ、3: 意外性のある解釈）。",
+      "- tags の値は下の語彙リストの英語表記からだけ選ぶ。カテゴリごとに0〜3個。",
+      "- 語彙リストにない要素は extra に短い英語のフレーズで入れる（最大5個。例: \"night drive\", \"gated reverb snare\"）。",
+      "- exclude には避けたい要素を英語で（最大3個）。tags や extra に入れたものと矛盾させない。",
+      "- bpm は数値。key は \"F major\" \"A minor\" のような表記、決めない場合は空文字。",
+      "- name・summary・why は日本語。",
+      "", "## 語彙リスト", vocab,
+      "", "## 出力", "次の形の JSON だけを返してください。",
+      '{"proposals":[{"name":"案の名前（短く）","summary":"どんな曲になるか（1〜2文）","why":"イメージや参考曲のどこを取り入れたか（1文）","tags":{"genre":[],"jp":[],"mood":[],"vocal":[],"inst":[],"prod":[]},"bpm":100,"key":"","extra":[],"exclude":[]}]}'
+    ].filter(l => l !== "").join("\n").replace(/\n## /g, "\n\n## ");
+  }
+  const presetBox = $("#presets");
+  presetBox.innerHTML = PRESETS.map((x, i) => `<button type="button" class="chip" data-preset="${i}" title="${esc(x.summary)}">${esc(x.name)}</button>`).join("");
+  presetBox.addEventListener("click", e => {
+    const b = e.target.closest("[data-preset]"); if (!b) return;
+    const p = cur(), x = PRESETS[+b.dataset.preset];
+    p.ideas = [x, ...p.ideas.filter(i => i.name !== x.name)].slice(0, 6); touch(); renderIdeas();
+  });
+  function ideaStyle(x) {
+    return styleText(Object.assign(blank(), { jp: cur().jp, tags: x.tags, bpm: x.bpm || 100, bpmOn: !!x.bpm, key: x.key, custom: x.extra.join(", ") }));
+  }
+  const SRC = { claude: "Claude の提案", preset: "プリセット", paste: "貼り付け" };
+  function renderIdeas() {
+    const p = cur(), box = $("#ideas");
+    $("#ideaCount").textContent = p.ideas.length ? p.ideas.length + " 案" : "";
+    if (!p.ideas.length) {
+      box.innerHTML = `<p class="ideas-empty">イメージや参考曲を書いて提案してもらうか、右の「情景から選ぶ」を押すと、ここにスタイル案が並びます。気に入った案の「この案を使う」で STYLE に反映されます。</p>`;
+      return;
+    }
+    box.innerHTML = p.ideas.map((x, i) => {
+      const st = ideaStyle(x);
+      const mini = CATS.flatMap(c => x.tags[c.id].map(t => ALL_JA.get(t) || t)).concat(x.bpm ? [x.bpm + " BPM"] : []);
+      return `<article class="idea">
+        <header><h4>${esc(x.name)}</h4><span class="src">${SRC[x.src] || ""}</span></header>
+        ${x.summary ? `<p>${esc(x.summary)}</p>` : ""}
+        ${x.why ? `<p class="why">${esc(x.why)}</p>` : ""}
+        <div class="mini">${mini.map(m => `<span>${esc(m)}</span>`).join("")}</div>
+        <code>${esc(st)}</code>
+        ${x.exclude.length ? `<p class="why">除外: ${esc(x.exclude.join(", "))}</p>` : ""}
+        <div class="foot"><span class="mono hint">${len(st)} 文字</span>
+          <span class="row" style="gap:6px"><button class="btn ghost" type="button" data-drop="${i}">外す</button><button class="btn primary" type="button" data-apply="${i}">この案を使う</button></span></div>
+      </article>`;
+    }).join("");
+  }
+  $("#ideas").addEventListener("click", e => {
+    const p = cur();
+    const d = e.target.closest("[data-drop]");
+    if (d) { p.ideas.splice(+d.dataset.drop, 1); touch(); renderIdeas(); return; }
+    const a = e.target.closest("[data-apply]"); if (!a) return;
+    const x = p.ideas[+a.dataset.apply]; if (!x) return;
+    const prev = JSON.stringify({ tags: p.tags, bpm: p.bpm, bpmOn: p.bpmOn, key: p.key, custom: p.custom, exclude: p.exclude, brief: p.brief });
+    p.tags = JSON.parse(JSON.stringify(x.tags));
+    if (x.bpm) { p.bpm = x.bpm; p.bpmOn = true; } else p.bpmOn = false;
+    p.key = x.key || "";
+    p.custom = x.extra.join(", ");
+    const used = new Set(CATS.flatMap(c => p.tags[c.id]).map(t => t.toLowerCase()));
+    p.exclude = [...new Set([...splitList(p.exclude), ...x.exclude])].filter(t => !used.has(t.toLowerCase())).join(", ");
+    if (!p.brief.theme.trim() && p.idea.image.trim()) p.brief.theme = p.idea.image.trim();
+    touch(); fillFields(); renderStyle(); renderExclude();
+    document.getElementById("styleTape").scrollIntoView({ block: "start", behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+    toast(`「${x.name}」を STYLE に反映しました`, "元に戻す", () => { Object.assign(p, JSON.parse(prev)); touch(); fillFields(); renderStyle(); renderExclude(); });
+  });
+  function renderAltPrompt() { $("#altPrompt").value = ideaPrompt(cur(), false); }
+  $("#iImage").addEventListener("input", e => { cur().idea.image = e.target.value; touch(); renderAltPrompt(); });
+  $("#iRef").addEventListener("input", e => { cur().idea.ref = e.target.value; touch(); renderAltPrompt(); });
+  $("#btnAltApply").addEventListener("click", () => {
+    const txt = $("#altPaste").value.trim(); if (!txt) { toast("AI の回答を貼り付けてください"); return; }
+    let data = null;
+    try { data = JSON.parse(txt); } catch (e) {
+      const a = txt.indexOf("{"), b = txt.lastIndexOf("}");
+      if (a >= 0 && b > a) { try { data = JSON.parse(txt.slice(a, b + 1)); } catch (e2) {} }
+    }
+    const ideas = data ? sanitizeList(data, "paste") : [];
+    if (!ideas.length) { toast("案を読み取れませんでした。AI の回答を JSON ごと貼り付けてください"); return; }
+    const p = cur(); p.ideas = ideas; touch(); renderIdeas(); $("#altPaste").value = "";
+    toast(`${ideas.length} 案を並べました`);
+  });
+
+  let imgFile = null, thumbUrl = null;
+  $("#iImg").addEventListener("change", e => {
+    imgFile = e.target.files[0] || null;
+    const t = $("#iThumb");
+    if (thumbUrl) URL.revokeObjectURL(thumbUrl);
+    thumbUrl = imgFile ? URL.createObjectURL(imgFile) : null;
+    t.hidden = !thumbUrl; if (thumbUrl) t.src = thumbUrl;
+  });
+
+  const btnAsk = $("#btnAsk"), btnStop = $("#btnStop");
+  const setStatus = (msg, tone) => { const s = $("#askStatus"); s.textContent = msg; s.dataset.tone = tone || ""; };
+  let sampleFn = null, askCtl = null;
+  function noClaude(msg) {
+    btnAsk.hidden = true; btnStop.hidden = true; $("#altBox").open = true;
+    setStatus(msg || "");
+  }
+  if (window.claude && typeof window.claude.use === "function") {
+    setStatus("準備しています…");
+    window.claude.use("sample").then(async s => {
+      if (!s) { noClaude("ここでは Claude を呼び出せないため、下の「ほかの AI チャット」を使ってください。"); return; }
+      sampleFn = s; btnAsk.disabled = false; setStatus("");
+      const lim = await s.limits().catch(() => null);
+      if (lim && lim.images) { $("#iImgWrap").hidden = false; $("#iImg").accept = lim.images.mediaTypes.join(","); }
+    }, () => noClaude("ここでは Claude を呼び出せないため、下の「ほかの AI チャット」を使ってください。"));
+  } else {
+    noClaude("このページを直接開いている場合は、下の「ほかの AI チャット」から提案を受けられます。");
+  }
+  const ASK_ERR = {
+    rate_limited: "混み合っているか、利用上限に達しています。少し時間をおいてもう一度押してください。",
+    session_expired: "サインインし直してから、もう一度押してください。",
+    image_rejected: "画像を読み込めませんでした。JPEG か PNG の画像を選んでください。",
+    refused: "この内容では提案できませんでした。イメージの書き方を変えてください。",
+    invalid_json: "回答をうまく読み取れませんでした。もう一度押してください。",
+    empty_completion: "回答が空でした。イメージを少し具体的にして、もう一度押してください。",
+    prompt_too_large: "入力が長すぎます。イメージを短くしてください。"
+  };
+  const HIDE = new Set(["not_granted", "sampling_disabled", "not_declared", "capability_disabled", "capability_removed"]);
+  btnStop.addEventListener("click", () => askCtl && askCtl.abort());
+  btnAsk.addEventListener("click", async () => {
+    if (!sampleFn) return;
+    const p = cur();
+    if (!p.idea.image.trim() && !p.idea.ref.trim() && !imgFile) { setStatus("イメージか参考曲を入力してください。", "bad"); $("#iImage").focus(); return; }
+    askCtl = new AbortController();
+    btnAsk.disabled = true; btnStop.hidden = false;
+    setStatus("考えています…（30秒〜1分ほどかかります）");
+    const opts = { signal: askCtl.signal, cache: false };
+    if (imgFile) opts.images = [imgFile];
+    try {
+      const res = await sampleFn.json(ideaPrompt(p, !!imgFile), opts);
+      const ideas = sanitizeList(res, "claude");
+      if (!ideas.length) { setStatus(ASK_ERR.invalid_json, "bad"); return; }
+      p.ideas = ideas; touch(); renderIdeas();
+      setStatus(`${ideas.length} 案できました。もう一度押すと別の案を出します。`);
+      btnAsk.textContent = "別の案を出してもらう";
+    } catch (e) {
+      const code = e && e.code;
+      if (code === "cancelled") setStatus("止めました。");
+      else if (code === "images_unavailable") { $("#iImgWrap").hidden = true; imgFile = null; setStatus("ここでは画像を送れません。文字だけでもう一度押してください。", "bad"); }
+      else if (HIDE.has(code)) noClaude("Claude の利用が許可されていないため、下の「ほかの AI チャット」を使ってください。");
+      else setStatus(ASK_ERR[code] || "うまく受け取れませんでした。もう一度押してください。", "bad");
+    } finally {
+      btnAsk.disabled = false; btnStop.hidden = true; askCtl = null;
+    }
+  });
 
   /* ---------- rendering ---------- */
   function meter(el, n, max) {
@@ -808,7 +1084,6 @@ select,input[type=text],input[type=number]{background:var(--sheet);border:1px so
     const n = len(cur().exclude), max = LIMITS[store.limit].exclude;
     $("#excludeCount").textContent = `${n} / ${max} 文字`;
   }
-  const esc = s => s.replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   function renderLyrics() {
     const text = ta.value, a = analyze(text);
     meter($("#lyricsMeter"), len(text), LIMITS[store.limit].lyrics);
@@ -850,13 +1125,14 @@ select,input[type=text],input[type=number]{background:var(--sheet);border:1px so
     $("#title").value = p.title; $("#bpm").value = p.bpm; $("#bpmOn").checked = p.bpmOn; $("#key").value = p.key;
     $("#custom").value = p.custom; $("#exclude").value = p.exclude; ta.value = p.lyrics; $("#limitMode").value = store.limit;
     $("#jpOn").checked = p.jp;
+    $("#iImage").value = p.idea.image; $("#iRef").value = p.idea.ref;
     const b = p.brief;
     $("#bTheme").value = b.theme; $("#bWords").value = b.words; $("#bPov").value = b.pov; $("#bStruct").value = b.struct;
     $("#bLine").value = b.line; $("#bEng").value = b.eng; $("#bRhyme").checked = b.rhyme; $("#bKana").checked = b.kana; $("#bTitles").checked = b.titles;
     renderTitle();
   }
   function renderTitle() { $("#titleCount").textContent = len(cur().title) + " 文字"; }
-  function renderAll() { renderProjects(); fillFields(); renderStyle(); renderExclude(); renderLyrics(); renderExport(); }
+  function renderAll() { renderProjects(); fillFields(); renderStyle(); renderExclude(); renderLyrics(); renderExport(); renderIdeas(); renderAltPrompt(); }
 
   /* ---------- field events ---------- */
   $("#title").addEventListener("input", e => { const p = cur(); p.title = e.target.value; delete p.sample; touch(); renderTitle(); clearTimeout(renderProjects._t); renderProjects._t = setTimeout(renderProjects, 400); });
@@ -939,7 +1215,7 @@ select,input[type=text],input[type=number]{background:var(--sheet);border:1px so
   document.addEventListener("click", e => {
     const b = e.target.closest("[data-copy]"); if (!b) return;
     const p = cur();
-    const map = { title: [p.title, "タイトル"], style: [styleText(p), "スタイル"], exclude: [p.exclude, "除外スタイル"], lyrics: [p.lyrics, "歌詞"], brief: [briefText(p), "作詞プロンプト"] };
+    const map = { title: [p.title, "タイトル"], style: [styleText(p), "スタイル"], exclude: [p.exclude, "除外スタイル"], lyrics: [p.lyrics, "歌詞"], brief: [briefText(p), "作詞プロンプト"], idea: [ideaPrompt(p, false), "提案用の指示文"] };
     const [t, w] = map[b.dataset.copy]; copyText(t, w);
   });
   $("#btnCopyAll").addEventListener("click", () => {
