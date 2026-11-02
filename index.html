@@ -492,7 +492,9 @@ a.btn{text-decoration:none;display:inline-block}
     <div class="brief-grid">
       <div class="form">
         <div class="f"><label class="lbl" for="bTheme">テーマ・ストーリー</label><textarea id="bTheme" placeholder="例: 夏の終わり、海沿いの道を一人で走りながら、言えなかった気持ちを思い出す"></textarea></div>
-        <div class="f"><label class="lbl" for="bWords">入れたい言葉（カンマ区切り）</label><input type="text" id="bWords" class="textin" placeholder="例: 夕凪, ハイウェイ, サングラス" autocomplete="off"></div>
+        <div class="f"><label class="lbl" for="bWords">入れたい言葉（カンマ区切り）</label><input type="text" id="bWords" class="textin" placeholder="例: 夕凪, ハイウェイ, サングラス" autocomplete="off">
+          <div class="askrow"><button class="btn ghost" id="btnVocab" type="button" hidden>テーマから語彙を集める（Claude）</button><span class="status" id="vocabStatus" role="status"></span></div>
+          <div class="feel-chips" id="vocabChips"></div></div>
         <div class="pair">
           <div class="f"><label class="lbl" for="bPov">語り手</label><select id="bPov">
             <option value="auto">おまかせ</option><option value="boku">僕</option><option value="watashi">私</option><option value="ore">俺</option><option value="atashi">あたし</option><option value="third">三人称（物語）</option><option value="duo">男女の掛け合い</option>
@@ -1040,7 +1042,9 @@ a.btn{text-decoration:none;display:inline-block}
     { id: "eng", ja: "英語の決めフレーズ", rule: "サビの頭か終わりに、覚えやすい短い英語の決めフレーズを置く" },
     { id: "cheer", ja: "背中を押す", rule: "聴いている人に「きみ」と語りかけ、背中を押す言葉で締める" },
     { id: "bitter", ja: "一滴の切なさ", rule: "明るい曲の中に一行だけ不安や切なさを混ぜ、そこから前を向く" },
-    { id: "girl", ja: "女の子の等身大", rule: "女の子の目線で、照れ・強がり・本音が入り混じる等身大の気持ちを書く" }
+    { id: "girl", ja: "女の子の等身大", rule: "女の子の目線で、照れ・強がり・本音が入り混じる等身大の気持ちを書く" },
+    { id: "dense", ja: "語彙たっぷり", rule: "テーマのイメージに合う名詞・漢字熟語・カタカナ語をたくさん詰め込み、1行に2つ以上入れる" },
+    { id: "chaos", ja: "カオスな言葉遊び", rule: "難しい漢字熟語と日常の言葉のギャップ、早口の言葉の連打、唐突なツッコミで、意味より勢いで耳に残す" }
   ];
   const TANAKA_ESS = ["dream", "daily", "play", "call", "eng", "bitter"];
   const essBox = $("#essChips");
@@ -1115,8 +1119,8 @@ a.btn{text-decoration:none;display:inline-block}
     bStruct.options[0].textContent = analyze(p.lyrics).secs.length ? "いまの歌詞のタグ" : "いまの歌詞のタグ（なし→J-POP 王道）";
     $("#briefOut").value = briefText(p);
   }
-  [["bTheme", "theme", "input"], ["bWords", "words", "input"], ["bPov", "pov", "change"], ["bStruct", "struct", "change"], ["bLine", "line", "change"], ["bEng", "eng", "change"]]
-    .forEach(([id, k, ev]) => $("#" + id).addEventListener(ev, e => { cur().brief[k] = e.target.value; touch(); renderBrief(); }));
+  [["bTheme", "theme", "input"], ["bWords", "words", "input", true], ["bPov", "pov", "change"], ["bStruct", "struct", "change"], ["bLine", "line", "change"], ["bEng", "eng", "change"]]
+    .forEach(([id, k, ev, voc]) => $("#" + id).addEventListener(ev, e => { cur().brief[k] = e.target.value; touch(); renderBrief(); if (voc && typeof renderVocab === "function") renderVocab(); }));
   [["bRhyme", "rhyme"], ["bKana", "kana"], ["bTitles", "titles"]]
     .forEach(([id, k]) => $("#" + id).addEventListener("change", e => { cur().brief[k] = e.target.checked; touch(); renderBrief(); }));
   $("#jpOn").addEventListener("change", e => { cur().jp = e.target.checked; touch(); renderStyle(); renderIdeas(); });
@@ -1628,6 +1632,46 @@ a.btn{text-decoration:none;display:inline-block}
   });
   $("#btnHarmCopy").addEventListener("click", () => copyText(progChords(false).join(" "), "コード進行"));
 
+  /* ---------- vocabulary helper ---------- */
+  let vocabFn = null, vocabList = [];
+  if (window.claude && typeof window.claude.use === "function") {
+    window.claude.use("sample").then(s => { if (s) { vocabFn = s; $("#btnVocab").hidden = false; } }, () => {});
+  }
+  function renderVocab() {
+    const have = new Set(splitList(cur().brief.words));
+    $("#vocabChips").innerHTML = vocabList.map((w, i) => `<button type="button" class="chip" data-voc="${i}" aria-pressed="${have.has(w)}">${esc(w)}</button>`).join("");
+  }
+  $("#vocabChips").addEventListener("click", e => {
+    const b = e.target.closest("[data-voc]"); if (!b) return;
+    const w = vocabList[+b.dataset.voc], br = cur().brief, list = splitList(br.words);
+    br.words = (list.includes(w) ? list.filter(x => x !== w) : [...list, w]).join(", ");
+    $("#bWords").value = br.words; touch(); renderVocab(); renderBrief();
+  });
+  $("#btnVocab").addEventListener("click", async () => {
+    const p = cur(), theme = p.brief.theme.trim() || p.idea.image.trim() || p.title.trim();
+    const st = (m, t) => { const el = $("#vocabStatus"); el.textContent = m; el.dataset.tone = t || ""; };
+    if (!theme) { st("先にテーマ・ストーリーを書いてください。", "bad"); $("#bTheme").focus(); return; }
+    const btn = $("#btnVocab"); btn.disabled = true; st("集めています…");
+    try {
+      const res = await vocabFn.json([
+        "次のテーマの日本語の歌詞に使える言葉を30個集めてください。",
+        "テーマ: " + theme,
+        "ジャンル・雰囲気: " + styleText(p),
+        "条件: 情景・小物・動作・擬音・漢字熟語・カタカナ語をまんべんなく混ぜる。1〜6文字程度の短い言葉。実在の人物名・作品名・既存の歌詞のフレーズは使わない。",
+        '出力: {"words":["言葉", ...]} の JSON だけ。'
+      ].join("\n"), { cache: false, modelTier: "quick" });
+      const words = (Array.isArray(res) ? res : res && Array.isArray(res.words) ? res.words : [])
+        .map(w => String(w).trim().replace(/[,、]/g, "")).filter(w => w && w.length <= 12);
+      vocabList = [...new Set(words)].slice(0, 40);
+      renderVocab();
+      st(vocabList.length ? "押した言葉が「入れたい言葉」に入ります。" : "うまく集められませんでした。もう一度押してください。", vocabList.length ? "" : "bad");
+    } catch (e) {
+      const code = e && e.code;
+      if (HIDE.has(code)) { btn.hidden = true; st(""); }
+      else st(ASK_ERR[code] || "うまく受け取れませんでした。もう一度押してください。", "bad");
+    } finally { btn.disabled = false; }
+  });
+
   /* ---------- combos ---------- */
   const COMBOS = [{
     name: "田中秀和風アイドル × クラブ",
@@ -1651,6 +1695,31 @@ a.btn{text-decoration:none;display:inline-block}
         "[Break: soft, piano breakdown, 8 bars]", "[Chord Progression: Gm7 - Gm7/C - C7b9 - Fmaj7 - Am7/D - Dm7]", "ほんとはね ないしょだよ", "ふるえる手を ぎゅっとにぎった", "",
         "[Build-up: snare roll build, 4 bars]", "[Shout]", "Somebody scream!", "",
         "[Chorus: explosive, key change up, 8 bars]", "ハレノチ☆ステージ どこまでも", "きみの声が いちばん星", "Shine on! 光れ ミラーボール", "きょうも あしたも デビューデイ", "(ハイ! ハイ! ハイハイハイ!)", "",
+        "[Outro: soft, 4 bars]", "", "[End]", ""
+      ].join("\n")
+    }
+  }, {
+    name: "カオス☆パイセン（畑亜貴風 × aug 進行）",
+    summary: "千年ぶりに目覚めた邪神の先輩が、放課後の学校で世界征服と友達づくりを同時に始める。漢字熟語と日常語を詰め込んだカオスな歌詞を、全音音階の aug イントロと aug の分数コードで走らせる、約1分40秒の曲。",
+    includes: ["STYLE: アニソン・フューチャーファンク・アニメOP風・渋谷系、168 BPM、D メジャー", "LYRICS: オリジナル歌詞「カオス☆パイセン降臨祭」（語彙たっぷり、aug 進行のヒントつき）", "HARMONY: aug の分数コード（イントロは aug の全音移動、Aメロは aug クリシェ）", "DYNAMICS: 落ちサビ → スネアロール → 転調した大サビ（目標 2分）", "PROMPT: 語彙たっぷり + カオスな言葉遊び + 掛け声 + 一滴の切なさ"],
+    data: {
+      title: "カオス☆パイセン降臨祭",
+      style: ["anime","J-pop","future funk","anime opening","Shibuya-kei","energetic","cute","epic","female vocals","vocal harmonies","piano","slap bass","brass section","synth","four-on-the-floor","catchy hook","jazzy chord progressions","augmented chords","sudden key change"],
+      custom: "group vocals, whole tone augmented intro, rapid-fire tongue-twister vocals, chaotic comedy energy, chromatic chord movement",
+      bpm: 168, key: "D major", exclude: "rap, heavy distortion, metal, lo-fi", target: 120,
+      harmony: { key: 2, prog: 5 },
+      brief: { theme: "千年ぶりに目覚めた邪神の先輩が、放課後の学校で世界征服と友達づくりを同時に始めるドタバタ劇", words: "混沌, 降臨, 魔法陣, 深淵, 黙示録, 銀河, 次元, 契約, 購買部, 上履き, 黒板消し, 隕石", pov: "auto", struct: "cur", line: "short", eng: "some", rhyme: true, kana: true, titles: false, essence: ["dense","chaos","play","call","eng","bitter"] },
+      lyrics: [
+        "[Intro: explosive, 4 bars]", "[Chord Progression: Caug - Bbaug - Caug - Bbaug]", "(混沌! 降臨! パイセン参上!)", "",
+        "[Verse 1: mid-energy, 8 bars]", "[Chord Progression: D - Daug - D6 - D7]", "放課後 理科室 魔法陣", "上履きのまま 異界の扉", "黒板消しで 呪文をかいて", "購買部の メロンパンで 契約成立", "",
+        "[Pre-Chorus: mid-energy, rising tension, 4 bars]", "[Chord Progression: G#m7b5 - Gm6 - F#m7 - B7b9]", "深淵 銀河 黙示録", "三角定規で うちゅうをはかれ", "(はい! はい! はいはいはい!)", "",
+        "[Chorus: powerful, 8 bars]", "[Chord Progression: D - Daug/G# - Gmaj7 - F#aug/C - F#m7 - Bm7]", "カオス☆パイセン 降臨祭", "次元の壁ごと ぶちぬいて", "暗黒 星座 ジャンケンポン", "勝っても負けても 世界征服", "(Chaos! Chaos! Party time!)", "",
+        "[Verse 2: mid-energy, 8 bars]", "[Chord Progression: D - Daug - D6 - D7]", "生徒会長に 宣戦布告", "校則第百条 うちゅうは自由", "昼休みには 隕石キャッチ", "放送室から 全銀河へ", "",
+        "[Pre-Chorus: mid-energy, rising tension, 4 bars]", "深淵 銀河 黙示録", "三角定規で うちゅうをはかれ", "(はい! はい! はいはいはい!)", "",
+        "[Chorus: powerful, 8 bars]", "カオス☆パイセン 降臨祭", "次元の壁ごと ぶちぬいて", "暗黒 星座 ジャンケンポン", "勝っても負けても 世界征服", "(Chaos! Chaos! Party time!)", "",
+        "[Break: soft, piano breakdown, 8 bars]", "[Chord Progression: Em7 - Em7/A - A7b9 - Dmaj7 - F#m7/B - Bm7]", "ほんとは ちょっと さびしいの", "千年ぶりの ともだちだから", "",
+        "[Build-up: snare roll build, 4 bars]", "[Shout]", "(三・二・一・混沌!)", "",
+        "[Chorus: explosive, key change up, 8 bars]", "[Chord Progression: E - Eaug/A# - Amaj7 - G#aug/D - G#m7 - C#m7]", "カオス☆パイセン 降臨祭", "銀河の果てまで ついてきて", "暗黒 星座 あっちむいてホイ", "きみとならば うちゅう征服", "(Chaos! Chaos! Party time!)", "",
         "[Outro: soft, 4 bars]", "", "[End]", ""
       ].join("\n")
     }
@@ -1757,7 +1826,7 @@ a.btn{text-decoration:none;display:inline-block}
     renderTitle();
   }
   function renderTitle() { $("#titleCount").textContent = len(cur().title) + " 文字"; renderSend(); }
-  function renderAll() { renderProjects(); fillFields(); renderStyle(); renderExclude(); renderLyrics(); renderExport(); renderIdeas(); renderAltPrompt(); renderHarmony(); }
+  function renderAll() { renderProjects(); fillFields(); renderStyle(); renderExclude(); renderLyrics(); renderExport(); renderIdeas(); renderAltPrompt(); renderHarmony(); vocabList = []; renderVocab(); }
 
   /* ---------- field events ---------- */
   $("#title").addEventListener("input", e => { const p = cur(); p.title = e.target.value; delete p.sample; touch(); renderTitle(); clearTimeout(renderProjects._t); renderProjects._t = setTimeout(renderProjects, 400); });
