@@ -1044,6 +1044,7 @@ a.btn{text-decoration:none;display:inline-block}
     { id: "bitter", ja: "一滴の切なさ", rule: "明るい曲の中に一行だけ不安や切なさを混ぜ、そこから前を向く" },
     { id: "girl", ja: "女の子の等身大", rule: "女の子の目線で、照れ・強がり・本音が入り混じる等身大の気持ちを書く" },
     { id: "dense", ja: "語彙たっぷり", rule: "テーマのイメージに合う名詞・漢字熟語・カタカナ語をたくさん詰め込み、1行に2つ以上入れる" },
+    { id: "heal", ja: "癒しと肯定", rule: "つらい気持ちを否定せずにまず受け止め、説教せずにやさしく肯定してから、笑顔に変えていく" },
     { id: "chaos", ja: "カオスな言葉遊び", rule: "難しい漢字熟語と日常の言葉のギャップ、早口の言葉の連打、唐突なツッコミで、意味より勢いで耳に残す" }
   ];
   const TANAKA_ESS = ["dream", "daily", "play", "call", "eng", "bitter"];
@@ -1721,6 +1722,31 @@ a.btn{text-decoration:none;display:inline-block}
         "[Build-up: snare roll build, 4 bars]", "[Shout]", "(三・二・一・混沌!)", "",
         "[Chorus: explosive, key change up, 8 bars]", "[Chord Progression: E - Eaug/A# - Amaj7 - G#aug/D - G#m7 - C#m7]", "カオス☆パイセン 降臨祭", "銀河の果てまで ついてきて", "暗黒 星座 あっちむいてホイ", "きみとならば うちゅう征服", "(Chaos! Chaos! Party time!)", "",
         "[Outro: soft, 4 bars]", "", "[End]", ""
+      ].join("\n")
+    }
+  }, {
+    name: "モヤモヤ退散☆パイセン（癒し × aug 進行）",
+    summary: "つらい毎日にカオス☆パイセンが降臨して、心のモヤモヤをまるごとハグして晴らす。やさしいAメロから、手を上げたくなる大サビへ。約1分50秒の応援ソング。",
+    includes: ["STYLE: J-POP・アイドル・アニソン・フューチャーファンク、150 BPM、A メジャー", "LYRICS: オリジナル歌詞「モヤモヤ退散☆パイセン」（aug 進行のヒントつき）", "HARMONY: aug の分数コード", "DYNAMICS: やさしい入り → 落ちサビ → スネアロール → 転調した大サビ（目標 2分）", "PROMPT: 癒しと肯定 + 背中を押す + 一滴の切なさ + 掛け声"],
+    data: {
+      title: "モヤモヤ退散☆パイセン",
+      style: ["J-pop","idol pop","anime","future funk","Shibuya-kei","uplifting","emotional","euphoric","cute","female vocals","vocal harmonies","piano","slap bass","brass section","synth","four-on-the-floor","catchy hook","jazzy chord progressions","augmented chords","sudden key change"],
+      custom: "group vocals, warm healing atmosphere, comforting gentle verses, hands-up anthem chorus, chromatic chord movement",
+      bpm: 150, key: "A major", exclude: "rap, heavy distortion, metal, lo-fi", target: 120,
+      harmony: { key: 9, prog: 5 },
+      brief: { theme: "つらい毎日を送る主人公のもとにカオス☆パイセンが降臨し、心のモヤモヤをまるごと受け止めて、困難な現実も笑顔で歩けるようにしてくれる応援ソング", words: "モヤモヤ, 退散, 降臨, 魔法陣, 満員電車, 既読, タイムライン, 百点満点, ハグ, 笑顔", pov: "auto", struct: "cur", line: "short", eng: "some", rhyme: true, kana: true, titles: false, essence: ["heal","cheer","bitter","daily","call","eng","play"] },
+      lyrics: [
+        "[Intro: soft, 4 bars]", "[Chord Progression: A - Aaug - A6 - A7]", "(だいじょうぶ だいじょうぶ)", "",
+        "[Verse 1: soft, 8 bars]", "月曜 満員電車 ためいき色", "既読のつかない スマホの画面", "ちいさな失敗 ポケットに", "かくしたまんまで 夜になる", "",
+        "[Pre-Chorus: mid-energy, rising tension, 4 bars]", "[Chord Progression: D#m7b5 - Dm6 - C#m7 - F#7b9]", "そのとき 窓から 魔法陣", "「呼んだ?」って パイセン降臨", "(はい! はい! はいはいはい!)", "",
+        "[Chorus: powerful, 8 bars]", "[Chord Progression: A - Aaug/D# - Dmaj7 - C#aug/G - C#m7 - F#m7]", "モヤモヤ退散 パイセン参上", "なみだも 混沌も まるごとハグして", "Smile again! 世界はまだ", "きみの笑顔で 救えるんだ", "(ハイ! ハイ! ハイハイハイ!)", "",
+        "[Verse 2: soft, 8 bars]", "できない自分に バツをつけて", "くらべてばかりの タイムライン", "パイセンは言う 「それでいいじゃん」", "千年いきても 迷子だし", "",
+        "[Pre-Chorus: mid-energy, rising tension, 4 bars]", "そのとき 窓から 魔法陣", "「呼んだ?」って パイセン降臨", "(はい! はい! はいはいはい!)", "",
+        "[Chorus: powerful, 8 bars]", "モヤモヤ退散 パイセン参上", "なみだも 混沌も まるごとハグして", "Smile again! 世界はまだ", "きみの笑顔で 救えるんだ", "(ハイ! ハイ! ハイハイハイ!)", "",
+        "[Break: very soft, piano breakdown, 8 bars]", "[Chord Progression: Bm7 - Bm7/E - E7b9 - Amaj7 - C#m7/F# - F#m7]", "がんばれなくても いいんだよ", "ここにいるだけで 百点満点", "",
+        "[Build-up: snare roll build, 4 bars]", "[Shout]", "(せーの! だいじょうぶ!)", "",
+        "[Chorus: explosive, key change up, 8 bars]", "[Chord Progression: B - Baug/F - Emaj7 - D#aug/A - D#m7 - G#m7]", "モヤモヤ退散 パイセン参上", "きのうの涙も あしたの光に", "Smile again! 世界ごと", "笑顔にしちゃえ いますぐに", "(ハイ! ハイ! ハイハイハイ!)", "",
+        "[Outro: soft, 4 bars]", "(だいじょうぶ だいじょうぶ)", "", "[End]", ""
       ].join("\n")
     }
   }];
