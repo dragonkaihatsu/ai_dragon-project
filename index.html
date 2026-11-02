@@ -503,6 +503,9 @@ a.btn{text-decoration:none;display:inline-block}
           <div class="f"><label class="lbl" for="bLine">1行の長さ</label><select id="bLine">
             <option value="short">短め（7〜11文字）</option><option value="mid">ふつう（10〜16文字）</option><option value="long">長め（14〜22文字）</option>
           </select></div>
+          <div class="f"><label class="lbl" for="bLang">歌詞の言語</label><select id="bLang">
+            <option value="ja">日本語</option><option value="en">全部英語</option>
+          </select></div>
           <div class="f"><label class="lbl" for="bEng">英語のフレーズ</label><select id="bEng">
             <option value="none">入れない</option><option value="some">サビに少し</option><option value="more">多め</option>
           </select></div>
@@ -582,7 +585,7 @@ a.btn{text-decoration:none;display:inline-block}
       ["ポップパンク","pop punk"],["メタル","metal"],["EDM","EDM"],["フューチャーベース","future bass"],["ハウス","house"],["ドラムンベース","drum and bass"],
       ["シンセウェイヴ","synthwave"],["Lo-fi ヒップホップ","lo-fi hip hop"],["トラップ","trap"],["R&B","R&B"],["ファンク","funk"],["ジャズ","jazz"],
       ["ボサノバ","bossa nova"],["バラード","ballad"],["フォーク","acoustic folk"],["アイドル","idol pop"],["演歌","enka"],["オーケストラ","orchestral"],["アンビエント","ambient"],
-      ["ハードコア","hardcore techno"],["ガバ","gabber"],["J-CORE","J-core"],["トランスコア","trancecore"],["ハッピーハードコア","happy hardcore"],["ブレイクコア","breakcore"],["ジャングル","jungle"],["リキッドDnB","liquid drum and bass"],["トランス","trance"],["ハンズアップ","hands up"],["フューチャーファンク","future funk"],["フレンチハウス","french house"]
+      ["ハードコア","hardcore techno"],["ガバ","gabber"],["J-CORE","J-core"],["トランスコア","trancecore"],["ハッピーハードコア","happy hardcore"],["ブレイクコア","breakcore"],["ジャングル","jungle"],["リキッドDnB","liquid drum and bass"],["トランス","trance"],["ハンズアップ","hands up"],["フューチャーファンク","future funk"],["フレンチハウス","french house"],["シンフォニックメタル","symphonic metal"]
     ]},
     { id: "jp", ja: "和・日本らしさ", items: [
       ["歌謡曲","kayokyoku"],["昭和歌謡","Showa-era kayokyoku"],["渋谷系","Shibuya-kei"],["ヴィジュアル系","visual kei"],["アニメOP風","anime opening"],
@@ -590,16 +593,16 @@ a.btn{text-decoration:none;display:inline-block}
     ]},
     { id: "mood", ja: "ムード", items: [
       ["明るい","uplifting"],["爽やか","refreshing"],["エネルギッシュ","energetic"],["切ない","bittersweet"],["ノスタルジック","nostalgic"],["憂鬱","melancholic"],
-      ["エモーショナル","emotional"],["夢見心地","dreamy"],["チル","chill"],["ロマンチック","romantic"],["壮大","epic"],["ダーク","dark"],["攻撃的","aggressive"],["かわいい","cute"],["多幸感","euphoric"]
+      ["エモーショナル","emotional"],["夢見心地","dreamy"],["チル","chill"],["ロマンチック","romantic"],["壮大","epic"],["ダーク","dark"],["攻撃的","aggressive"],["かわいい","cute"],["多幸感","euphoric"],["ゴシック","gothic"],["荘厳","majestic"]
     ]},
     { id: "vocal", ja: "ボーカル", items: [
       ["女性ボーカル","female vocals"],["男性ボーカル","male vocals"],["デュエット","duet"],["合唱","choir"],["ハモリ多め","vocal harmonies"],["透明感","airy vocals"],
-      ["ウィスパー","whispery vocals"],["ファルセット","falsetto"],["力強い","powerful vocals"],["ハスキー","husky voice"],["ラップ","rap"],["インスト","instrumental"]
+      ["ウィスパー","whispery vocals"],["ファルセット","falsetto"],["力強い","powerful vocals"],["ハスキー","husky voice"],["ラップ","rap"],["オペラ風","operatic vocals"],["インスト","instrumental"]
     ]},
     { id: "inst", ja: "楽器", items: [
       ["ピアノ","piano"],["エレピ","rhodes piano"],["アコギ","acoustic guitar"],["エレキ","electric guitar"],["シンセ","synth"],["ストリングス","strings"],
       ["ヴァイオリン","violin"],["ブラス","brass section"],["サックス","saxophone"],["スラップベース","slap bass"],["808","808 bass"],["オルガン","organ"],
-      ["チップチューン","chiptune"]
+      ["チップチューン","chiptune"],["パイプオルガン","pipe organ"],["チェンバロ","harpsichord"],["ティンパニ","timpani"]
     ]},
     { id: "prod", ja: "サウンド・制作", items: [
       ["高音質","polished production"],["Lo-fi","lo-fi"],["アナログ感","analog warmth"],["リバーブ深め","reverb-heavy"],["ワイドなステレオ","wide stereo"],
@@ -607,7 +610,7 @@ a.btn{text-decoration:none;display:inline-block}
       ["80年代","80s"],["90年代","90s"],["キャッチーなフック","catchy hook"],
       ["だんだん盛り上がる","dynamic build"],["サビで爆発","explosive chorus"],["静と動の対比","quiet-loud dynamics"],["転調あり","key change"],
       ["アーメンブレイク","amen break"],["ボーカルチョップ","vocal chops"],["エアホーン","air horns"],["煽りボイス","hype vocal samples"],
-      ["おしゃれなコード","jazzy chord progressions"],["augコード","augmented chords"],["急な転調","sudden key change"]
+      ["ツーバス","double kick drums"],["RPGのボス戦","JRPG boss battle"],["おしゃれなコード","jazzy chord progressions"],["augコード","augmented chords"],["急な転調","sudden key change"]
     ]}
   ];
   const NO_RANDOM = new Set(["instrumental","rap","choir","duet"]);
@@ -699,7 +702,7 @@ a.btn{text-decoration:none;display:inline-block}
   const KEY = "tracksheet.v1";
   const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
   const blank = () => ({ id: uid(), title: "", tags: { genre: [], jp: [], mood: [], vocal: [], inst: [], prod: [] }, jp: true, bpm: 100, bpmOn: false, key: "", custom: "", exclude: "", lyrics: "", readIgnore: [],
-    brief: { theme: "", words: "", pov: "auto", struct: "cur", line: "mid", eng: "some", rhyme: true, kana: true, titles: true, essence: [] },
+    brief: { theme: "", words: "", pov: "auto", struct: "cur", line: "mid", eng: "some", rhyme: true, kana: true, titles: true, essence: [], lang: "ja" },
     idea: { image: "", ref: "", feel: "" }, ideas: [], target: 0, harmony: { key: -1, prog: 0 }, updated: Date.now() });
   const sample = () => Object.assign(blank(), {
     sample: true, title: "夕凪ハイウェイ",
@@ -979,7 +982,8 @@ a.btn{text-decoration:none;display:inline-block}
         const n = len(line.replace(/\s/g, ""));
         lyricLines++; chars += n;
         if (curSec) { curSec.lines++; curSec.chars += n; } else loose++;
-        if (n > 30) longLines++;
+        const isJa = /[\u3040-\u30ff\u3400-\u9fff]/.test(line);
+        if (isJa ? n > 30 : line.trim().split(/\s+/).length > 12) longLines++;
       }
       offset += line.length + 1;
     });
@@ -1076,7 +1080,8 @@ a.btn{text-decoration:none;display:inline-block}
   }
   function briefText(p) {
     const b = p.brief, ja = list => list.map(t => ALL_JA.get(t) || t).join("・");
-    const L = ["あなたはプロの作詞家です。AI 作曲サービス Suno で歌わせる、日本語の歌詞を書いてください。", "", "## 曲の情報"];
+    const en = b.lang === "en";
+    const L = [`あなたはプロの作詞家です。AI 作曲サービス Suno で歌わせる、${en ? "すべて英語の" : "日本語の"}歌詞を書いてください。`, "", "## 曲の情報"];
     L.push(`- タイトル: ${p.title.trim() || "未定"}`);
     const g = ja([...p.tags.genre, ...p.tags.jp]); if (g) L.push(`- ジャンル: ${g}`);
     if (p.tags.mood.length) L.push(`- 雰囲気: ${ja(p.tags.mood)}`);
@@ -1102,11 +1107,13 @@ a.btn{text-decoration:none;display:inline-block}
     L.push("- 既存の曲の歌詞やフレーズは使わず、すべて新しく書く");
     L.push("- セクションタグは英語のまま、上の表記どおりに書く（日本語のタグは歌われてしまうため。: のあとの演出指定もそのまま残す）");
     L.push("- 静かなセクションは言葉数を少なく、盛り上がるセクションは力強く短いフレーズにして、緩急をつける");
-    L.push(`- 1行はおよそ ${LINE_LEN[b.line]} 文字。同じセクションの行は長さをそろえる`);
+    if (en) L.push(`- 1行はおよそ ${{ short: "4〜6", mid: "6〜8", long: "8〜11" }[b.line]} 語。同じセクションの行は音節数をそろえる`);
+    else L.push(`- 1行はおよそ ${LINE_LEN[b.line]} 文字。同じセクションの行は長さをそろえる`);
     L.push("- サビには曲の核になるフレーズを入れ、覚えやすく繰り返す");
     if (b.rhyme) L.push("- 行末の母音をそろえて韻を踏む（特にサビ）");
-    L.push(`- ${ENG[b.eng]}`);
-    if (b.kana) L.push("- 読み方が複数ある漢字（今日、明日、空、辛い、方、間、心 など）はひらがなで書く");
+    if (en) L.push("- 歌詞はすべて英語で書く。日本語は使わない。古めかしく格調のある言葉も使ってよい");
+    else L.push(`- ${ENG[b.eng]}`);
+    if (b.kana && !en) L.push("- 読み方が複数ある漢字（今日、明日、空、辛い、方、間、心 など）はひらがなで書く");
     L.push("- コーラスや合いの手は ( ) で囲む");
     L.push("- 歌詞のない区間はタグだけを置き、説明文や記号を入れない");
     L.push("", "## 出力", "Suno の Lyrics 欄にそのまま貼れるよう、タグと歌詞だけを出力してください。解説は不要です。");
@@ -1120,10 +1127,14 @@ a.btn{text-decoration:none;display:inline-block}
     bStruct.options[0].textContent = analyze(p.lyrics).secs.length ? "いまの歌詞のタグ" : "いまの歌詞のタグ（なし→J-POP 王道）";
     $("#briefOut").value = briefText(p);
   }
-  [["bTheme", "theme", "input"], ["bWords", "words", "input", true], ["bPov", "pov", "change"], ["bStruct", "struct", "change"], ["bLine", "line", "change"], ["bEng", "eng", "change"]]
+  [["bTheme", "theme", "input"], ["bWords", "words", "input", true], ["bPov", "pov", "change"], ["bStruct", "struct", "change"], ["bLine", "line", "change"], ["bEng", "eng", "change"], ["bLang", "lang", "change"]]
     .forEach(([id, k, ev, voc]) => $("#" + id).addEventListener(ev, e => { cur().brief[k] = e.target.value; touch(); renderBrief(); if (voc && typeof renderVocab === "function") renderVocab(); }));
   [["bRhyme", "rhyme"], ["bKana", "kana"], ["bTitles", "titles"]]
     .forEach(([id, k]) => $("#" + id).addEventListener("change", e => { cur().brief[k] = e.target.checked; touch(); renderBrief(); }));
+  $("#bLang").addEventListener("change", e => {
+    const p = cur();
+    if (e.target.value === "en" && p.jp) { p.jp = false; $("#jpOn").checked = false; touch(); renderStyle(); renderIdeas(); toast("全部英語にしたので、STYLE の「日本語の歌として指定する」をオフにしました"); }
+  });
   $("#jpOn").addEventListener("change", e => { cur().jp = e.target.checked; touch(); renderStyle(); renderIdeas(); });
 
   /* ---------- ideas: image / reference song -> style ---------- */
@@ -1749,6 +1760,32 @@ a.btn{text-decoration:none;display:inline-block}
         "[Outro: soft, 4 bars]", "(だいじょうぶ だいじょうぶ)", "", "[End]", ""
       ].join("\n")
     }
+  }, {
+    name: "ゴシック騎士譚（オーケストラ × BPM200・全部英語）",
+    summary: "伝説の騎士をたたえる、RPG のラストバトルのような荘厳なゴシック・シンフォニック。パイプオルガンと合唱で始まり、チェンバロとヴァイオリンが走り、最後は転調した合唱サビで締める。歌詞はすべて英語、約1分36秒。",
+    includes: ["STYLE: シンフォニックメタル・オーケストラ・ゴシック、200 BPM、D マイナー", "LYRICS: オリジナル英語歌詞「The Oath of Sir Aurelion」", "DYNAMICS: 合唱イントロ → ヴァイオリンとギターの掛け合い → 静かなレクイエム → 転調した合唱サビ", "PROMPT: 歌詞の言語「全部英語」"],
+    data: {
+      title: "The Oath of Sir Aurelion", jp: false,
+      style: ["symphonic metal","orchestral","gothic","epic","majestic","dark","operatic vocals","choir","female vocals","strings","violin","brass section","pipe organ","harpsichord","timpani","electric guitar","double kick drums","JRPG boss battle","polished production","sudden key change"],
+      custom: "male choir chants, latin choir, dramatic orchestral hits, neoclassical violin runs, cathedral reverb",
+      bpm: 200, key: "", exclude: "rap, lo-fi, EDM, Japanese vocals", target: 120,
+      harmony: { key: -1, prog: 0 },
+      brief: { theme: "伝説の騎士 Sir Aurelion が、燃える空の下で崩れた王冠への誓いを守り、夜明けまで城門を守り抜いた物語を、後の世の人々がたたえる歌", words: "oath, crown, cathedral, ravens, iron, dawn, flame, requiem", pov: "third", struct: "cur", line: "mid", eng: "more", rhyme: true, kana: false, titles: false, essence: [], lang: "en" },
+      lyrics: [
+        "[Intro: mid-energy, pipe organ and choir, 8 bars]", "[Choir]", "(Gloria... Aurelion...)", "",
+        "[Verse 1: mid-energy, 8 bars]", "Beneath the bells of a burning sky", "A silver knight would not kneel to die", "He bore the oath of a broken crown", "And held the gate when the walls came down", "",
+        "[Pre-Chorus: rising tension, 4 bars]", "Ravens cry across the frozen plain", "Iron sings his forgotten name", "",
+        "[Chorus: explosive, with choir, 8 bars]", "Rise, Sir Aurelion, keeper of the flame", "Through the endless night we call your name", "Blade of the dawn, shield of the free", "Your legend burns for eternity", "",
+        "[Instrumental: powerful, violin and guitar duel, 8 bars]", "",
+        "[Verse 2: mid-energy, 8 bars]", "He stood alone where the cathedral fell", "Answered the dark with a hymn and a bell", "Seven moons bled over the shore", "Still he stood guard, still he swore", "",
+        "[Pre-Chorus: rising tension, 4 bars]", "Ravens cry across the frozen plain", "Iron sings his forgotten name", "",
+        "[Chorus: explosive, with choir, 8 bars]", "Rise, Sir Aurelion, keeper of the flame", "Through the endless night we call your name", "Blade of the dawn, shield of the free", "Your legend burns for eternity", "",
+        "[Bridge: very soft, piano and vocals only, 8 bars]", "Lay down your sword, the war is won", "Rest in the light of the rising sun", "(Requiem... requiem...)", "",
+        "[Build-up: snare roll build, 4 bars]", "",
+        "[Chorus: explosive, key change up, with choir, 8 bars]", "Rise, Sir Aurelion, keeper of the flame", "Every heart remembers your name", "Blade of the dawn, crown of the free", "Your legend lives in eternity", "",
+        "[Outro: soft, choir fade, 4 bars]", "", "[End]", ""
+      ].join("\n")
+    }
   }];
   $("#combos").innerHTML = COMBOS.map((c, i) => `<article class="combo"><h4>${esc(c.name)}</h4><p>${esc(c.summary)}</p>
     <ul>${c.includes.map(x => `<li>${esc(x)}</li>`).join("")}</ul>
@@ -1759,7 +1796,7 @@ a.btn{text-decoration:none;display:inline-block}
     const conv = sanitizeIdea({ tags: { any: d.style }, extra: [] }, "preset");
     const extra = [...conv.extra, ...splitList(d.custom)];
     const p = normalize({
-      title: d.title, tags: conv.tags, jp: true, bpm: d.bpm, bpmOn: true, key: d.key, custom: [...new Set(extra)].join(", "),
+      title: d.title, tags: conv.tags, jp: d.jp !== false, bpm: d.bpm, bpmOn: true, key: d.key, custom: [...new Set(extra)].join(", "),
       exclude: d.exclude, lyrics: d.lyrics, target: d.target, harmony: { ...d.harmony }, brief: JSON.parse(JSON.stringify(d.brief))
     });
     p.id = uid(); p.updated = Date.now();
@@ -1822,7 +1859,7 @@ a.btn{text-decoration:none;display:inline-block}
     if (a.loose && a.secs.length) notes.push(`最初のタグより前に歌詞が ${a.loose} 行あります。`);
     a.secs.forEach(s => { if (!s.lines && !NO_LYRIC_OK.test(s.base)) notes.push(`[${s.name}] に歌詞がありません。`); });
     if (a.jpTags) notes.push(`日本語のタグが ${a.jpTags} 個あります。英語のタグにすると歌われにくくなります。`);
-    if (a.longLines) notes.push(`30文字を超える長い行が ${a.longLines} 行あります。分けると譜割りが安定しやすいです。`);
+    if (a.longLines) notes.push(`長い行（日本語は30文字・英語は12語を超える行）が ${a.longLines} 行あります。分けると譜割りが安定しやすいです。`);
     if (len(text) > LIMITS[store.limit].lyrics) notes.push("歌詞が文字数の上限を超えています。");
     renderSend(); renderDyn(a.secs);
     lastReads = findReads(text, cur().readIgnore);
@@ -1848,7 +1885,7 @@ a.btn{text-decoration:none;display:inline-block}
     const b = p.brief;
     $("#bTheme").value = b.theme; $("#bWords").value = b.words; $("#bPov").value = b.pov; $("#bStruct").value = b.struct;
     renderEss();
-    $("#bLine").value = b.line; $("#bEng").value = b.eng; $("#bRhyme").checked = b.rhyme; $("#bKana").checked = b.kana; $("#bTitles").checked = b.titles;
+    $("#bLine").value = b.line; $("#bEng").value = b.eng; $("#bLang").value = b.lang; $("#bRhyme").checked = b.rhyme; $("#bKana").checked = b.kana; $("#bTitles").checked = b.titles;
     renderTitle();
   }
   function renderTitle() { $("#titleCount").textContent = len(cur().title) + " 文字"; renderSend(); }
