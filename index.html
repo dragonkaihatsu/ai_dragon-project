@@ -230,6 +230,8 @@ a.btn{text-decoration:none;display:inline-block}
 .chord{border:1px solid var(--rule);border-radius:4px;padding:10px 8px;background:var(--sunk);display:flex;flex-direction:column;gap:2px;min-width:0}
 .chord b{font-family:var(--f-mono);font-size:17px;font-weight:600;overflow-wrap:anywhere}
 .chord span{font-family:var(--f-mono);font-size:11px;color:var(--muted)}
+#memoOut{white-space:pre-wrap;line-height:1.7}
+#timeMemo{width:100%;min-height:150px;background:var(--sheet);border:1px solid var(--rule);border-radius:4px;padding:8px 10px;font-size:13px;line-height:1.7;resize:vertical}
 .harm-words{font-family:var(--f-mono);font-size:12px;background:var(--sunk);border:1px dashed var(--muted);border-radius:4px;padding:8px 10px;overflow-wrap:anywhere}
 
 /* combos */
@@ -461,6 +463,23 @@ a.btn{text-decoration:none;display:inline-block}
       <button class="btn ghost" id="btnShort" type="button">短く終わる工夫を入れる</button>
     </div>
     <div class="strip-scroll"><div class="console" id="console"></div></div>
+    <details class="alt" id="timeBox">
+      <summary>時間メモから構成を作る</summary>
+      <div class="inner">
+        <p class="hint">参考曲を聴きながら「0:20 静かになってピアノだけ」のように、時間と感じたことを1行ずつ書きます。STYLE の BPM から小節数を計算して、盛り上がりと演出つきのタグに変換します。「35秒」「1分20秒」「1：20」の書き方も使えます。</p>
+        <textarea id="timeMemo" aria-label="時間メモ" placeholder="0:00 イントロ アーメンブレイクとリードシンセ&#10;0:20 静かになってピアノだけ&#10;0:45 溜め どこどこドラム&#10;1:05 半音上がる転調 大サビ&#10;1:45 じゃーん で終わり アウトロなし"></textarea>
+        <div class="row">
+          <button class="btn" id="btnMemo" type="button">構成に変換</button>
+          <button class="btn ghost" id="btnMemoClaude" type="button" hidden>Claude に整えてもらう</button>
+          <span class="status" id="memoStatus" role="status"></span>
+        </div>
+        <div class="harm-words" id="memoOut" hidden></div>
+        <div class="row" id="memoActs" hidden>
+          <button class="btn primary" id="btnMemoUse" type="button">LYRICS に入れる</button>
+          <button class="btn ghost" id="btnMemoStyle" type="button">メモの音を STYLE に足す</button>
+        </div>
+      </div>
+    </details>
   </section>
 
   <section class="sheet" aria-labelledby="harmTape">
@@ -661,6 +680,7 @@ a.btn{text-decoration:none;display:inline-block}
     ["ハンズアップ","手を上げたくなる多幸感。ピアノで落としてから主旋律が全開で戻ってくる。",["hands up","trance","J-core","euphoric","uplifting","energetic","synth","four-on-the-floor","piano","catchy hook","polished production"],149,["supersaw anthem lead","offbeat bass","snare roll build-up","piano breakdown","hands-up climax"]],
     ["コード感クラブポップ","複雑でおしゃれなコードを、4つ打ちとスラップベースでキャッチーに踊らせる。",["house","future funk","Shibuya-kei","J-pop","uplifting","energetic","female vocals","vocal harmonies","piano","slap bass","brass section","synth","four-on-the-floor","catchy hook","jazzy chord progressions","augmented chords","sudden key change"],128,["chromatic chord movement","sidechained synth chords","punchy brass hits"]],
     ["アーケード音ゲー","ハードルネッサンス系の泣きメロに、スクラッチやボイスチョップ、急停止を足した、譜面映えする2分曲。",["trancecore","trance","instrumental","euphoric","emotional","energetic","supersaw lead","piano","synth","four-on-the-floor","turntable scratches","glitch stutter edits","vocal chops","modern arcade rhythm game music","polished production"],190,["dotted eighth note melody","offbeat bass","reverse kick","kick drum rolls","piano breakdown","sudden stops"]],
+    ["深海ハードルネッサンス","深海のように透き通ったリードが、アーメンブレイクとリバースシンバルの上を泳ぐ。半音上の転調で大サビが開ける2分曲。",["trancecore","breakcore","instrumental","euphoric","emotional","dreamy","supersaw lead","piano","amen break","modern arcade rhythm game music","polished production","wide stereo"],185,["crystal clear deep-sea lead synth","portamento synth lead","reverse cymbals","piano arpeggios","high bell accents","half step key change"]],
     ["アイドル","コールを入れたくなる、元気でかわいいアイドルポップ。",["idol pop","future bass","cute","energetic","uplifting","female vocals","vocal harmonies","synth","catchy hook","polished production"],160,["call and response chant"]]
   ].map(([name, summary, t, bpm, extra]) => sanitizeIdea({ name, summary, tags: { any: t }, bpm, extra }, "preset"));
 
@@ -707,7 +727,7 @@ a.btn{text-decoration:none;display:inline-block}
   const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
   const blank = () => ({ id: uid(), title: "", tags: { genre: [], jp: [], mood: [], vocal: [], inst: [], prod: [] }, jp: true, bpm: 100, bpmOn: false, key: "", custom: "", exclude: "", lyrics: "", readIgnore: [],
     brief: { theme: "", words: "", pov: "auto", struct: "cur", line: "mid", eng: "some", rhyme: true, kana: true, titles: true, essence: [], lang: "ja" },
-    idea: { image: "", ref: "", feel: "" }, ideas: [], target: 0, harmony: { key: -1, prog: 0 }, updated: Date.now() });
+    idea: { image: "", ref: "", feel: "" }, ideas: [], target: 0, harmony: { key: -1, prog: 0 }, timeMemo: "", updated: Date.now() });
   const sample = () => Object.assign(blank(), {
     sample: true, title: "夕凪ハイウェイ",
     tags: { genre: ["city pop"], mood: ["nostalgic","bittersweet"], vocal: ["female vocals","airy vocals"], inst: ["rhodes piano","slap bass","brass section"], prod: ["80s","analog warmth"] },
@@ -1813,6 +1833,121 @@ a.btn{text-decoration:none;display:inline-block}
     });
   });
 
+  /* ---------- time memo -> structure ---------- */
+  const MEMO_SOUNDS = [[/アーメン/, "amen break"], [/リバースシンバル|逆再生シンバル/, "reverse cymbals"], [/リバースシンセ/, "reverse synth"],
+    [/ウィンウィン|ウインウイン|うぃんうぃん|ウィンウイン/, "portamento synth lead"], [/ピアノ\s*の?\s*アルペジオ/, "piano arpeggios"], [/ベル/, "high bell accents"],
+    [/強風|風の音|風のよう/, "wind whoosh"], [/どこどこ|ドコドコ/, "kick drum rolls"], [/ブレイクコア/, "breakcore drums"], [/テンポアップ|速くなる/, "double-time drums"],
+    [/リード/, "lead synth"], [/スクラッチ/, "scratches"], [/コーラス|合唱/, "choir"], [/ストリングス/, "strings"], [/ピアノ/, "piano"]];
+  function parseMemo(text) {
+    const out = [];
+    text.split("\n").forEach(raw => {
+      const z = raw.trim().replace(/：/g, ":").replace(/[０-９]/g, d => String.fromCharCode(d.charCodeAt(0) - 0xFEE0));
+      if (!z) return;
+      let m, t = null, desc = "";
+      if ((m = z.match(/^(\d{1,2}):(\d{2})(?:\.\d+)?\s*(.*)$/))) { t = +m[1] * 60 + +m[2]; desc = m[3]; }
+      else if ((m = z.match(/^(\d{1,2})\s*分\s*(\d{1,2})\s*秒\s*(.*)$/))) { t = +m[1] * 60 + +m[2]; desc = m[3]; }
+      else if ((m = z.match(/^(\d{1,3})\s*秒\s*(.*)$/))) { t = +m[1]; desc = m[2]; }
+      if (t == null) { if (out.length) out[out.length - 1].desc += " " + z; return; }
+      out.push({ t, desc });
+    });
+    return out.sort((a, b) => a.t - b.t);
+  }
+  function classifyMemo(d, i, n) {
+    const has = r => r.test(d);
+    let base = i === 0 ? "Intro" : "Instrumental", energy = 0, arr = "";
+    if (has(/イントロ/)) base = "Intro";
+    if (has(/静か|のみ|だけ|落と|しっとり/)) { base = "Break"; energy = has(/のみ|だけ|強風|風/) ? 1 : 2; }
+    if (has(/リズム隊|ドラム追加|リズム追加|ループ/)) { base = "Instrumental"; energy = 3; }
+    if (has(/溜め|ため|テンポアップ|どこどこ|ドコドコ|盛り上げ/)) { base = "Build-up"; energy = 3; arr = "rising tension"; }
+    if (has(/サビ|解放|ドロップ|全開/)) { base = "Drop"; energy = has(/大サビ|解放|最高/) ? 5 : 4; }
+    if (has(/もう一回サビ|もう一度サビ|ラスサビ/)) { base = "Drop"; energy = 5; arr = "anthem lead"; }
+    if (has(/転調|半音上|キーが上/)) arr = "key change up";
+    if (has(/ピアノ\s*(メイン|ソロ)|ピアノが主役/) && base !== "Drop") { base = "Instrumental"; energy = energy || 2; arr = arr || "piano solo"; }
+    const ending = i === n - 1 && has(/じゃーん|ジャーン|キメ|アウトロなし|終わ/);
+    if (ending) { base = "Outro"; energy = 4; arr = "sudden ending hit"; }
+    if (!energy) energy = { Intro: 3, Instrumental: 3, Break: 2, "Build-up": 3, Drop: 4, Outro: 3 }[base] || 3;
+    let rest = [];
+    if (arr === "key change up" && has(/半音/)) rest.push("half step");
+    MEMO_SOUNDS.forEach(([r, w]) => { if (r.test(d) && !rest.includes(w)) rest.push(w); });
+    if (rest.includes("piano arpeggios") || arr === "piano solo") rest = rest.filter(w => w !== "piano");
+    return { base, energy, arr, rest: rest.slice(0, 5), ending };
+  }
+  let memoPlan = [];
+  function memoToPlan(text) {
+    const pts = parseMemo(text), bpm = curBpm();
+    return pts.map((pt, i) => {
+      const c = classifyMemo(pt.desc, i, pts.length);
+      const dur = i < pts.length - 1 ? pts[i + 1].t - pt.t : (c.ending ? 2 * 240 / bpm : 8 * 240 / bpm);
+      const bars = Math.max(2, Math.round(dur * bpm / 240 / 2) * 2);
+      return { tag: buildTag({ base: c.base, energy: c.energy, arr: c.arr, rest: c.rest, bars }), at: pt.t, desc: pt.desc, bars };
+    });
+  }
+  function showMemo(plan, note) {
+    memoPlan = plan;
+    const out = $("#memoOut"), acts = $("#memoActs");
+    out.hidden = acts.hidden = !plan.length;
+    if (!plan.length) return;
+    const sec = plan.reduce((n, x) => n + x.bars, 0) * 240 / curBpm();
+    out.textContent = plan.map(x => (x.at != null ? fmtSec(x.at).padStart(5) + "  " : "") + x.tag).join("\n") + "\n[End]"
+      + `\n\n推定の長さ ${fmtSec(sec)}（${curBpm()} BPM で計算）` + (note ? "\n" + note : "");
+  }
+  $("#timeMemo").addEventListener("input", e => { cur().timeMemo = e.target.value; touch(); });
+  $("#btnMemo").addEventListener("click", () => {
+    const plan = memoToPlan($("#timeMemo").value);
+    const st = $("#memoStatus");
+    if (!plan.length) { st.textContent = "「0:20 静かになる」のように、行の頭に時間を書いてください。"; st.dataset.tone = "bad"; showMemo([]); return; }
+    st.textContent = cur().bpmOn ? "" : "BPM が未指定なので 120 で計算しました。STYLE で BPM を指定すると正確になります。"; st.dataset.tone = "";
+    showMemo(plan);
+  });
+  $("#btnMemoUse").addEventListener("click", () => {
+    if (!memoPlan.length) return;
+    const prev = ta.value;
+    setLyrics(memoPlan.map(x => x.tag).join("\n\n") + "\n\n[End]\n");
+    toast("時間メモの構成を LYRICS に入れました", "元に戻す", () => setLyrics(prev));
+  });
+  $("#btnMemoStyle").addEventListener("click", () => {
+    const words = [...new Set([...memoPlan.flatMap(x => parseTag(x.tag.slice(1, -1)).rest), ...((memoPlan[0] && memoPlan[0].extraStyle) || [])])].filter(w => w !== "half step");
+    if (memoPlan.some(x => /key change up/.test(x.tag))) words.push(/half step/.test(memoPlan.map(x => x.tag).join()) ? "half step key change" : "key change");
+    const p = cur(), list = splitList(p.custom), prev = p.custom;
+    const add = words.filter(w => !list.some(x => x.toLowerCase() === w.toLowerCase()));
+    if (!add.length) { toast("もう STYLE に入っています"); return; }
+    p.custom = [...list, ...add].join(", "); $("#custom").value = p.custom; touch(); renderStyle();
+    toast(`${add.length} 個の音の言葉を STYLE に足しました`, "元に戻す", () => { p.custom = prev; $("#custom").value = prev; touch(); renderStyle(); });
+  });
+  if (window.claude && typeof window.claude.use === "function") {
+    window.claude.use("sample").then(sm => {
+      if (!sm) return;
+      const btn = $("#btnMemoClaude"); btn.hidden = false;
+      btn.addEventListener("click", async () => {
+        const memo = $("#timeMemo").value.trim(), st = $("#memoStatus");
+        if (!memo) { st.textContent = "先に時間メモを書いてください。"; st.dataset.tone = "bad"; return; }
+        const draft = memoToPlan(memo);
+        btn.disabled = true; st.textContent = "整えています…"; st.dataset.tone = "";
+        try {
+          const res = await sm.json([
+            "参考曲を聴いた人の「時間メモ」を、Suno のセクションタグの並びに変換してください。",
+            `BPM: ${curBpm()}（1小節 = ${(240 / curBpm()).toFixed(2)} 秒、4/4）`,
+            "時間メモ:", memo,
+            "機械的に変換した下書き:", draft.map(x => x.tag).join("\n") || "（なし）",
+            "ルール: 各タグは \"Drop: explosive, key change up, piano arpeggios, 12 bars\" の形（[ ] は付けない）。盛り上がりは very soft / soft / mid-energy / powerful / explosive から1つ。演出と音色は短い英語で最大5個。小節数は時間の長さと BPM から計算し、2の倍数にする。メモの擬音（どこどこ、ウィンウィン、じゃーん など）は具体的な音の英語に置き換える。歌がない曲なら Intro / Instrumental / Build-up / Drop / Break / Outro を使う。最後に End を入れない。",
+            '出力: {"structure":["...", "..."], "style":["曲全体のスタイルに足す英語の言葉（最大8個）"]} の JSON だけ。'
+          ].join("\n"), { cache: false });
+          const list = (res && Array.isArray(res.structure) ? res.structure : []).map(t => String(t).replace(/^\[|\]$/g, "").trim()).filter(t => t && !/^end$/i.test(t)).slice(0, 24);
+          if (!list.length) { st.textContent = "うまく整えられませんでした。もう一度押してください。"; st.dataset.tone = "bad"; return; }
+          const plan = list.map((t, i) => { const tg = parseTag(t); return { tag: buildTag(tg), at: draft[i] ? draft[i].at : null, bars: tg.bars || 8 }; });
+          const styleAdd = (res && Array.isArray(res.style) ? res.style : []).map(String).filter(Boolean).slice(0, 8);
+          showMemo(plan, styleAdd.length ? "STYLE に足す候補: " + styleAdd.join(", ") : "");
+          if (styleAdd.length) memoPlan.forEach((x, i) => { if (i === 0) x.extraStyle = styleAdd; });
+          st.textContent = "Claude が整えました。"; st.dataset.tone = "";
+        } catch (e) {
+          const code = e && e.code;
+          if (HIDE.has(code)) { btn.hidden = true; st.textContent = ""; }
+          else { st.textContent = ASK_ERR[code] || "うまく受け取れませんでした。もう一度押してください。"; st.dataset.tone = "bad"; }
+        } finally { btn.disabled = false; }
+      });
+    }, () => {});
+  }
+
   /* ---------- rendering ---------- */
   function meter(el, n, max) {
     const pct = max ? Math.min(100, n / max * 100) : 0;
@@ -1885,7 +2020,7 @@ a.btn{text-decoration:none;display:inline-block}
     $("#title").value = p.title; $("#bpm").value = p.bpm; $("#bpmOn").checked = p.bpmOn; $("#key").value = p.key;
     $("#custom").value = p.custom; $("#exclude").value = p.exclude; ta.value = p.lyrics; $("#limitMode").value = store.limit;
     $("#jpOn").checked = p.jp;
-    $("#iImage").value = p.idea.image; $("#iRef").value = p.idea.ref; $("#iFeel").value = p.idea.feel;
+    $("#iImage").value = p.idea.image; $("#iRef").value = p.idea.ref; $("#iFeel").value = p.idea.feel; $("#timeMemo").value = p.timeMemo;
     const b = p.brief;
     $("#bTheme").value = b.theme; $("#bWords").value = b.words; $("#bPov").value = b.pov; $("#bStruct").value = b.struct;
     renderEss();
