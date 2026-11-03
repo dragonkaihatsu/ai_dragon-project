@@ -610,15 +610,16 @@ a.btn{text-decoration:none;display:inline-block}
       ["80年代","80s"],["90年代","90s"],["キャッチーなフック","catchy hook"],
       ["だんだん盛り上がる","dynamic build"],["サビで爆発","explosive chorus"],["静と動の対比","quiet-loud dynamics"],["転調あり","key change"],
       ["アーメンブレイク","amen break"],["ボーカルチョップ","vocal chops"],["エアホーン","air horns"],["煽りボイス","hype vocal samples"],
-      ["ツーバス","double kick drums"],["RPGのボス戦","JRPG boss battle"],["おしゃれなコード","jazzy chord progressions"],["augコード","augmented chords"],["急な転調","sudden key change"]
+      ["ツーバス","double kick drums"],["RPGのボス戦","JRPG boss battle"],
+      ["DJスクラッチ","turntable scratches"],["グリッチ","glitch stutter edits"],["音ゲーっぽさ","modern arcade rhythm game music"],["スーパーソウ","supersaw lead"],["おしゃれなコード","jazzy chord progressions"],["augコード","augmented chords"],["急な転調","sudden key change"]
     ]}
   ];
   const NO_RANDOM = new Set(["instrumental","rap","choir","duet"]);
   const KEYS = ["","C major","G major","D major","A major","E major","F major","B♭ major","E♭ major","A minor","E minor","B minor","F♯ minor","D minor","G minor","C minor"];
-  const EXCLUDES = [["ラップ","rap"],["EDM","EDM"],["激しい歪み","heavy distortion"],["オートチューン","autotune"],["シャウト","screaming"],["語り","spoken word"],["男性ボーカル","male vocals"],["女性ボーカル","female vocals"],["Lo-fi","lo-fi"]];
+  const EXCLUDES = [["ラップ","rap"],["EDM","EDM"],["激しい歪み","heavy distortion"],["オートチューン","autotune"],["シャウト","screaming"],["語り","spoken word"],["男性ボーカル","male vocals"],["女性ボーカル","female vocals"],["Lo-fi","lo-fi"],["チップチューン","chiptune"],["8bit","8-bit"],["レトロゲーム","retro game music"]];
   const SEC_TAGS = [["Intro","イントロ"],["Verse","Aメロ"],["Pre-Chorus","Bメロ"],["Chorus","サビ"],["Post-Chorus","後サビ"],["Bridge","Cメロ"],["Instrumental","間奏"],["Guitar Solo","ソロ"],["Break","ブレイク"],["Build-up","ビルド"],["Drop","ドロップ"],["Hook","フック"],["Outro","アウトロ"],["Fade Out","フェードアウト"],["End","終わり"]];
   const CUE_TAGS = [["Whisper","ささやき"],["Spoken Word","語り"],["Female Vocal","女声"],["Male Vocal","男声"],["Harmony","ハモリ"],["Choir","合唱"],["Belting","張り上げ"],["Ad-lib","アドリブ"]];
-  const FX_TAGS = [["Air Horn","パーティーホーン"],["Shout","煽り","Somebody scream!"],["Siren","サイレン"],["Rewind","巻き戻し"],["Riser","ライザー"],["Vocal Chop","ボイスチョップ"],["Crowd Cheer","歓声"],["Silence","無音"]];
+  const FX_TAGS = [["Air Horn","パーティーホーン"],["Shout","煽り","Somebody scream!"],["Siren","サイレン"],["Rewind","巻き戻し"],["Riser","ライザー"],["Vocal Chop","ボイスチョップ"],["Crowd Cheer","歓声"],["Silence","無音"],["Scratch","スクラッチ"],["Shout","煽り（Come on!）","Come on!"]];
   const FEEL_WORDS = [
     ["清涼感",["crisp clean highs","airy pads"]],["透明感",["crystalline textures"]],["静寂",["sparse arrangement","spacious silence"]],["クール",["cool detached mood"]],
     ["浮遊感",["floating ethereal pads"]],["水・雨のよう",["water drop plucks","rain ambience"]],["キラキラ",["glittering bell arpeggios"]],["ピアノが綺麗",["glassy emotional piano"]],
@@ -634,6 +635,8 @@ a.btn{text-decoration:none;display:inline-block}
     { name: "ヒップホップ", secs: ["Intro","Verse 1","Hook","Verse 2","Hook","Verse 3","Hook","Outro"] },
     { name: "ハンズアップ2分", bpm: 149, secs: ["Intro: mid-energy, 8 bars","Build-up: rising tension, 8 bars","Drop: powerful, 16 bars","Break: soft, piano breakdown, 8 bars","Build-up: snare roll build, 8 bars","Drop: explosive, anthem lead, 16 bars","End"],
       text: "[Intro: mid-energy, 8 bars]\n\n[Build-up: rising tension, 8 bars]\n[Riser]\n\n[Drop: powerful, 16 bars]\n[Air Horn]\n\n[Break: soft, piano breakdown, 8 bars]\n\n[Build-up: snare roll build, 8 bars]\n[Shout]\nSomebody scream!\n\n[Drop: explosive, anthem lead, 16 bars]\n[Air Horn]\n\n[End]\n" },
+    { name: "アーケード音ゲー", bpm: 190, secs: ["Intro: powerful, piano hook, 4 bars","Instrumental: mid-energy, lead melody, 16 bars","Build-up: rising tension, 4 bars","Drop: explosive, 16 bars","Break: sudden stop, 4 bars","Instrumental: soft, piano solo, 8 bars","Build-up: snare roll build, 8 bars","Drop: explosive, anthem lead, key change up, 16 bars","Outro: powerful, sudden ending hit, 4 bars","End"],
+      text: "[Intro: powerful, piano hook, 4 bars]\n[Scratch]\n\n[Instrumental: mid-energy, lead melody, 16 bars]\n\n[Build-up: rising tension, 4 bars]\n[Riser]\n\n[Drop: explosive, 16 bars]\n[Vocal Chop]\n\n[Break: sudden stop, 4 bars]\n[Silence]\n\n[Instrumental: soft, piano solo, 8 bars]\n\n[Build-up: snare roll build, 8 bars]\n[Shout]\nCome on!\n\n[Drop: explosive, anthem lead, key change up, 16 bars]\n[Scratch]\n\n[Outro: powerful, sudden ending hit, 4 bars]\n\n[End]\n" },
     { name: "音ゲー2分", bpm: 172, secs: ["Intro: very soft, 8 bars","Build-up: mid-energy, rising tension, 8 bars","Drop: explosive, 16 bars","Break: very soft, sudden stop, 8 bars","Build-up: rising tension, 8 bars","Drop: explosive, 16 bars","Outro: soft, fade out, 4 bars","End"],
       text: "[Intro: very soft, 8 bars]\n[Vocal Chop]\n\n[Build-up: mid-energy, rising tension, 8 bars]\n[Riser]\n\n[Shout]\nSomebody scream!\n\n[Drop: explosive, 16 bars]\n[Air Horn]\n\n[Break: very soft, sudden stop, 8 bars]\n\n[Build-up: rising tension, 8 bars]\n[Riser]\n\n[Drop: explosive, 16 bars]\n[Air Horn]\n\n[Outro: soft, fade out, 4 bars]\n\n[End]\n" }
   ];
@@ -657,6 +660,7 @@ a.btn{text-decoration:none;display:inline-block}
     ["清涼ブレイクコア","静かでクールな空気の中を、細かく刻んだブレイクが走り抜ける。",["breakcore","liquid drum and bass","dreamy","melancholic","airy vocals","piano","synth","amen break","vocal chops","air horns","reverb-heavy","wide stereo"],172,["crisp clean highs","glittering bell arpeggios","sparse arrangement","sudden silence breaks"]],
     ["ハンズアップ","手を上げたくなる多幸感。ピアノで落としてから主旋律が全開で戻ってくる。",["hands up","trance","J-core","euphoric","uplifting","energetic","synth","four-on-the-floor","piano","catchy hook","polished production"],149,["supersaw anthem lead","offbeat bass","snare roll build-up","piano breakdown","hands-up climax"]],
     ["コード感クラブポップ","複雑でおしゃれなコードを、4つ打ちとスラップベースでキャッチーに踊らせる。",["house","future funk","Shibuya-kei","J-pop","uplifting","energetic","female vocals","vocal harmonies","piano","slap bass","brass section","synth","four-on-the-floor","catchy hook","jazzy chord progressions","augmented chords","sudden key change"],128,["chromatic chord movement","sidechained synth chords","punchy brass hits"]],
+    ["アーケード音ゲー","ハードルネッサンス系の泣きメロに、スクラッチやボイスチョップ、急停止を足した、譜面映えする2分曲。",["trancecore","trance","instrumental","euphoric","emotional","energetic","supersaw lead","piano","synth","four-on-the-floor","turntable scratches","glitch stutter edits","vocal chops","modern arcade rhythm game music","polished production"],190,["dotted eighth note melody","offbeat bass","reverse kick","kick drum rolls","piano breakdown","sudden stops"]],
     ["アイドル","コールを入れたくなる、元気でかわいいアイドルポップ。",["idol pop","future bass","cute","energetic","uplifting","female vocals","vocal harmonies","synth","catchy hook","polished production"],160,["call and response chant"]]
   ].map(([name, summary, t, bpm, extra]) => sanitizeIdea({ name, summary, tags: { any: t }, bpm, extra }, "preset"));
 
@@ -1419,7 +1423,7 @@ a.btn{text-decoration:none;display:inline-block}
   const ENERGY_JA = ["とても静か", "静か", "中くらい", "力強い", "最高潮"];
   const ARR = [["ピアノと歌だけ","piano and vocals only"],["アコースティック","stripped-back acoustic"],["ドラム抜き","no drums"],["ハーフタイム","half-time feel"],
     ["倍テン","double-time drums"],["盛り上げていく","rising tension"],["落ちサビ→全開","soft start into full band"],["転調（上げ）","key change up"],
-    ["一瞬止める","sudden stop"],["ピアノのブレイクダウン","piano breakdown"],["スネアロールで溜める","snare roll build"],["主旋律を全開で","anthem lead"],["合唱を重ねる","with choir"],["掛け合い","call and response"],["アカペラ","a cappella"],["フェードアウト","fade out"]];
+    ["一瞬止める","sudden stop"],["ピアノのブレイクダウン","piano breakdown"],["スネアロールで溜める","snare roll build"],["主旋律を全開で","anthem lead"],["ピアノソロ","piano solo"],["キメで終わる","sudden ending hit"],["合唱を重ねる","with choir"],["掛け合い","call and response"],["アカペラ","a cappella"],["フェードアウト","fade out"]];
   function parseTag(name) {
     const i = name.indexOf(":"), base = (i < 0 ? name : name.slice(0, i)).trim();
     const mods = i < 0 ? [] : name.slice(i + 1).split(",").map(x => x.trim()).filter(Boolean);
