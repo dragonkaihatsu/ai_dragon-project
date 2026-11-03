@@ -630,7 +630,8 @@ a.btn{text-decoration:none;display:inline-block}
       ["だんだん盛り上がる","dynamic build"],["サビで爆発","explosive chorus"],["静と動の対比","quiet-loud dynamics"],["転調あり","key change"],
       ["アーメンブレイク","amen break"],["ボーカルチョップ","vocal chops"],["エアホーン","air horns"],["煽りボイス","hype vocal samples"],
       ["ツーバス","double kick drums"],["RPGのボス戦","JRPG boss battle"],
-      ["DJスクラッチ","turntable scratches"],["グリッチ","glitch stutter edits"],["音ゲーっぽさ","modern arcade rhythm game music"],["スーパーソウ","supersaw lead"],["おしゃれなコード","jazzy chord progressions"],["augコード","augmented chords"],["急な転調","sudden key change"]
+      ["DJスクラッチ","turntable scratches"],["グリッチ","glitch stutter edits"],["音ゲーっぽさ","modern arcade rhythm game music"],["スーパーソウ","supersaw lead"],
+      ["アンセム系リード","anthemic lead"],["オク下重ね","octave-layered lead"],["ライザー","riser sweeps"],["16分ノイズチョップ","chopped noise 16th stutters"],["おしゃれなコード","jazzy chord progressions"],["augコード","augmented chords"],["急な転調","sudden key change"]
     ]}
   ];
   const NO_RANDOM = new Set(["instrumental","rap","choir","duet"]);
@@ -644,7 +645,7 @@ a.btn{text-decoration:none;display:inline-block}
     ["浮遊感",["floating ethereal pads"]],["水・雨のよう",["water drop plucks","rain ambience"]],["キラキラ",["glittering bell arpeggios"]],["ピアノが綺麗",["glassy emotional piano"]],
     ["切ない",["wistful melody"]],["天使みたいな声",["angelic vocal chops"]],["疾走感",["driving breakbeats"]],["細かく刻む",["chopped amen breaks","rapid snare rolls"]],
     ["ドラムが暴れる",["glitchy drum edits","stuttering breaks"]],["深い低音",["deep sub bass"]],["轟音・ノイズ",["shoegaze guitar wall"]],["急に止まる",["sudden silence breaks"]],
-    ["一気に開ける",["euphoric drops"]],["コードがおしゃれ",["jazzy extended chords"]],["半音で動く",["chromatic chord movement"]],["急に転調する",["sudden key change before the chorus"]],["ベースが歌う",["melodic slap bass"]],["ブラスが華やか",["punchy brass hits"]],["手を上げたくなる",["hands-up anthem lead"]],["多幸感",["euphoric supersaw chords"]],["夜明けっぽい",["dawn-like atmosphere"]]
+    ["一気に開ける",["euphoric drops"]],["ヒュイーンと上がる",["rising riser sweep"]],["張りのある高音",["bright punchy supersaw lead"]],["温かいリード",["warm anthemic lead"]],["コードがおしゃれ",["jazzy extended chords"]],["半音で動く",["chromatic chord movement"]],["急に転調する",["sudden key change before the chorus"]],["ベースが歌う",["melodic slap bass"]],["ブラスが華やか",["punchy brass hits"]],["手を上げたくなる",["hands-up anthem lead"]],["多幸感",["euphoric supersaw chords"]],["夜明けっぽい",["dawn-like atmosphere"]]
   ];
   const TEMPLATES = [
     { name: "J-POP 王道", secs: ["Intro","Verse 1","Pre-Chorus","Chorus","Verse 2","Pre-Chorus","Chorus","Bridge","Chorus","Outro"] },
@@ -654,6 +655,8 @@ a.btn{text-decoration:none;display:inline-block}
     { name: "ヒップホップ", secs: ["Intro","Verse 1","Hook","Verse 2","Hook","Verse 3","Hook","Outro"] },
     { name: "ハンズアップ2分", bpm: 149, secs: ["Intro: mid-energy, 8 bars","Build-up: rising tension, 8 bars","Drop: powerful, 16 bars","Break: soft, piano breakdown, 8 bars","Build-up: snare roll build, 8 bars","Drop: explosive, anthem lead, 16 bars","End"],
       text: "[Intro: mid-energy, 8 bars]\n\n[Build-up: rising tension, 8 bars]\n[Riser]\n\n[Drop: powerful, 16 bars]\n[Air Horn]\n\n[Break: soft, piano breakdown, 8 bars]\n\n[Build-up: snare roll build, 8 bars]\n[Shout]\nSomebody scream!\n\n[Drop: explosive, anthem lead, 16 bars]\n[Air Horn]\n\n[End]\n" },
+    { name: "4つ打ち→サビでアーメン", bpm: 185, secs: ["Intro: mid-energy, four-on-the-floor drums, piano, high bell accents, 8 bars","Instrumental: mid-energy, anthemic lead, four-on-the-floor drums, 16 bars","Build-up: rising tension, riser sweep, kick drum rolls, 8 bars","Drop: explosive, switch to amen break, supersaw lead, octave-layered lead, piano arpeggios, 16 bars","Break: soft, rhodes piano, high bell accents, 8 bars","Build-up: rising tension, riser sweep, 8 bars","Drop: explosive, key change up, switch to amen break, supersaw lead, 16 bars","Outro: powerful, chopped noise 16th stutters, sudden ending hit, 4 bars","End"],
+      text: "[Intro: mid-energy, four-on-the-floor drums, piano, high bell accents, 8 bars]\n\n[Instrumental: mid-energy, anthemic lead, four-on-the-floor drums, 16 bars]\n\n[Build-up: rising tension, riser sweep, kick drum rolls, 8 bars]\n[Riser]\n\n[Drop: explosive, switch to amen break, supersaw lead, octave-layered lead, piano arpeggios, 16 bars]\n\n[Break: soft, rhodes piano, high bell accents, 8 bars]\n\n[Build-up: rising tension, riser sweep, 8 bars]\n[Riser]\n\n[Drop: explosive, key change up, switch to amen break, supersaw lead, 16 bars]\n\n[Outro: powerful, chopped noise 16th stutters, sudden ending hit, 4 bars]\n\n[End]\n" },
     { name: "アーケード音ゲー", bpm: 190, secs: ["Intro: powerful, piano hook, 4 bars","Instrumental: mid-energy, lead melody, 16 bars","Build-up: rising tension, 4 bars","Drop: explosive, 16 bars","Break: sudden stop, 4 bars","Instrumental: soft, piano solo, 8 bars","Build-up: snare roll build, 8 bars","Drop: explosive, anthem lead, key change up, 16 bars","Outro: powerful, sudden ending hit, 4 bars","End"],
       text: "[Intro: powerful, piano hook, 4 bars]\n[Scratch]\n\n[Instrumental: mid-energy, lead melody, 16 bars]\n\n[Build-up: rising tension, 4 bars]\n[Riser]\n\n[Drop: explosive, 16 bars]\n[Vocal Chop]\n\n[Break: sudden stop, 4 bars]\n[Silence]\n\n[Instrumental: soft, piano solo, 8 bars]\n\n[Build-up: snare roll build, 8 bars]\n[Shout]\nCome on!\n\n[Drop: explosive, anthem lead, key change up, 16 bars]\n[Scratch]\n\n[Outro: powerful, sudden ending hit, 4 bars]\n\n[End]\n" },
     { name: "音ゲー2分", bpm: 172, secs: ["Intro: very soft, 8 bars","Build-up: mid-energy, rising tension, 8 bars","Drop: explosive, 16 bars","Break: very soft, sudden stop, 8 bars","Build-up: rising tension, 8 bars","Drop: explosive, 16 bars","Outro: soft, fade out, 4 bars","End"],
@@ -1443,7 +1446,7 @@ a.btn{text-decoration:none;display:inline-block}
   const ENERGY_JA = ["とても静か", "静か", "中くらい", "力強い", "最高潮"];
   const ARR = [["ピアノと歌だけ","piano and vocals only"],["アコースティック","stripped-back acoustic"],["ドラム抜き","no drums"],["ハーフタイム","half-time feel"],
     ["倍テン","double-time drums"],["盛り上げていく","rising tension"],["落ちサビ→全開","soft start into full band"],["転調（上げ）","key change up"],
-    ["一瞬止める","sudden stop"],["ピアノのブレイクダウン","piano breakdown"],["スネアロールで溜める","snare roll build"],["主旋律を全開で","anthem lead"],["ピアノソロ","piano solo"],["キメで終わる","sudden ending hit"],["合唱を重ねる","with choir"],["掛け合い","call and response"],["アカペラ","a cappella"],["フェードアウト","fade out"]];
+    ["一瞬止める","sudden stop"],["ピアノのブレイクダウン","piano breakdown"],["スネアロールで溜める","snare roll build"],["主旋律を全開で","anthem lead"],["ピアノソロ","piano solo"],["キメで終わる","sudden ending hit"],["4つ打ちドラム","four-on-the-floor drums"],["アーメンに切替","switch to amen break"],["16分ノイズチョップ","chopped noise 16th stutters"],["合唱を重ねる","with choir"],["掛け合い","call and response"],["アカペラ","a cappella"],["フェードアウト","fade out"]];
   function parseTag(name) {
     const i = name.indexOf(":"), base = (i < 0 ? name : name.slice(0, i)).trim();
     const mods = i < 0 ? [] : name.slice(i + 1).split(",").map(x => x.trim()).filter(Boolean);
@@ -1837,6 +1840,7 @@ a.btn{text-decoration:none;display:inline-block}
   const MEMO_SOUNDS = [[/アーメン/, "amen break"], [/リバースシンバル|逆再生シンバル/, "reverse cymbals"], [/リバースシンセ/, "reverse synth"],
     [/ウィンウィン|ウインウイン|うぃんうぃん|ウィンウイン/, "portamento synth lead"], [/ピアノ\s*の?\s*アルペジオ/, "piano arpeggios"], [/ベル/, "high bell accents"],
     [/強風|風の音|風のよう/, "wind whoosh"], [/どこどこ|ドコドコ/, "kick drum rolls"], [/ブレイクコア/, "breakcore drums"], [/テンポアップ|速くなる/, "double-time drums"],
+    [/ヒュイーン|ひゅいーん|ライザー/, "riser sweep"], [/ノイズ/, "chopped noise 16th stutters"], [/4つ打ち|四つ打ち/, "four-on-the-floor drums"], [/エレピ|エレクトリックピアノ/, "rhodes piano"], [/オク下|オクターブ下/, "octave-layered lead"],
     [/リード/, "lead synth"], [/スクラッチ/, "scratches"], [/コーラス|合唱/, "choir"], [/ストリングス/, "strings"], [/ピアノ/, "piano"]];
   function parseMemo(text) {
     const out = [];
