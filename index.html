@@ -633,7 +633,7 @@ a.btn{text-decoration:none;display:inline-block}
       ["アーメンブレイク","amen break"],["ボーカルチョップ","vocal chops"],["エアホーン","air horns"],["煽りボイス","hype vocal samples"],
       ["ツーバス","double kick drums"],["RPGのボス戦","JRPG boss battle"],
       ["DJスクラッチ","turntable scratches"],["グリッチ","glitch stutter edits"],["音ゲーっぽさ","modern arcade rhythm game music"],["スーパーソウ","supersaw lead"],
-      ["ヴィンテージ80年代","late 80s club record"],["アナログ機材","vintage analog production"],["ドライなミックス","dry mix"],["アンセム系リード","anthemic lead"],["オク下重ね","octave-layered lead"],["ライザー","riser sweeps"],["16分ノイズチョップ","chopped noise 16th stutters"],["おしゃれなコード","jazzy chord progressions"],["augコード","augmented chords"],["急な転調","sudden key change"]
+      ["ヴィンテージ80年代","late 80s club record"],["アナログ機材","vintage analog production"],["ドライなミックス","dry mix"],["レコードの温もり","vinyl warmth"],["かすかなレコードノイズ","subtle vinyl crackle"],["テープの温かさ","warm tape saturation"],["12インチ盤","1980s 12-inch vinyl single"],["高音やわらか","soft rolled-off highs"],["アンセム系リード","anthemic lead"],["オク下重ね","octave-layered lead"],["ライザー","riser sweeps"],["16分ノイズチョップ","chopped noise 16th stutters"],["おしゃれなコード","jazzy chord progressions"],["augコード","augmented chords"],["急な転調","sudden key change"]
     ]}
   ];
   const NO_RANDOM = new Set(["instrumental","rap","choir","duet"]);
@@ -647,7 +647,7 @@ a.btn{text-decoration:none;display:inline-block}
     ["浮遊感",["floating ethereal pads"]],["水・雨のよう",["water drop plucks","rain ambience"]],["キラキラ",["glittering bell arpeggios"]],["ピアノが綺麗",["glassy emotional piano"]],
     ["切ない",["wistful melody"]],["天使みたいな声",["angelic vocal chops"]],["疾走感",["driving breakbeats"]],["細かく刻む",["chopped amen breaks","rapid snare rolls"]],
     ["ドラムが暴れる",["glitchy drum edits","stuttering breaks"]],["深い低音",["deep sub bass"]],["轟音・ノイズ",["shoegaze guitar wall"]],["急に止まる",["sudden silence breaks"]],
-    ["一気に開ける",["euphoric drops"]],["ヒュイーンと上がる",["rising riser sweep"]],["張りのある高音",["bright punchy supersaw lead"]],["温かいリード",["warm anthemic lead"]],["コードがおしゃれ",["jazzy extended chords"]],["半音で動く",["chromatic chord movement"]],["急に転調する",["sudden key change before the chorus"]],["ベースが歌う",["melodic slap bass"]],["ブラスが華やか",["punchy brass hits"]],["手を上げたくなる",["hands-up anthem lead"]],["多幸感",["euphoric supersaw chords"]],["夜明けっぽい",["dawn-like atmosphere"]]
+    ["一気に開ける",["euphoric drops"]],["レコードの音質",["vinyl warmth","warm tape saturation","soft rolled-off highs"]],["昔のクラブ",["1980s 12-inch vinyl single","vintage analog production"]],["ヒュイーンと上がる",["rising riser sweep"]],["張りのある高音",["bright punchy supersaw lead"]],["温かいリード",["warm anthemic lead"]],["コードがおしゃれ",["jazzy extended chords"]],["半音で動く",["chromatic chord movement"]],["急に転調する",["sudden key change before the chorus"]],["ベースが歌う",["melodic slap bass"]],["ブラスが華やか",["punchy brass hits"]],["手を上げたくなる",["hands-up anthem lead"]],["多幸感",["euphoric supersaw chords"]],["夜明けっぽい",["dawn-like atmosphere"]]
   ];
   const TEMPLATES = [
     { name: "J-POP 王道", secs: ["Intro","Verse 1","Pre-Chorus","Chorus","Verse 2","Pre-Chorus","Chorus","Bridge","Chorus","Outro"] },
@@ -1616,7 +1616,7 @@ a.btn{text-decoration:none;display:inline-block}
     }
     ["mood", "prod", "inst"].forEach(c => p.tags[c] = p.tags[c].filter(t => !EDM_WORDS.test(t) && !["dynamic build", "explosive chorus", "riser sweeps", "supersaw lead", "polished production", "euphoric"].includes(t)));
     const keep = splitList(p.custom).filter(w => !EDM_WORDS.test(w));
-    ["late 80s club record", "vintage analog production", "vintage drum machine", "dry mix"].forEach(w => { if (!keep.includes(w)) keep.push(w); });
+    ["late 80s club record", "vintage analog production", "vintage drum machine", "dry mix", "vinyl warmth", "warm tape saturation"].forEach(w => { if (!keep.includes(w)) keep.push(w); });
     p.custom = keep.join(", ");
     const ex = splitList(p.exclude);
     ["big room EDM", "drops", "sidechain pumping", "risers", "supersaw"].forEach(w => { if (!ex.some(x => x.toLowerCase() === w.toLowerCase())) ex.push(w); });
@@ -1886,7 +1886,7 @@ a.btn{text-decoration:none;display:inline-block}
     data: {
       title: "Dance Into The Light", jp: false,
       style: ["italo house","piano house","hi-NRG","house","80s","uplifting","energetic","female vocals","piano","strings","four-on-the-floor","catchy hook"],
-      custom: "late 80s club record, vintage analog production, vintage drum machine, dry mix, bright house piano chords, bouncy dotted eighth note piano stabs, octave bouncing synth bass, 909 kick and hi-hats, 808 cowbell and claps, offbeat open hi-hats, tambourine, synth strings, deep powerful soulful female vocals, soulful diva shouts, simple repetitive English hook",
+      custom: "late 80s club record, 1980s 12-inch vinyl single, vinyl warmth, warm tape saturation, subtle vinyl crackle, vintage analog production, vintage drum machine, dry mix, bright house piano chords, bouncy dotted eighth note piano stabs, octave bouncing synth bass, 909 kick and hi-hats, 808 cowbell and claps, offbeat open hi-hats, tambourine, synth strings, deep powerful soulful female vocals, soulful diva shouts, simple repetitive English hook",
       bpm: 128, key: "", exclude: "big room EDM, drops, sidechain pumping, risers, supersaw, trap, rap, heavy distortion", target: 0,
       harmony: { key: -1, prog: 0 },
       brief: { theme: "夜のクラブで、光の中へ踊りだす高揚感。単純な英語のフレーズを何度も繰り返す", words: "feel, beat, night, light, dance, tonight", pov: "auto", struct: "cur", line: "short", eng: "more", rhyme: true, kana: false, titles: false, essence: [], lang: "en" },
