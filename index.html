@@ -461,6 +461,7 @@ a.btn{text-decoration:none;display:inline-block}
       </select>
       <button class="btn ghost" id="btnFit" type="button">目標に収める</button>
       <button class="btn ghost" id="btnShort" type="button">短く終わる工夫を入れる</button>
+      <label class="check" for="fadeOn"><input type="checkbox" id="fadeOn"> アウトロは必ずフェードアウト</label>
     </div>
     <div class="strip-scroll"><div class="console" id="console"></div></div>
     <details class="alt" id="timeBox">
@@ -801,6 +802,7 @@ a.btn{text-decoration:none;display:inline-block}
   }
   let store = load();
   if (!store) { const s = sample(); store = { projects: [s], currentId: s.id, limit: "new" }; }
+  if (typeof store.fadeOut !== "boolean") store.fadeOut = true;
   let saveTimer;
   function save() {
     clearTimeout(saveTimer);
@@ -844,6 +846,7 @@ a.btn{text-decoration:none;display:inline-block}
     if (p.bpmOn) parts.push(p.bpm + " BPM");
     if (p.key) parts.push(p.key);
     parts.push(...splitList(p.custom));
+    if (store.fadeOut) parts.push("fade out ending");
     return [...new Set(parts)].join(", ");
   }
   const label = p => (p.title || "無題の曲") + (p.sample ? "（サンプル）" : "");
@@ -939,7 +942,8 @@ a.btn{text-decoration:none;display:inline-block}
 
   /* ---------- lyrics editing ---------- */
   const ta = $("#lyrics");
-  function setLyrics(v, caret) {
+  function setLyrics(v, caret, raw) {
+    if (!raw && store.fadeOut) v = enforceFade(v);
     ta.value = v; cur().lyrics = v; touch(); renderLyrics();
     if (caret != null) { ta.focus(); ta.setSelectionRange(caret, caret); }
   }
@@ -984,7 +988,7 @@ a.btn{text-decoration:none;display:inline-block}
       const syncBpm = () => { touch(); fillFields(); renderStyle(); renderDyn(analyze(ta.value).secs); };
       setLyrics(text, text.indexOf("\n") + 1);
       if (t.bpm) { p.bpm = t.bpm; p.bpmOn = true; syncBpm(); }
-      if (prev.trim() || t.bpm) toast(`「${t.name}」で書き換えました${t.bpm ? `（BPM を ${t.bpm} に設定）` : ""}`, "元に戻す", () => { setLyrics(prev); if (t.bpm) { Object.assign(p, pb); syncBpm(); } });
+      if (prev.trim() || t.bpm) toast(`「${t.name}」で書き換えました${t.bpm ? `（BPM を ${t.bpm} に設定）` : ""}`, "元に戻す", () => { setLyrics(prev, null, true); if (t.bpm) { Object.assign(p, pb); syncBpm(); } });
     };
     if (!ta.value.trim()) apply(); else arm(b, "上書きする？", apply);
   });
@@ -1055,7 +1059,7 @@ a.btn{text-decoration:none;display:inline-block}
     }
     const prev = ta.value;
     setLyrics(prev.split("\n").map(l => isTagLine(l) ? l : l.replace(readRe(r.w), b.dataset.kana)).join("\n"));
-    toast(`「${r.w}」を「${b.dataset.kana}」に置き換えました（${r.n}か所）`, "元に戻す", () => setLyrics(prev));
+    toast(`「${r.w}」を「${b.dataset.kana}」に置き換えました（${r.n}か所）`, "元に戻す", () => setLyrics(prev, null, true));
   });
 
   /* ---------- lyrics prompt ---------- */
@@ -1146,6 +1150,7 @@ a.btn{text-decoration:none;display:inline-block}
     L.push("- 歌詞のない区間はタグだけを置き、説明文や記号を入れない");
     L.push("", "## 出力", "Suno の Lyrics 欄にそのまま貼れるよう、タグと歌詞だけを出力してください。解説は不要です。");
     if (b.titles) L.push("歌詞のあとに区切り線（---）を入れ、タイトル案を3つ挙げてください。");
+    if (store.fadeOut) L.push("曲の最後は [Outro: very soft, fade out] にして、だんだん音量が小さくなる終わり方にしてください。");
     return L.join("\n");
   }
   const bStruct = $("#bStruct");
@@ -1235,7 +1240,7 @@ a.btn{text-decoration:none;display:inline-block}
       const prev = ta.value;
       setLyrics(x.structure.map(t => `[${t}]\n`).join("\n"));
       $("#lyricsTape").scrollIntoView({ block: "start" });
-      toast(`「${x.name}」の構成を LYRICS に入れました`, "元に戻す", () => setLyrics(prev));
+      toast(`「${x.name}」の構成を LYRICS に入れました`, "元に戻す", () => setLyrics(prev, null, true));
       return;
     }
     const a = e.target.closest("[data-apply]"); if (!a) return;
@@ -1413,7 +1418,7 @@ a.btn{text-decoration:none;display:inline-block}
     const prev = ta.value;
     setLyrics(v + "\n");
     $("#lyricsTape").scrollIntoView({ block: "start", behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
-    toast("Claude の歌詞を LYRICS に反映しました", "元に戻す", () => setLyrics(prev));
+    toast("Claude の歌詞を LYRICS に反映しました", "元に戻す", () => setLyrics(prev, null, true));
   });
 
   /* ---------- send to suno ---------- */
@@ -1437,7 +1442,7 @@ a.btn{text-decoration:none;display:inline-block}
   }
   $("#steps").addEventListener("click", e => {
     const b = e.target.closest("[data-send]"); if (!b) return;
-    const k = b.dataset.send; copyText(sendValue(k).trim(), SEND_NAME[k]);
+    const k = b.dataset.send; if (k === "lyrics") fixFadeBeforeCopy(); copyText(sendValue(k).trim(), SEND_NAME[k]);
     sent.add(k); renderSend();
   });
   $("#btnSendReset").addEventListener("click", () => { sent.clear(); renderSend(); });
@@ -1518,7 +1523,7 @@ a.btn{text-decoration:none;display:inline-block}
     if (b.dataset.dyn === "reset") secs.forEach((s, i) => edits.set(i, t => { t.energy = 0; t.arr = ""; }));
     else planFor(secs, b.dataset.dyn).forEach((pl, i) => { if (!/^end\b/i.test(secs[i].base)) edits.set(i, t => { t.energy = pl.e; t.arr = pl.a; }); });
     rewriteSections(edits);
-    if (ta.value !== prev) toast(b.dataset.dyn === "reset" ? "盛り上がりと演出の指定を外しました" : `「${b.textContent}」をタグに書き込みました`, "元に戻す", () => setLyrics(prev));
+    if (ta.value !== prev) toast(b.dataset.dyn === "reset" ? "盛り上がりと演出の指定を外しました" : `「${b.textContent}」をタグに書き込みました`, "元に戻す", () => setLyrics(prev, null, true));
   });
   function barsOf(s, t) {
     if (t.bars) return t.bars;
@@ -1549,8 +1554,8 @@ a.btn{text-decoration:none;display:inline-block}
     secs.forEach((s, i) => { const b = barsOf(s, parseTag(s.name)); if (b) edits.set(i, t => { t.bars = Math.max(4, Math.floor(b * f / 4) * 4); }); });
     rewriteSections(edits);
     let after = songSeconds(analyze(ta.value).secs);
-    if (after > p.target) toast(`これ以上は短くできませんでした（${fmtSec(after)}）。セクションを減らしてください`, "元に戻す", () => setLyrics(prev));
-    else toast(`小節数を減らして ${fmtSec(after)} にしました`, "元に戻す", () => setLyrics(prev));
+    if (after > p.target) toast(`これ以上は短くできませんでした（${fmtSec(after)}）。セクションを減らしてください`, "元に戻す", () => setLyrics(prev, null, true));
+    else toast(`小節数を減らして ${fmtSec(after)} にしました`, "元に戻す", () => setLyrics(prev, null, true));
   });
   $("#btnShort").addEventListener("click", () => {
     const secs = analyze(ta.value).secs; if (!secs.length) { toast("先に構成のタグを入れてください"); return; }
@@ -1560,7 +1565,36 @@ a.btn{text-decoration:none;display:inline-block}
     let v = ta.value.replace(/\s*\[Fade Out[^\]]*\]\s*$/i, "\n").trimEnd();
     if (!/\[End\]$/i.test(v)) v += "\n\n[End]";
     setLyrics(v + "\n");
-    toast(ta.value === prev ? "もう短く終わる形になっています" : "イントロ・アウトロを4小節にして、最後に [End] を置きました", ta.value === prev ? null : "元に戻す", ta.value === prev ? null : () => setLyrics(prev));
+    toast(ta.value === prev ? "もう短く終わる形になっています" : "イントロ・アウトロを4小節にして、最後に [End] を置きました", ta.value === prev ? null : "元に戻す", ta.value === prev ? null : () => setLyrics(prev, null, true));
+  });
+  function enforceFade(text) {
+    const lines = String(text || "").replace(/\s+$/, "").split("\n");
+    const tail = l => !l.trim() || /^\s*\[(End|Fade Out)[^\]]*\]\s*$/i.test(l);
+    while (lines.length && tail(lines[lines.length - 1])) lines.pop();
+    if (!lines.some(l => l.trim())) return text;
+    const fadeify = t => { t.energy = 1; t.arr = "fade out"; t.rest = t.rest.filter(w => !/sudden|ending hit|stop/i.test(w)); if (!t.bars) t.bars = 8; return t; };
+    let idx = -1;
+    for (let i = lines.length - 1; i >= 0; i--) { const m = lines[i].match(/^\s*\[([^\]]+)\]\s*$/); if (m && kindOf(baseOf(m[1]))) { idx = i; break; } }
+    const last = idx >= 0 ? parseTag(lines[idx].trim().slice(1, -1)) : null;
+    if (last && /^outro\b/i.test(last.base)) lines[idx] = buildTag(fadeify(last));
+    else lines.push("", buildTag(fadeify({ base: "Outro", energy: 0, arr: "", rest: [], bars: 8 })));
+    lines.push("[Fade Out]", "", "[End]");
+    return lines.join("\n") + "\n";
+  }
+  let fadeNote = false;
+  function fixFadeBeforeCopy() {
+    if (!store.fadeOut || !ta.value.trim()) return;
+    const fixed = enforceFade(ta.value);
+    if (fixed !== ta.value) { setLyrics(fixed, null, true); fadeNote = true; }
+  }
+  $("#fadeOn").checked = store.fadeOut;
+  $("#fadeOn").addEventListener("change", e => {
+    store.fadeOut = e.target.checked; save();
+    if (store.fadeOut && ta.value.trim()) {
+      const prev = ta.value; setLyrics(ta.value);
+      if (ta.value !== prev) toast("最後をフェードアウトの終わり方にしました", "元に戻す", () => setLyrics(prev, null, true));
+    }
+    renderStyle(); renderBrief();
   });
   const KIND_VAR = { verse: "--sec-verse", pre: "--sec-pre", chorus: "--sec-chorus", bridge: "--sec-bridge", inst: "--sec-inst", edge: "--muted" };
   function renderDyn(secs) {
@@ -1668,7 +1702,7 @@ a.btn{text-decoration:none;display:inline-block}
     const before = v.slice(0, c), pre = before && !before.endsWith("\n") ? "\n" : "";
     const prev = v;
     setLyrics(before + pre + line + "\n" + v.slice(c), before.length + pre.length + line.length + 1);
-    toast("コードを歌詞に書き込みました。[Chorus] などのタグのすぐ下に置くと、そのセクションのヒントになります", "元に戻す", () => setLyrics(prev));
+    toast("コードを歌詞に書き込みました。[Chorus] などのタグのすぐ下に置くと、そのセクションのヒントになります", "元に戻す", () => setLyrics(prev, null, true));
   });
   $("#btnHarmCopy").addEventListener("click", () => copyText(progChords(false).join(" "), "コード進行"));
 
@@ -1849,7 +1883,7 @@ a.btn{text-decoration:none;display:inline-block}
     const extra = [...conv.extra, ...splitList(d.custom)];
     const p = normalize({
       title: d.title, tags: conv.tags, jp: d.jp !== false, bpm: d.bpm, bpmOn: true, key: d.key, custom: [...new Set(extra)].join(", "),
-      exclude: d.exclude, lyrics: d.lyrics, target: d.target, harmony: { ...d.harmony }, brief: JSON.parse(JSON.stringify(d.brief))
+      exclude: d.exclude, lyrics: store.fadeOut ? enforceFade(d.lyrics) : d.lyrics, target: d.target, harmony: { ...d.harmony }, brief: JSON.parse(JSON.stringify(d.brief))
     });
     p.id = uid(); p.updated = Date.now();
     const prevId = store.currentId;
@@ -1932,7 +1966,7 @@ a.btn{text-decoration:none;display:inline-block}
     if (!memoPlan.length) return;
     const prev = ta.value;
     setLyrics(memoPlan.map(x => x.tag).join("\n\n") + "\n\n[End]\n");
-    toast("時間メモの構成を LYRICS に入れました", "元に戻す", () => setLyrics(prev));
+    toast("時間メモの構成を LYRICS に入れました", "元に戻す", () => setLyrics(prev, null, true));
   });
   $("#btnMemoStyle").addEventListener("click", () => {
     const words = [...new Set([...memoPlan.flatMap(x => parseTag(x.tag.slice(1, -1)).rest), ...((memoPlan[0] && memoPlan[0].extraStyle) || [])])].filter(w => w !== "half step");
@@ -2133,17 +2167,19 @@ a.btn{text-decoration:none;display:inline-block}
       panel.hidden = false; box.value = text; panel.scrollIntoView({ block: "nearest" }); box.focus(); box.select();
     };
     try {
-      navigator.clipboard.writeText(text).then(() => toast(`${what}をコピーしました`), fallback);
+      navigator.clipboard.writeText(text).then(() => { toast(`${what}をコピーしました${fadeNote ? "（最後をフェードアウトの形に整えました）" : ""}`); fadeNote = false; }, () => { fadeNote = false; fallback(); });
     } catch (e) { fallback(); }
   }
   $("#btnFallbackClose").addEventListener("click", () => { $("#fallbackPanel").hidden = true; });
   document.addEventListener("click", e => {
     const b = e.target.closest("[data-copy]"); if (!b) return;
+    if (b.dataset.copy === "lyrics") fixFadeBeforeCopy();
     const p = cur();
     const map = { title: [p.title, "タイトル"], style: [styleText(p), "スタイル"], exclude: [p.exclude, "除外スタイル"], lyrics: [p.lyrics, "歌詞"], brief: [briefText(p), "作詞プロンプト"], idea: [ideaPrompt(p, false), "提案用の指示文"] };
     const [t, w] = map[b.dataset.copy]; copyText(t, w);
   });
   $("#btnCopyAll").addEventListener("click", () => {
+    fixFadeBeforeCopy();
     const p = cur();
     const parts = [["Title", p.title], ["Style of Music", styleText(p)], ["Exclude Styles", p.exclude], ["Lyrics", p.lyrics]]
       .filter(([, v]) => v && v.trim()).map(([k, v]) => `■ ${k}\n${v.trim()}`);
