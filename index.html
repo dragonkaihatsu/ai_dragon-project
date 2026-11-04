@@ -619,7 +619,7 @@ a.btn{text-decoration:none;display:inline-block}
     ]},
     { id: "vocal", ja: "ボーカル", items: [
       ["女性ボーカル","female vocals"],["男性ボーカル","male vocals"],["デュエット","duet"],["合唱","choir"],["ハモリ多め","vocal harmonies"],["透明感","airy vocals"],
-      ["ウィスパー","whispery vocals"],["ファルセット","falsetto"],["力強い","powerful vocals"],["ハスキー","husky voice"],["ラップ","rap"],["オペラ風","operatic vocals"],["インスト","instrumental"]
+      ["ウィスパー","whispery vocals"],["ファルセット","falsetto"],["力強い","powerful vocals"],["ハスキー","husky voice"],["ラップ","rap"],["オペラ風","operatic vocals"],["低音の女性ボーカル","deep contralto female vocals"],["インスト","instrumental"]
     ]},
     { id: "inst", ja: "楽器", items: [
       ["ピアノ","piano"],["エレピ","rhodes piano"],["アコギ","acoustic guitar"],["エレキ","electric guitar"],["シンセ","synth"],["ストリングス","strings"],
@@ -634,7 +634,7 @@ a.btn{text-decoration:none;display:inline-block}
       ["アーメンブレイク","amen break"],["ボーカルチョップ","vocal chops"],["エアホーン","air horns"],["煽りボイス","hype vocal samples"],
       ["ツーバス","double kick drums"],["RPGのボス戦","JRPG boss battle"],
       ["DJスクラッチ","turntable scratches"],["グリッチ","glitch stutter edits"],["音ゲーっぽさ","modern arcade rhythm game music"],["スーパーソウ","supersaw lead"],
-      ["フィルターハウス","filtered disco house"],["フィルタースイープ","filter sweeps"],["2000年代レースゲーム","2000s racing game soundtrack"],["ヴィンテージ80年代","late 80s club record"],["アナログ機材","vintage analog production"],["ドライなミックス","dry mix"],["レコードの温もり","vinyl warmth"],["かすかなレコードノイズ","subtle vinyl crackle"],["テープの温かさ","warm tape saturation"],["12インチ盤","1980s 12-inch vinyl single"],["高音やわらか","soft rolled-off highs"],["アンセム系リード","anthemic lead"],["オク下重ね","octave-layered lead"],["ライザー","riser sweeps"],["16分ノイズチョップ","chopped noise 16th stutters"],["おしゃれなコード","jazzy chord progressions"],["augコード","augmented chords"],["急な転調","sudden key change"]
+      ["アーバン R&B","urban R&B groove"],["ヒップホップのノリ","hip hop swing"],["深く温かい低音","deep warm bass"],["フィルターハウス","filtered disco house"],["フィルタースイープ","filter sweeps"],["2000年代レースゲーム","2000s racing game soundtrack"],["ヴィンテージ80年代","late 80s club record"],["アナログ機材","vintage analog production"],["ドライなミックス","dry mix"],["レコードの温もり","vinyl warmth"],["かすかなレコードノイズ","subtle vinyl crackle"],["テープの温かさ","warm tape saturation"],["12インチ盤","1980s 12-inch vinyl single"],["高音やわらか","soft rolled-off highs"],["アンセム系リード","anthemic lead"],["オク下重ね","octave-layered lead"],["ライザー","riser sweeps"],["16分ノイズチョップ","chopped noise 16th stutters"],["おしゃれなコード","jazzy chord progressions"],["augコード","augmented chords"],["急な転調","sudden key change"]
     ]}
   ];
   const NO_RANDOM = new Set(["instrumental","rap","choir","duet"]);
@@ -648,7 +648,7 @@ a.btn{text-decoration:none;display:inline-block}
     ["浮遊感",["floating ethereal pads"]],["水・雨のよう",["water drop plucks","rain ambience"]],["キラキラ",["glittering bell arpeggios"]],["ピアノが綺麗",["glassy emotional piano"]],
     ["切ない",["wistful melody"]],["天使みたいな声",["angelic vocal chops"]],["疾走感",["driving breakbeats"]],["細かく刻む",["chopped amen breaks","rapid snare rolls"]],
     ["ドラムが暴れる",["glitchy drum edits","stuttering breaks"]],["深い低音",["deep sub bass"]],["轟音・ノイズ",["shoegaze guitar wall"]],["急に止まる",["sudden silence breaks"]],
-    ["一気に開ける",["euphoric drops"]],["レコードの音質",["vinyl warmth","warm tape saturation","soft rolled-off highs"]],["昔のクラブ",["1980s 12-inch vinyl single","vintage analog production"]],["ヒュイーンと上がる",["rising riser sweep"]],["張りのある高音",["bright punchy supersaw lead"]],["温かいリード",["warm anthemic lead"]],["コードがおしゃれ",["jazzy extended chords"]],["半音で動く",["chromatic chord movement"]],["急に転調する",["sudden key change before the chorus"]],["ベースが歌う",["melodic slap bass"]],["ブラスが華やか",["punchy brass hits"]],["手を上げたくなる",["hands-up anthem lead"]],["多幸感",["euphoric supersaw chords"]],["夜明けっぽい",["dawn-like atmosphere"]]
+    ["一気に開ける",["euphoric drops"]],["アーバン",["urban R&B groove","hip hop swing","jazzy chords"]],["低い女性の声",["deep contralto female vocals"]],["レコードの音質",["vinyl warmth","warm tape saturation","soft rolled-off highs"]],["昔のクラブ",["1980s 12-inch vinyl single","vintage analog production"]],["ヒュイーンと上がる",["rising riser sweep"]],["張りのある高音",["bright punchy supersaw lead"]],["温かいリード",["warm anthemic lead"]],["コードがおしゃれ",["jazzy extended chords"]],["半音で動く",["chromatic chord movement"]],["急に転調する",["sudden key change before the chorus"]],["ベースが歌う",["melodic slap bass"]],["ブラスが華やか",["punchy brass hits"]],["手を上げたくなる",["hands-up anthem lead"]],["多幸感",["euphoric supersaw chords"]],["夜明けっぽい",["dawn-like atmosphere"]]
   ];
   const TEMPLATES = [
     { name: "J-POP 王道", secs: ["Intro","Verse 1","Pre-Chorus","Chorus","Verse 2","Pre-Chorus","Chorus","Bridge","Chorus","Outro"] },
@@ -1926,6 +1926,31 @@ a.btn{text-decoration:none;display:inline-block}
         "[Chorus: powerful, 8 bars]", "[Chord Progression: Eb - Ebaug/A - Abmaj7 - Gaug/Db - Gm7 - Cm7]", "Ride with me until the dawn", "Ride with me, the night goes on", "(Faster, faster)", "Ride with me until the dawn", "",
         "[Break: soft, rhodes piano and vocals only, 8 bars]", "[Chord Progression: Cm - Ab - Bb - Eb]", "Until the dawn", "Until the dawn", "",
         "[Chorus: powerful, key change up, 8 bars]", "[Chord Progression: E - Eaug/A# - Amaj7 - G#aug/D - G#m7 - C#m7]", "Ride with me until the dawn", "Ride with me, the night goes on", "(Faster, faster)", "Ride with me until the dawn", "",
+        "[Outro: very soft, fade out, 8 bars]", "[Fade Out]", "", "[End]", ""
+      ].join("\n")
+    }
+  }, {
+    name: "80年代クラブ × アーバン（R4 風・低音の女性ボーカル）",
+    summary: "80年代のクラブ・レコードの温もりに、アーバンな R&B・ヒップホップのノリとアシッドジャズのコードを足す。低く太い女性ボーカルと、深く温かいベースが主役の夜の街の曲。",
+    includes: ["STYLE: イタロ・ハウス × アーバン R&B × アシッドジャズ、120 BPM", "LYRICS: オリジナル英語歌詞「City After Midnight」（単純な英語の繰り返し）", "HARMONY: 丸サ進行", "DYNAMICS: エレピのイントロ → ブレイクビーツと4つ打ちのグルーヴ → サビ → ブレイク → ドラムフィル → サビ → フェードアウト"],
+    data: {
+      title: "City After Midnight", jp: false,
+      style: ["italo house","acid jazz","house","80s","energetic","female vocals","deep contralto female vocals","rhodes piano","slap bass","saxophone","four-on-the-floor","catchy hook","jazzy chord progressions"],
+      custom: "late 80s club record, urban R&B groove, hip hop swing, breakbeat drums layered with four-on-the-floor kick, deep warm bass, soulful diva shouts, vinyl warmth, warm tape saturation, vintage drum machine, dry mix, simple repetitive English hook",
+      bpm: 120, key: "", exclude: "big room EDM, drops, sidechain pumping, risers, supersaw, trap, rap, heavy distortion, high-pitched vocals", target: 0,
+      harmony: { key: -1, prog: 1 },
+      brief: { theme: "真夜中の街をゆっくり歩きながら、低い声で歌う大人のクラブソング。単純な英語のフレーズを繰り返す", words: "city, midnight, street, lights, bass, move", pov: "auto", struct: "cur", line: "short", eng: "more", rhyme: true, kana: false, titles: false, essence: [], lang: "en" },
+      lyrics: [
+        "[Intro: soft, rhodes piano, vinyl warmth, 4 bars]", "(Uh, yeah)", "",
+        "[Instrumental: mid-energy, breakbeat drums with four-on-the-floor kick, deep warm bass, 8 bars]", "",
+        "[Verse 1: mid-energy, deep contralto female vocals, 8 bars]", "Walking down the city street", "Concrete rhythm, steady beat", "Shadows dancing, lights so low", "Take it easy, take it slow", "",
+        "[Chorus: powerful, soulful diva shouts, 8 bars]", "City after midnight (oh)", "Feel it after midnight", "City after midnight (yeah)", "Move it after midnight", "",
+        "[Instrumental: mid-energy, rhodes piano, slap bass groove, saxophone, 8 bars]", "",
+        "[Verse 2: mid-energy, deep contralto female vocals, 8 bars]", "Taxi lights and saxophone", "Never feel I'm on my own", "Bass is humming through the floor", "Everybody wants some more", "",
+        "[Chorus: powerful, soulful diva shouts, 8 bars]", "City after midnight (oh)", "Feel it after midnight", "City after midnight (yeah)", "Move it after midnight", "",
+        "[Break: soft, rhodes piano and vocals only, 8 bars]", "After midnight", "After midnight", "",
+        "[Break: mid-energy, drum fill, 4 bars]", "[Shout]", "Come on!", "",
+        "[Chorus: powerful, 16 bars]", "City after midnight (oh)", "Feel it after midnight", "City after midnight (yeah)", "Move it after midnight", "City after midnight (oh)", "Feel it after midnight", "City after midnight (come on)", "Move it after midnight", "",
         "[Outro: very soft, fade out, 8 bars]", "[Fade Out]", "", "[End]", ""
       ].join("\n")
     }
