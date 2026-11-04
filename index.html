@@ -604,7 +604,7 @@ a.btn{text-decoration:none;display:inline-block}
       ["ポップパンク","pop punk"],["メタル","metal"],["EDM","EDM"],["フューチャーベース","future bass"],["ハウス","house"],["ドラムンベース","drum and bass"],
       ["シンセウェイヴ","synthwave"],["Lo-fi ヒップホップ","lo-fi hip hop"],["トラップ","trap"],["R&B","R&B"],["ファンク","funk"],["ジャズ","jazz"],
       ["ボサノバ","bossa nova"],["バラード","ballad"],["フォーク","acoustic folk"],["アイドル","idol pop"],["演歌","enka"],["オーケストラ","orchestral"],["アンビエント","ambient"],
-      ["ハードコア","hardcore techno"],["ガバ","gabber"],["J-CORE","J-core"],["トランスコア","trancecore"],["ハッピーハードコア","happy hardcore"],["ブレイクコア","breakcore"],["ジャングル","jungle"],["リキッドDnB","liquid drum and bass"],["トランス","trance"],["ハンズアップ","hands up"],["フューチャーファンク","future funk"],["フレンチハウス","french house"],["シンフォニックメタル","symphonic metal"]
+      ["ハードコア","hardcore techno"],["ガバ","gabber"],["J-CORE","J-core"],["トランスコア","trancecore"],["ハッピーハードコア","happy hardcore"],["ブレイクコア","breakcore"],["ジャングル","jungle"],["リキッドDnB","liquid drum and bass"],["トランス","trance"],["ハンズアップ","hands up"],["フューチャーファンク","future funk"],["フレンチハウス","french house"],["シンフォニックメタル","symphonic metal"],["イタロ・ハウス","italo house"],["ピアノハウス","piano house"],["Hi-NRG","hi-NRG"]
     ]},
     { id: "jp", ja: "和・日本らしさ", items: [
       ["歌謡曲","kayokyoku"],["昭和歌謡","Showa-era kayokyoku"],["渋谷系","Shibuya-kei"],["ヴィジュアル系","visual kei"],["アニメOP風","anime opening"],
@@ -684,6 +684,7 @@ a.btn{text-decoration:none;display:inline-block}
     ["コード感クラブポップ","複雑でおしゃれなコードを、4つ打ちとスラップベースでキャッチーに踊らせる。",["house","future funk","Shibuya-kei","J-pop","uplifting","energetic","female vocals","vocal harmonies","piano","slap bass","brass section","synth","four-on-the-floor","catchy hook","jazzy chord progressions","augmented chords","sudden key change"],128,["chromatic chord movement","sidechained synth chords","punchy brass hits"]],
     ["アーケード音ゲー","ハードルネッサンス系の泣きメロに、スクラッチやボイスチョップ、急停止を足した、譜面映えする2分曲。",["trancecore","trance","instrumental","euphoric","emotional","energetic","supersaw lead","piano","synth","four-on-the-floor","turntable scratches","glitch stutter edits","vocal chops","modern arcade rhythm game music","polished production"],190,["dotted eighth note melody","offbeat bass","reverse kick","kick drum rolls","piano breakdown","sudden stops"]],
     ["深海ハードルネッサンス","深海のように透き通ったリードが、アーメンブレイクとリバースシンバルの上を泳ぐ。半音上の転調で大サビが開ける2分曲。",["trancecore","breakcore","instrumental","euphoric","emotional","dreamy","supersaw lead","piano","amen break","modern arcade rhythm game music","polished production","wide stereo"],185,["crystal clear deep-sea lead synth","portamento synth lead","reverse cymbals","piano arpeggios","high bell accents","half step key change"]],
+    ["イタロ・ハウス × Hi-NRG","付点8分で跳ねる明るいハウスピアノと、オクターブで跳ねるベース。ソウルフルな女性シャウトが乗る80年代のクラブサウンド。",["italo house","piano house","hi-NRG","80s","uplifting","euphoric","female vocals","piano","strings","four-on-the-floor","catchy hook"],128,["bouncy dotted eighth note piano stabs","octave bouncing synth bass","punchy 909 kick and hi-hats","808 cowbell and claps","soulful diva shouts","deep powerful soulful female vocals"]],
     ["アイドル","コールを入れたくなる、元気でかわいいアイドルポップ。",["idol pop","future bass","cute","energetic","uplifting","female vocals","vocal harmonies","synth","catchy hook","polished production"],160,["call and response chant"]]
   ].map(([name, summary, t, bpm, extra]) => sanitizeIdea({ name, summary, tags: { any: t }, bpm, extra }, "preset"));
 
@@ -1811,6 +1812,30 @@ a.btn{text-decoration:none;display:inline-block}
         "[Build-up: snare roll build, 4 bars]", "",
         "[Chorus: explosive, key change up, with choir, 8 bars]", "Rise, Sir Aurelion, keeper of the flame", "Every heart remembers your name", "Blade of the dawn, crown of the free", "Your legend lives in eternity", "",
         "[Outro: soft, choir fade, 4 bars]", "", "[End]", ""
+      ].join("\n")
+    }
+  }, {
+    name: "80年代クラブ（イタロ・ハウス × Hi-NRG・単純な英語）",
+    summary: "付点8分で跳ねるハウスピアノ、オクターブベース、909 と 808 のドラム。ソウルフルな女性ボーカルが、単純な英語のフレーズを何度も繰り返す、約2分20秒のクラブトラック。",
+    includes: ["STYLE: イタロ・ハウス・ピアノハウス・Hi-NRG、128 BPM", "LYRICS: オリジナル英語歌詞「Dance Into The Light」（短いフレーズの繰り返し）", "DYNAMICS: 打楽器だけのイントロ → ピアノ → サビ → ピアノのブレイク → 全開のサビ", "PROMPT: 歌詞の言語「全部英語」"],
+    data: {
+      title: "Dance Into The Light", jp: false,
+      style: ["italo house","piano house","hi-NRG","house","80s","uplifting","euphoric","energetic","female vocals","piano","strings","four-on-the-floor","catchy hook"],
+      custom: "bright house piano chords, bouncy dotted eighth note piano stabs, octave bouncing synth bass, punchy 909 kick and hi-hats, 808 cowbell and claps, offbeat open hi-hats, tambourine, synth strings, deep powerful soulful female vocals, soulful diva shouts, simple repetitive English hook",
+      bpm: 128, key: "", exclude: "trap, lo-fi, rap, heavy distortion", target: 0,
+      harmony: { key: -1, prog: 0 },
+      brief: { theme: "夜のクラブで、光の中へ踊りだす高揚感。単純な英語のフレーズを何度も繰り返す", words: "feel, beat, night, light, dance, tonight", pov: "auto", struct: "cur", line: "short", eng: "more", rhyme: true, kana: false, titles: false, essence: [], lang: "en" },
+      lyrics: [
+        "[Intro: mid-energy, four-on-the-floor, percussion only, 4 bars]", "(Oh yeah!)", "",
+        "[Instrumental: powerful, bouncy dotted eighth note piano stabs, octave bouncing synth bass, 8 bars]", "",
+        "[Verse 1: mid-energy, deep soulful female vocals, 8 bars]", "Feel the beat, feel the night", "Feel the beat, hold me tight", "Feel the beat, feel the light", "Everybody dance tonight", "",
+        "[Chorus: powerful, soulful diva shouts, 8 bars]", "Into the light (into the light)", "Dance into the light", "Into the light (come on!)", "Dance into the light", "",
+        "[Verse 2: mid-energy, 8 bars]", "Feel the beat, feel the night", "Feel the beat, hold me tight", "Feel the beat, feel the light", "Everybody dance tonight", "",
+        "[Chorus: powerful, soulful diva shouts, 8 bars]", "Into the light (into the light)", "Dance into the light", "Into the light (come on!)", "Dance into the light", "",
+        "[Break: soft, piano and vocals only, 8 bars]", "Feel it, feel it", "Don't stop, don't stop", "",
+        "[Build-up: rising tension, snare roll build, 4 bars]", "[Shout]", "Come on!", "",
+        "[Chorus: explosive, synth strings, 16 bars]", "Into the light (into the light)", "Dance into the light", "Into the light (come on!)", "Dance into the light", "Into the light (into the light)", "Dance into the light", "Into the light (oh yeah!)", "Dance into the light", "",
+        "[Outro: soft, percussion only, 4 bars]", "", "[End]", ""
       ].join("\n")
     }
   }];
