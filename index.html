@@ -606,7 +606,8 @@ a.btn{text-decoration:none;display:inline-block}
       ["ポップパンク","pop punk"],["メタル","metal"],["EDM","EDM"],["フューチャーベース","future bass"],["ハウス","house"],["ドラムンベース","drum and bass"],
       ["シンセウェイヴ","synthwave"],["Lo-fi ヒップホップ","lo-fi hip hop"],["トラップ","trap"],["R&B","R&B"],["ファンク","funk"],["ジャズ","jazz"],
       ["ボサノバ","bossa nova"],["バラード","ballad"],["フォーク","acoustic folk"],["アイドル","idol pop"],["演歌","enka"],["オーケストラ","orchestral"],["アンビエント","ambient"],
-      ["ハードコア","hardcore techno"],["ガバ","gabber"],["J-CORE","J-core"],["トランスコア","trancecore"],["ハッピーハードコア","happy hardcore"],["ブレイクコア","breakcore"],["ジャングル","jungle"],["リキッドDnB","liquid drum and bass"],["トランス","trance"],["ハンズアップ","hands up"],["フューチャーファンク","future funk"],["フレンチハウス","french house"],["シンフォニックメタル","symphonic metal"],["イタロ・ハウス","italo house"],["ピアノハウス","piano house"],["Hi-NRG","hi-NRG"]
+      ["ハードコア","hardcore techno"],["ガバ","gabber"],["J-CORE","J-core"],["トランスコア","trancecore"],["ハッピーハードコア","happy hardcore"],["ブレイクコア","breakcore"],["ジャングル","jungle"],["リキッドDnB","liquid drum and bass"],["トランス","trance"],["ハンズアップ","hands up"],["フューチャーファンク","future funk"],["フレンチハウス","french house"],["シンフォニックメタル","symphonic metal"],["イタロ・ハウス","italo house"],["ピアノハウス","piano house"],["Hi-NRG","hi-NRG"],
+      ["プログレッシブハウス","progressive house"],["ファンキーハウス","funky house"],["アシッドジャズ","acid jazz"],["ブレイクビーツ","breakbeat"],["UKガラージ","UK garage"]
     ]},
     { id: "jp", ja: "和・日本らしさ", items: [
       ["歌謡曲","kayokyoku"],["昭和歌謡","Showa-era kayokyoku"],["渋谷系","Shibuya-kei"],["ヴィジュアル系","visual kei"],["アニメOP風","anime opening"],
@@ -633,7 +634,7 @@ a.btn{text-decoration:none;display:inline-block}
       ["アーメンブレイク","amen break"],["ボーカルチョップ","vocal chops"],["エアホーン","air horns"],["煽りボイス","hype vocal samples"],
       ["ツーバス","double kick drums"],["RPGのボス戦","JRPG boss battle"],
       ["DJスクラッチ","turntable scratches"],["グリッチ","glitch stutter edits"],["音ゲーっぽさ","modern arcade rhythm game music"],["スーパーソウ","supersaw lead"],
-      ["ヴィンテージ80年代","late 80s club record"],["アナログ機材","vintage analog production"],["ドライなミックス","dry mix"],["レコードの温もり","vinyl warmth"],["かすかなレコードノイズ","subtle vinyl crackle"],["テープの温かさ","warm tape saturation"],["12インチ盤","1980s 12-inch vinyl single"],["高音やわらか","soft rolled-off highs"],["アンセム系リード","anthemic lead"],["オク下重ね","octave-layered lead"],["ライザー","riser sweeps"],["16分ノイズチョップ","chopped noise 16th stutters"],["おしゃれなコード","jazzy chord progressions"],["augコード","augmented chords"],["急な転調","sudden key change"]
+      ["フィルターハウス","filtered disco house"],["フィルタースイープ","filter sweeps"],["2000年代レースゲーム","2000s racing game soundtrack"],["ヴィンテージ80年代","late 80s club record"],["アナログ機材","vintage analog production"],["ドライなミックス","dry mix"],["レコードの温もり","vinyl warmth"],["かすかなレコードノイズ","subtle vinyl crackle"],["テープの温かさ","warm tape saturation"],["12インチ盤","1980s 12-inch vinyl single"],["高音やわらか","soft rolled-off highs"],["アンセム系リード","anthemic lead"],["オク下重ね","octave-layered lead"],["ライザー","riser sweeps"],["16分ノイズチョップ","chopped noise 16th stutters"],["おしゃれなコード","jazzy chord progressions"],["augコード","augmented chords"],["急な転調","sudden key change"]
     ]}
   ];
   const NO_RANDOM = new Set(["instrumental","rap","choir","duet"]);
@@ -1901,6 +1902,31 @@ a.btn{text-decoration:none;display:inline-block}
         "[Break: mid-energy, drum fill, 4 bars]", "[Shout]", "Come on!", "",
         "[Chorus: powerful, synth strings, 16 bars]", "Into the light (into the light)", "Dance into the light", "Into the light (come on!)", "Dance into the light", "Into the light (into the light)", "Dance into the light", "Into the light (oh yeah!)", "Dance into the light", "",
         "[Outro: soft, percussion only, 4 bars]", "", "[End]", ""
+      ].join("\n")
+    }
+  }, {
+    name: "2000年代レースゲーム × ハウス（サビ aug・ほか小室進行）",
+    summary: "夜の首都高を走るレースゲームのテーマ。4つ打ちのハウスにフィルターの開け閉め、エレピとソウルフルな女性ボーカル。サビだけ aug の分数コードで景色が開け、最後は半音上に転調する。",
+    includes: ["STYLE: ファンキーハウス・プログレッシブハウス・アシッドジャズ、130 BPM、E♭ メジャー", "LYRICS: オリジナル英語歌詞「Ride Until The Dawn」", "HARMONY: サビ以外は小室進行（Cm - A♭ - B♭ - E♭）、サビは aug の分数コード（E♭ - E♭aug/A - A♭maj7 - Gaug/D♭ - Gm7 - Cm7）", "DYNAMICS: フィルターで開くイントロ → サビ → エレピのブレイク → 転調したサビ → フェードアウト"],
+    data: {
+      title: "Ride Until The Dawn", jp: false,
+      style: ["funky house","progressive house","acid jazz","house","energetic","uplifting","female vocals","rhodes piano","piano","slap bass","synth","four-on-the-floor","catchy hook","augmented chords","sudden key change"],
+      custom: "2000s racing game soundtrack, driving night city vibe, filtered disco house, filter sweeps, 909 kick, offbeat open hi-hats, shuffled percussion, soulful female vocals, chopped vocal hooks, house piano stabs, sleek 2000s production, driving minor-key dance progression",
+      bpm: 130, key: "E♭ major", exclude: "big room EDM, dubstep, trap, rap, heavy distortion, chiptune", target: 0,
+      harmony: { key: 3, prog: 5 },
+      brief: { theme: "夜明けまで夜の街を走り抜けるレースゲームのテーマ。単純な英語のフレーズを繰り返す", words: "ride, night, dawn, city lights, engines, faster", pov: "auto", struct: "cur", line: "short", eng: "more", rhyme: true, kana: false, titles: false, essence: [], lang: "en" },
+      lyrics: [
+        "[Intro: mid-energy, filtered house groove, filter sweeps, 8 bars]", "[Chord Progression: Cm - Ab - Bb - Eb]", "(Are you ready?)", "",
+        "[Verse 1: mid-energy, soulful female vocals, 8 bars]", "[Chord Progression: Cm - Ab - Bb - Eb]", "City lights are calling me", "Engines hum in harmony", "Neon lines on midnight streets", "Feel the bass beneath my feet", "",
+        "[Pre-Chorus: mid-energy, filter sweeps, 4 bars]", "[Chord Progression: Cm - Ab - Bb - Eb]", "Hold on tight, the night is young", "Ride it till the morning sun", "",
+        "[Chorus: powerful, 8 bars]", "[Chord Progression: Eb - Ebaug/A - Abmaj7 - Gaug/Db - Gm7 - Cm7]", "Ride with me until the dawn", "Ride with me, the night goes on", "(Faster, faster)", "Ride with me until the dawn", "",
+        "[Instrumental: powerful, house piano stabs, filtered disco house, 8 bars]", "[Chord Progression: Cm - Ab - Bb - Eb]", "",
+        "[Verse 2: mid-energy, 8 bars]", "[Chord Progression: Cm - Ab - Bb - Eb]", "Red light, green light, let it go", "Every engine, every glow", "Every corner, every turn", "Feel the fire, let it burn", "",
+        "[Pre-Chorus: mid-energy, filter sweeps, 4 bars]", "Hold on tight, the night is young", "Ride it till the morning sun", "",
+        "[Chorus: powerful, 8 bars]", "[Chord Progression: Eb - Ebaug/A - Abmaj7 - Gaug/Db - Gm7 - Cm7]", "Ride with me until the dawn", "Ride with me, the night goes on", "(Faster, faster)", "Ride with me until the dawn", "",
+        "[Break: soft, rhodes piano and vocals only, 8 bars]", "[Chord Progression: Cm - Ab - Bb - Eb]", "Until the dawn", "Until the dawn", "",
+        "[Chorus: powerful, key change up, 8 bars]", "[Chord Progression: E - Eaug/A# - Amaj7 - G#aug/D - G#m7 - C#m7]", "Ride with me until the dawn", "Ride with me, the night goes on", "(Faster, faster)", "Ride with me until the dawn", "",
+        "[Outro: very soft, fade out, 8 bars]", "[Fade Out]", "", "[End]", ""
       ].join("\n")
     }
   }];
