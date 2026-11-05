@@ -241,6 +241,21 @@ a.btn{text-decoration:none;display:inline-block}
 .combo p{margin:0;font-size:13px}
 .combo ul{margin:0;padding-left:1.2em;font-size:12px;color:var(--muted);display:flex;flex-direction:column;gap:2px}
 
+/* midi */
+.midi-drop{border:1px dashed var(--muted);border-radius:4px;padding:14px;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.midi-drop[data-over]{border-color:var(--accent);background:var(--sunk)}
+.midi-table{width:100%;border-collapse:collapse;font-size:13px}
+.midi-table th,.midi-table td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--rule);vertical-align:middle}
+.midi-table th{font-size:11px;color:var(--muted);letter-spacing:.06em;font-weight:700}
+.midi-table td.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+.midi-table select{font-size:12px;padding:4px}
+.dens{display:flex;align-items:flex-end;gap:1px;height:64px}
+.dens i{flex:1;min-width:2px;border-radius:1px 1px 0 0;background:var(--sec-verse)}
+.dens i[data-kind="chorus"]{background:var(--sec-chorus)} .dens i[data-kind="intro"],.dens i[data-kind="outro"]{background:var(--sec-edge)} .dens i[data-kind="break"]{background:var(--sec-inst)}
+.dens-labels{display:flex;gap:1px;font-size:10.5px;font-family:var(--f-mono);color:var(--muted)}
+.dens-labels span{overflow:hidden;white-space:nowrap;text-overflow:ellipsis;border-left:1px solid var(--rule);padding-left:3px;min-width:0}
+#midiOut{white-space:pre-wrap;line-height:1.7}
+
 /* tips + footer */
 .tips{background:var(--sheet);border:1px solid var(--rule);border-radius:6px;padding:16px 20px}
 .tips h2{font-size:13px;letter-spacing:.1em;margin:0 0 8px;color:var(--muted)}
@@ -363,6 +378,35 @@ a.btn{text-decoration:none;display:inline-block}
     <div class="group">
       <h3>スタイル案<span class="count" id="ideaCount"></span></h3>
       <div class="ideas" id="ideas"></div>
+    </div>
+  </section>
+
+  <section class="sheet" aria-labelledby="midiTape">
+    <div class="tape" id="midiTape">MIDI<small>MIDI から作る</small></div>
+    <p class="hint">MIDI ファイル（.mid）を読み込むと、テンポ・キー・各トラックの役割・コード進行・曲の構成を分析して、Suno に伝える言葉と構成のタグにします。Suno は MIDI をそのまま読めないので、中身を言葉に置き換えて伝える方式です。ファイルはこのブラウザの中だけで読み、どこにも送りません。</p>
+    <div class="midi-drop" id="midiDrop">
+      <label class="btn" for="midiFile">MIDI ファイルを選ぶ</label>
+      <input type="file" id="midiFile" accept=".mid,.midi,audio/midi,audio/x-midi" hidden>
+      <span class="hint" id="midiName">ここにファイルをドラッグしても読み込めます</span>
+    </div>
+    <div id="midiResult" class="form" hidden>
+      <div class="stats" id="midiStats"></div>
+      <div class="f"><span class="lbl">トラック（役割は音域と和音の数から推定。音色は変えられます）</span>
+        <div class="strip-scroll"><table class="midi-table"><thead><tr><th>#</th><th>名前</th><th>音域</th><th>ノート数</th><th>推定の役割</th><th>Suno での音色</th></tr></thead><tbody id="midiTracks"></tbody></table></div>
+        <p class="hint" id="midiDrumNote"></p></div>
+      <div class="f"><span class="lbl">小節ごとの音の多さと区切り</span>
+        <div class="dens" id="midiDens"></div><div class="dens-labels" id="midiDensLabels"></div></div>
+      <div class="f"><span class="lbl">よく出てくるコード進行（4小節）</span><div class="harm-words" id="midiLoop"></div></div>
+      <div class="row">
+        <label class="check" for="midiVocal"><input type="checkbox" id="midiVocal"> 歌ものとして作る（Verse / Chorus にする）</label>
+        <label class="check" for="midiChords"><input type="checkbox" id="midiChords" checked> 各セクションにコード進行の行を入れる</label>
+      </div>
+      <div class="harm-words" id="midiOut"></div>
+      <div class="row">
+        <button class="btn primary" id="btnMidiAll" type="button">まとめて反映する</button>
+        <button class="btn ghost" id="btnMidiStyle" type="button">BPM・キー・音色を STYLE に反映</button>
+        <button class="btn ghost" id="btnMidiLyrics" type="button">構成を LYRICS に入れる</button>
+      </div>
     </div>
   </section>
 
@@ -2151,6 +2195,291 @@ a.btn{text-decoration:none;display:inline-block}
       });
     }, () => {});
   }
+
+  /* ---------- MIDI: parse ---------- */
+  function parseMidi(bytes) {
+    let p = 0;
+    const u8 = () => bytes[p++], u16 = () => (bytes[p++] << 8) | bytes[p++], u32 = () => ((bytes[p++] << 24) >>> 0) + (bytes[p++] << 16) + (bytes[p++] << 8) + bytes[p++];
+    const vlq = () => { let v = 0, b; do { b = bytes[p++]; v = (v << 7) | (b & 0x7f); } while (b & 0x80 && p < bytes.length); return v; };
+    const str4 = () => String.fromCharCode(bytes[p], bytes[p + 1], bytes[p + 2], bytes[p + 3]);
+    if (str4() !== "MThd") throw new Error("not_midi");
+    p += 4; const hlen = u32(); const format = u16(), ntr = u16(), div = u16(); p = 8 + hlen;
+    if (div & 0x8000) throw new Error("smpte");
+    const tracks = [], tempos = [], timeSigs = [], keySigs = [];
+    let endTick = 0;
+    for (let t = 0; t < ntr && p < bytes.length; t++) {
+      while (p < bytes.length && str4() !== "MTrk") { p += 4; const skip = u32(); p += skip; }
+      if (p >= bytes.length) break;
+      p += 4; const len = u32(), end = Math.min(bytes.length, p + len);
+      const tr = { name: "", notes: [], programs: {}, chans: new Set() };
+      const open = new Map(); let tick = 0, rs = 0;
+      while (p < end) {
+        tick += vlq();
+        let st = bytes[p];
+        if (st === 0xff) {
+          p++; const ty = u8(), l = vlq(), data = bytes.subarray(p, p + l); p += l;
+          if (ty === 0x03 && !tr.name) tr.name = Array.from(data, c => String.fromCharCode(c)).join("").trim();
+          else if (ty === 0x51 && l === 3) tempos.push({ tick, us: (data[0] << 16) | (data[1] << 8) | data[2] });
+          else if (ty === 0x58 && l >= 2) timeSigs.push({ tick, num: data[0], den: 1 << data[1] });
+          else if (ty === 0x59 && l >= 2) keySigs.push({ tick, sf: (data[0] << 24) >> 24, mi: data[1] });
+          else if (ty === 0x2f) break;
+          continue;
+        }
+        if (st === 0xf0 || st === 0xf7) { p++; const l = vlq(); p += l; continue; }
+        if (st & 0x80) { rs = st; p++; } else st = rs;
+        const ty = st >> 4, ch = st & 15;
+        const a = bytes[p++], b = (ty === 0xc || ty === 0xd) ? 0 : bytes[p++];
+        if (ty === 0xc) tr.programs[ch] = a;
+        else if (ty === 0x9 && b > 0) { const k = ch * 128 + a; if (!open.has(k)) open.set(k, []); open.get(k).push({ t0: tick, vel: b }); tr.chans.add(ch); }
+        else if (ty === 0x8 || (ty === 0x9 && b === 0)) {
+          const k = ch * 128 + a, stack = open.get(k);
+          if (stack && stack.length) { const n = stack.shift(); tr.notes.push({ t0: n.t0, t1: Math.max(tick, n.t0 + 1), pitch: a, vel: n.vel, ch }); }
+        }
+      }
+      open.forEach((stack, k) => stack.forEach(n => tr.notes.push({ t0: n.t0, t1: Math.max(tick, n.t0 + div / 4), pitch: k % 128, vel: n.vel, ch: Math.floor(k / 128) })));
+      tr.notes.sort((x, y) => x.t0 - y.t0);
+      endTick = Math.max(endTick, tick);
+      tracks.push(tr);
+      p = end;
+    }
+    tempos.sort((x, y) => x.tick - y.tick);
+    return { format, div, tracks, tempos, timeSigs, keySigs, endTick };
+  }
+
+  /* ---------- MIDI: analyze ---------- */
+  const PC_S = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"], PC_F = ["C","Db","D","Eb","E","F","Gb","G","Ab","A","Bb","B"];
+  const KS_MAJ = [6.35, 2.23, 3.48, 2.33, 4.38, 4.09, 2.52, 5.19, 2.39, 3.66, 2.29, 2.88];
+  const KS_MIN = [6.33, 2.68, 3.52, 5.38, 2.60, 3.53, 2.54, 4.75, 3.98, 2.69, 3.34, 3.17];
+  const CHORD_T = [["", [0, 4, 7]], ["m", [0, 3, 7]], ["7", [0, 4, 7, 10]], ["maj7", [0, 4, 7, 11]], ["m7", [0, 3, 7, 10]], ["6", [0, 4, 7, 9]],
+    ["dim", [0, 3, 6]], ["aug", [0, 4, 8]], ["sus4", [0, 5, 7]], ["m7b5", [0, 3, 6, 10]], ["add9", [0, 2, 4, 7]]];
+  function gmWord(prog) {
+    const r = [[0, "piano"], [4, "rhodes piano"], [6, "harpsichord"], [7, "clavinet"], [8, "bells"], [11, "vibraphone"], [12, "marimba"], [14, "tubular bells"], [16, "organ"], [21, "accordion"], [22, "harmonica"],
+      [24, "acoustic guitar"], [26, "electric guitar"], [29, "overdriven guitar"], [30, "distorted guitar"], [32, "upright bass"], [33, "electric bass"], [35, "fretless bass"], [36, "slap bass"], [38, "synth bass"],
+      [40, "violin"], [41, "viola"], [42, "cello"], [43, "contrabass"], [44, "tremolo strings"], [45, "pizzicato strings"], [46, "harp"], [47, "timpani"], [48, "strings"], [50, "synth strings"], [52, "choir"], [54, "synth voice"], [55, "orchestra hits"],
+      [56, "trumpet"], [57, "trombone"], [58, "tuba"], [60, "french horn"], [61, "brass section"], [62, "synth brass"], [64, "saxophone"], [68, "oboe"], [70, "bassoon"], [71, "clarinet"], [72, "piccolo"], [73, "flute"], [75, "pan flute"], [78, "whistle"], [79, "ocarina"],
+      [80, "square lead synth"], [81, "saw lead synth"], [82, "synth lead"], [88, "synth pad"], [96, "synth fx"], [104, "sitar"], [105, "banjo"], [106, "shamisen"], [107, "koto"], [108, "kalimba"], [109, "bagpipe"], [110, "fiddle"],
+      [112, "bells"], [113, "agogo"], [114, "steel drums"], [116, "taiko drums"], [117, "toms"], [118, "synth drums"], [119, "reverse cymbals"], [120, "sound effects"]];
+    let w = "piano"; r.forEach(([n, word]) => { if (prog >= n) w = word; }); return w;
+  }
+  function analyzeMidi(m) {
+    const div = m.div, ts = m.timeSigs[0] || { num: 4, den: 4 }, tpb = div * 4 * ts.num / ts.den;
+    const tempos = m.tempos.length ? m.tempos : [{ tick: 0, us: 500000 }];
+    const sec = tick => { let s = 0, last = 0, us = tempos[0].us; for (const t of tempos) { if (t.tick >= tick) break; s += (t.tick - last) / div * us / 1e6; last = t.tick; us = t.us; } return s + (tick - last) / div * us / 1e6; };
+    const bpm = Math.round(60e6 / tempos[0].us * 10) / 10;
+    const tempoChanges = [...new Set(tempos.map(t => Math.round(60e6 / t.us)))];
+    const nBars = Math.max(1, Math.ceil(m.endTick / tpb - 0.01));
+    // tracks
+    const trs = m.tracks.map((tr, i) => ({ ...tr, idx: i })).filter(tr => tr.notes.length);
+    trs.forEach(tr => {
+      const ps = tr.notes.map(n => n.pitch);
+      tr.lo = Math.min(...ps); tr.hi = Math.max(...ps); tr.avg = ps.reduce((a, b) => a + b, 0) / ps.length;
+      const onsets = new Map(); tr.notes.forEach(n => onsets.set(n.t0, (onsets.get(n.t0) || 0) + 1));
+      tr.poly = tr.notes.length / onsets.size;
+      tr.drums = tr.chans.has(9);
+      const progs = Object.values(tr.programs);
+      tr.gm = progs.length ? progs[0] : null;
+      tr.role = tr.drums ? "drums" : tr.notes.length < 24 ? "accent" : tr.avg < 52 ? "bass" : tr.poly >= 1.8 ? "chords" : tr.avg >= 64 ? "lead" : "counter";
+      tr.bars = new Array(nBars).fill(0);
+      tr.notes.forEach(n => { const b0 = Math.floor(n.t0 / tpb); if (b0 < nBars) tr.bars[b0]++; });
+    });
+    // key
+    const pcw = new Array(12).fill(0);
+    trs.filter(t => !t.drums).forEach(t => t.notes.forEach(n => { pcw[n.pitch % 12] += (n.t1 - n.t0); }));
+    const corr = (prof, rot) => { const xs = pcw.map((_, i) => pcw[(i + rot) % 12]); const mx = xs.reduce((a, b) => a + b, 0) / 12, my = prof.reduce((a, b) => a + b, 0) / 12;
+      let num = 0, dx = 0, dy = 0; for (let i = 0; i < 12; i++) { num += (xs[i] - mx) * (prof[i] - my); dx += (xs[i] - mx) ** 2; dy += (prof[i] - my) ** 2; } return num / Math.sqrt(dx * dy || 1); };
+    let best = { r: -2, tonic: 0, minor: false };
+    for (let k = 0; k < 12; k++) { const a = corr(KS_MAJ, k), b = corr(KS_MIN, k); if (a > best.r) best = { r: a, tonic: k, minor: false }; if (b > best.r) best = { r: b, tonic: k, minor: true }; }
+    const relMajor = best.minor ? (best.tonic + 3) % 12 : best.tonic;
+    const useFlat = [1, 3, 5, 8, 10].includes(relMajor);
+    const nm = pc => (useFlat ? PC_F : PC_S)[pc];
+    const keyName = nm(best.tonic) + (best.minor ? " minor" : " major");
+    // chords per half bar
+    const half = tpb / 2, nHalf = nBars * 2, harm = trs.filter(t => !t.drums && t.role !== "accent");
+    const bassTr = harm.filter(t => t.role === "bass");
+    const chords = [];
+    for (let h = 0; h < nHalf; h++) {
+      const a = h * half, b = a + half, w = new Array(12).fill(0); let low = 999, lowW = new Array(12).fill(0);
+      harm.forEach(t => t.notes.forEach(n => { const o = Math.min(b, n.t1) - Math.max(a, n.t0); if (o > 0) { w[n.pitch % 12] += o; if (bassTr.length ? t.role === "bass" : true) { lowW[n.pitch % 12] += o * (bassTr.length ? 1 : Math.max(0, 72 - n.pitch)); } } }));
+      const tot = w.reduce((x, y) => x + y, 0);
+      if (tot < half * 0.25) { chords.push(null); continue; }
+      const bassPc = lowW.indexOf(Math.max(...lowW));
+      let bestC = null;
+      for (let r = 0; r < 12; r++) for (const [q, iv] of CHORD_T) {
+        const set = new Set(iv.map(x => (r + x) % 12));
+        let inS = 0, outS = 0; for (let i = 0; i < 12; i++) (set.has(i) ? (inS += w[i]) : (outS += w[i]));
+        let score = (inS - outS * 0.9) / tot - iv.length * 0.035 + (r === bassPc ? 0.12 : 0) + (w[r] > 0 ? 0 : -0.3);
+        if (!bestC || score > bestC.score) bestC = { score, r, q };
+      }
+      let name = nm(bestC.r) + bestC.q;
+      if (bassPc !== bestC.r && lowW[bassPc] > 0 && max2(lowW) ) name += "/" + nm(bassPc);
+      chords.push(name);
+    }
+    function max2(arr) { const s = [...arr].sort((x, y) => y - x); return s[0] > 0 && s[0] >= s[1] * 1.5; }
+    // per bar activity & sections
+    const melodic = trs.filter(t => t.role !== "accent");
+    const sig = b => melodic.filter(t => t.bars[b] > 0 || t.notes.some(n => n.t0 < (b + 1) * tpb && n.t1 > b * tpb)).map(t => t.idx).join(",");
+    const density = Array.from({ length: nBars }, (_, b) => trs.reduce((n, t) => n + t.bars[b], 0));
+    let segs = [];
+    for (let b = 0; b < nBars; b++) { const s = sig(b); if (segs.length && segs[segs.length - 1].sig === s) segs[segs.length - 1].len++; else segs.push({ start: b, len: 1, sig: s }); }
+    // merge short segments (< 2 bars) into previous
+    for (let changed = true; changed;) { changed = false;
+      for (let i = 0; i < segs.length; i++) if (segs[i].len < 2 && segs.length > 1) { const j = i > 0 ? i - 1 : i + 1; const a = Math.min(i, j), b = Math.max(i, j); segs[a] = { start: segs[a].start, len: segs[a].len + segs[b].len, sig: segs[a].len >= segs[b].len ? segs[a].sig : segs[b].sig }; segs.splice(b, 1); changed = true; break; }
+      for (let i = 1; i < segs.length; i++) if (segs[i].sig === segs[i - 1].sig) { segs[i - 1].len += segs[i].len; segs.splice(i, 1); changed = true; break; }
+    }
+    // split long sections into 8-bar pieces
+    segs = segs.flatMap(s => { if (s.len <= 16) return [s]; const out = []; for (let o = 0; o < s.len; o += 8) out.push({ start: s.start + o, len: Math.min(8, s.len - o), sig: s.sig }); if (out.length > 1 && out[out.length - 1].len < 4) { out[out.length - 2].len += out[out.length - 1].len; out.pop(); } return out; });
+    const cnt = s => s.sig ? s.sig.split(",").length : 0;
+    const dens = s => density.slice(s.start, s.start + s.len).reduce((a, b) => a + b, 0) / s.len;
+    const maxC = Math.max(...segs.map(cnt)), minC = Math.min(...segs.map(cnt));
+    const maxD = Math.max(...segs.map(dens)) || 1;
+    segs.forEach((s, i) => {
+      const c = cnt(s), lvl = maxC === minC ? 3 : 1 + (c - minC) / (maxC - minC) * 3 + dens(s) / maxD;
+      s.level = Math.max(1, Math.min(5, Math.round(lvl)));
+      s.tracks = s.sig ? s.sig.split(",").map(Number) : [];
+      s.hasLead = s.tracks.some(ix => (trs.find(t => t.idx === ix) || {}).role === "lead");
+      const seq = []; for (let h = s.start * 2; h < (s.start + s.len) * 2; h++) { const c2 = chords[h]; if (c2 && seq[seq.length - 1] !== c2) seq.push(c2); }
+      s.chords = seq;
+      s.t0 = sec(s.start * tpb);
+    });
+    const peak = Math.max(...segs.map(s => s.level));
+    segs.forEach((s, i) => {
+      if (i === 0 && s.level < peak) s.kind = "intro";
+      else if (i === segs.length - 1 && segs.length > 2 && s.level < peak) s.kind = "outro";
+      else if (s.level <= 2) s.kind = "break";
+      else if (s.level === peak && s.hasLead) s.kind = "chorus";
+      else s.kind = "verse";
+    });
+    const drumTr = trs.find(t => t.drums);
+    let drumWords = [];
+    if (drumTr) {
+      const kicks = drumTr.notes.filter(n => n.pitch === 35 || n.pitch === 36);
+      const onBeat = kicks.filter(n => (n.t0 % div) < div * 0.1 || (n.t0 % div) > div * 0.9).length;
+      drumWords.push(kicks.length && onBeat / kicks.length > 0.8 && kicks.length >= nBars * 3 ? "four-on-the-floor" : "breakbeat drums");
+      const ohh = drumTr.notes.filter(n => n.pitch === 46);
+      if (ohh.length && ohh.filter(n => Math.abs((n.t0 % div) - div / 2) < div * 0.1).length / ohh.length > 0.6) drumWords.push("offbeat open hi-hats");
+    }
+    // most frequent 4-bar loop (bar-level chords)
+    const barCh = Array.from({ length: nBars }, (_, b) => chords[b * 2] || chords[b * 2 + 1]);
+    const grams = new Map();
+    for (let b = 0; b + 4 <= nBars; b++) { const g = barCh.slice(b, b + 4); if (g.some(x => !x)) continue; const k = g.join(" - "); grams.set(k, (grams.get(k) || 0) + 1); }
+    let loop = null, loopN = 0; grams.forEach((n, k) => { if (n > loopN) { loop = k; loopN = n; } });
+    return { loop, loopN, bpm, tempoChanges, ts, nBars, seconds: sec(m.endTick), tracks: trs, keyName, keyTonic: best.tonic, keyMinor: best.minor, keyConf: best.r, chords, segs, density, drumWords };
+  }
+
+  /* ---------- MIDI: UI ---------- */
+  const MIDI_SOUNDS = [["", "使わない"], ["piano chords", "ピアノ"], ["house piano stabs", "ハウスピアノ"], ["rhodes piano", "エレピ"], ["synth pad", "シンセパッド"], ["lush strings", "ストリングス"],
+    ["brass section", "ブラス"], ["saxophone", "サックス"], ["electric guitar", "エレキギター"], ["acoustic guitar", "アコギ"], ["deep bassline", "低音のベース"], ["slap bass", "スラップベース"],
+    ["synth bass", "シンセベース"], ["808 bass", "808 ベース"], ["synth lead", "シンセリード"], ["supersaw lead", "スーパーソウ"], ["bells", "ベル"], ["organ", "オルガン"], ["choir", "合唱"],
+    ["orchestra hits", "オケヒ"], ["vocal melody", "歌のメロディ"]];
+  const ROLE_JA = { bass: "低音（ベース）", chords: "和音（伴奏）", lead: "主旋律", counter: "副旋律", accent: "飾り・効果音", drums: "ドラム" };
+  let midiA = null;
+  function midiDefaults(a) {
+    const leads = a.tracks.filter(t => t.role === "lead").sort((x, y) => y.avg - x.avg);
+    a.tracks.forEach(t => {
+      if (t.gm != null && !t.drums) { t.sound = gmWord(t.gm); return; }
+      t.sound = { bass: "deep bassline", chords: "piano chords", counter: "rhodes piano", accent: "", drums: "" }[t.role];
+      if (t.role === "lead") t.sound = t === leads[0] ? "synth lead" : "rhodes piano";
+    });
+  }
+  function midiPlan(a, vocal) {
+    let vN = 0;
+    const words = ix => {
+      const t = a.tracks.find(x => x.idx === ix);
+      return t && t.sound && !(vocal && t.sound === "vocal melody") ? { w: t.sound, pri: { lead: 0, chords: 1, bass: 2, counter: 3, accent: 4 }[t.role] ?? 5 } : null;
+    };
+    return a.segs.map((s, i) => {
+      let base = { intro: "Intro", outro: "Outro", break: "Break" }[s.kind];
+      if (!base) base = s.kind === "chorus" ? (vocal ? "Chorus" : "Instrumental") : (vocal ? "Verse " + (++vN) : "Instrumental");
+      const ws = s.tracks.map(words).filter(Boolean).sort((x, y) => x.pri - y.pri).map(x => x.w);
+      const rest = [...new Set(ws)].slice(0, 3);
+      if (!vocal && s.kind === "chorus") rest.unshift("main theme");
+      if (s.kind === "break" && rest.length) rest.push("sparse");
+      return { tag: buildTag({ base, energy: s.level, arr: "", rest, bars: s.len }), chords: s.chords.slice(0, 6), t0: s.t0 };
+    });
+  }
+  function midiText(a) {
+    const vocal = $("#midiVocal").checked, withCh = $("#midiChords").checked;
+    return midiPlan(a, vocal).map(x => x.tag + (withCh && x.chords.length ? `\n[Chord Progression: ${x.chords.join(" - ")}]` : "")).join("\n\n") + "\n\n[End]\n";
+  }
+  function midiStyleWords(a) {
+    const ws = [...new Set(a.tracks.map(t => t.sound).filter(w => w && w !== "vocal melody"))];
+    return [...ws, ...a.drumWords];
+  }
+  function renderMidi() {
+    const a = midiA, box = $("#midiResult"); box.hidden = !a; if (!a) return;
+    const kmap = normKey(a.keyName);
+    $("#midiStats").innerHTML = `<span><b>${fmtSec(a.seconds)}</b>長さ</span><span><b>${a.bpm}</b>BPM${a.tempoChanges.length > 1 ? "（途中で " + a.tempoChanges.join("→") + " に変化）" : ""}</span>`
+      + `<span><b>${a.ts.num}/${a.ts.den}</b>拍子</span><span><b>${a.nBars}</b>小節</span><span><b>${esc(kmap.key || a.keyName)}</b>推定キー${a.keyConf < 0.6 ? "（自信低め）" : ""}</span>`;
+    $("#midiTracks").innerHTML = a.tracks.map(t => {
+      const opts = MIDI_SOUNDS.some(([v]) => v === t.sound) ? MIDI_SOUNDS : [[t.sound, t.sound], ...MIDI_SOUNDS];
+      return `<tr><td class="mono">${t.idx + 1}</td><td>${esc(t.name || "（名前なし）")}${t.gm != null && !t.drums ? `<br><span class="hint">音色番号 ${t.gm}</span>` : ""}</td>`
+        + `<td class="mono">${PC_S[t.lo % 12]}${Math.floor(t.lo / 12) - 1}〜${PC_S[t.hi % 12]}${Math.floor(t.hi / 12) - 1}</td><td class="mono">${t.notes.length}</td><td>${ROLE_JA[t.role]}</td>`
+        + `<td>${t.drums ? "（ドラム）" : `<select data-mtrack="${t.idx}" aria-label="トラック ${t.idx + 1} の音色">${opts.map(([v, l]) => `<option value="${esc(v)}"${v === t.sound ? " selected" : ""}>${esc(l)}</option>`).join("")}</select>`}</td></tr>`;
+    }).join("");
+    $("#midiDrumNote").textContent = a.drumWords.length ? "ドラム: " + a.drumWords.join(", ") : "ドラムのトラックがありません。ドラムは STYLE（4つ打ち、ブレイクビーツなど）で指定してください。";
+    const maxD = Math.max(1, ...a.density);
+    const kindAt = b => (a.segs.find(s => b >= s.start && b < s.start + s.len) || {}).kind || "verse";
+    $("#midiDens").innerHTML = a.density.map((d, b) => `<i data-kind="${kindAt(b)}" style="height:${Math.max(4, d / maxD * 100)}%" title="${b + 1}小節目: ${d} ノート"></i>`).join("");
+    const names = { intro: "イントロ", outro: "アウトロ", break: "ブレイク", chorus: "サビ", verse: "Aメロ" };
+    $("#midiDensLabels").innerHTML = a.segs.map(s => `<span style="flex:${s.len} 1 0" title="${fmtSec(s.t0)}〜 ${s.len}小節">${names[s.kind]}</span>`).join("");
+    $("#midiLoop").textContent = a.loop ? `${a.loop}（${a.loopN}回）` : "はっきり繰り返す進行は見つかりませんでした";
+    $("#midiOut").textContent = midiText(a) + `\n推定の長さ ${fmtSec(a.segs.reduce((n, s) => n + s.len, 0) * 240 / a.bpm)}`;
+  }
+  async function loadMidiFile(f) {
+    const st = $("#midiName");
+    if (!f) return;
+    if (f.size > 4 * 1024 * 1024) { st.textContent = "ファイルが大きすぎます（4MB まで）。"; return; }
+    try {
+      const buf = new Uint8Array(await f.arrayBuffer());
+      const a = analyzeMidi(parseMidi(buf));
+      if (!a.tracks.length) throw new Error("no_notes");
+      midiDefaults(a); midiA = a;
+      st.textContent = `${f.name} を読み込みました`;
+      renderMidi();
+    } catch (e) {
+      midiA = null; renderMidi();
+      st.textContent = e && e.message === "no_notes" ? "音符が入っていない MIDI ファイルでした。" : "MIDI ファイルとして読めませんでした。拡張子が .mid のファイルを選んでください。";
+    }
+  }
+  $("#midiFile").addEventListener("change", e => { loadMidiFile(e.target.files[0]); e.target.value = ""; });
+  const drop = $("#midiDrop");
+  drop.addEventListener("dragover", e => { e.preventDefault(); drop.dataset.over = "1"; });
+  drop.addEventListener("dragleave", () => { delete drop.dataset.over; });
+  drop.addEventListener("drop", e => { e.preventDefault(); delete drop.dataset.over; loadMidiFile(e.dataTransfer.files[0]); });
+  $("#midiTracks").addEventListener("change", e => {
+    const sel = e.target.closest("[data-mtrack]"); if (!sel || !midiA) return;
+    const t = midiA.tracks.find(x => x.idx === +sel.dataset.mtrack); if (t) { t.sound = sel.value; renderMidi(); }
+  });
+  ["midiVocal", "midiChords"].forEach(id => $("#" + id).addEventListener("change", () => renderMidi()));
+  function midiApplyStyle(p) {
+    p.bpm = Math.max(50, Math.min(200, Math.round(midiA.bpm))); p.bpmOn = true;
+    const k = normKey(midiA.keyName); p.key = k.key || "";
+    const list = splitList(p.custom);
+    midiStyleWords(midiA).concat(k.key ? [] : [midiA.keyName]).forEach(w => { if (!list.some(x => x.toLowerCase() === w.toLowerCase())) list.push(w); });
+    p.custom = list.join(", ");
+    if ($("#midiVocal").checked === false && !p.tags.vocal.includes("instrumental")) p.tags.vocal.push("instrumental");
+  }
+  function midiUndoToast(msg, p, prev) {
+    toast(msg, "元に戻す", () => { Object.assign(p, JSON.parse(prev.state)); setLyrics(prev.lyrics, null, true); touch(); fillFields(); renderStyle(); renderLyrics(); });
+  }
+  const midiSnap = p => ({ state: JSON.stringify({ bpm: p.bpm, bpmOn: p.bpmOn, key: p.key, custom: p.custom, tags: p.tags }), lyrics: ta.value });
+  $("#btnMidiStyle").addEventListener("click", () => {
+    if (!midiA) return; const p = cur(), prev = midiSnap(p);
+    midiApplyStyle(p); touch(); fillFields(); renderStyle(); renderDyn(analyze(ta.value).secs);
+    midiUndoToast("BPM・キー・音色を STYLE に反映しました", p, prev);
+  });
+  $("#btnMidiLyrics").addEventListener("click", () => {
+    if (!midiA) return; const p = cur(), prev = midiSnap(p);
+    setLyrics(midiText(midiA));
+    midiUndoToast("MIDI の構成を LYRICS に入れました", p, prev);
+  });
+  $("#btnMidiAll").addEventListener("click", () => {
+    if (!midiA) return; const p = cur(), prev = midiSnap(p);
+    midiApplyStyle(p); touch(); fillFields(); renderStyle();
+    setLyrics(midiText(midiA));
+    $("#styleTape").scrollIntoView({ block: "start" });
+    midiUndoToast("MIDI の分析を STYLE と LYRICS にまとめて反映しました", p, prev);
+  });
 
   /* ---------- rendering ---------- */
   function meter(el, n, max) {
