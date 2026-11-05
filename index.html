@@ -1631,7 +1631,7 @@ a.btn{text-decoration:none;display:inline-block}
     return { edge: 8, verse: 16, pre: 8, chorus: 16, bridge: 8, inst: 8 }[s.kind] || 8;
   }
   const curBpm = () => cur().bpmOn ? cur().bpm : 120;
-  const fmtSec = x => `${Math.floor(x / 60)}:${String(Math.round(x % 60)).padStart(2, "0")}`;
+  const fmtSec = x => { const t = Math.round(x); return `${Math.floor(t / 60)}:${String(t % 60).padStart(2, "0")}`; };
   function songSeconds(secs) { const bpm = curBpm(); return secs.reduce((n, s) => n + barsOf(s, parseTag(s.name)), 0) * 240 / bpm; }
   function renderLen(secs) {
     const p = cur(), el = $("#lenEst"), sec = songSeconds(secs);
@@ -2111,23 +2111,25 @@ a.btn{text-decoration:none;display:inline-block}
     }
   }, {
     name: "元気が出るスピードレイヴ（E マイナー 165 BPM・音ゲー）",
-    summary: "オクターブで跳ねるベースと16分の分散和音リフで走るスピードレイヴ。サビは Em → C → D → G、Cメロで明るい E メジャーのスタブとピッチが上下するトリル、最後は半音上がって明るいメジャーで締める約1分42秒の音ゲー曲。",
-    includes: ["STYLE: スピードレイヴ・レイヴ・90年代ハードコア、165 BPM、E マイナー", "LYRICS: インスト用の構成（盛り上がり・小節数・コード進行つき）", "HARMONY: 小室進行（G メジャー: Em → C → D → G）", "DYNAMICS: キメで終わる（フェードアウトはオフ）"],
+    summary: "オクターブ重ねのノコギリ波リードとひずんだギターのパワーコードで走るスピードレイヴ。サビは Em → C → G → D、オルガンとギターの後奏、半音ずつ上がるブレイクで溜め、最後は半音上に転調して明るいメジャーで締める約1分43秒の音ゲー曲。",
+    includes: ["STYLE: スピードレイヴ・レイヴ・90年代ハードコア、165 BPM、E マイナー（精度の高い MIDI の分析から）", "楽器: ノコギリ波リード（オクターブ重ね）、オルガン、ポリシンセのパッド、ひずんだギター、オケヒ、シンセベース", "ドラム: 4つ打ち＋キックのフィル、裏拍のオープンハイハット、手数の多いスネアとクラップ、リバースシンバル", "DYNAMICS: キメで終わる（フェードアウトはオフ）"],
     data: {
       title: "Turbo Sunrise", jp: false, noFade: true, focus: ["lead"],
-      style: ["speed rave","rave","hyper eurobeat","90s","energetic","uplifting","epic","instrumental","synth","piano","four-on-the-floor","catchy hook","orchestra hits","modern arcade rhythm game music"],
-      custom: "rapid 16th note synth arpeggio riffs, octave bouncing bass, bright major chord rave stabs, pitch bend siren trill, octave synth stabs, driving minor-key dance progression, half step key change, ends on a bright major chord, sudden ending hit",
+      style: ["speed rave","rave","hyper eurobeat","90s","energetic","uplifting","epic","instrumental","synth","organ","electric guitar","four-on-the-floor","catchy hook","orchestra hits","modern arcade rhythm game music"],
+      custom: "octave-doubled saw lead, distorted guitar power chord riffs, overdriven rhythm guitar, polysynth pad, synth bass, extra kick fills, offbeat open hi-hats, busy snare and claps, reverse cymbals, crash cymbals, rising chromatic build, half step key change, ends on a bright major chord, sudden ending hit",
       bpm: 165, key: "E minor", exclude: "chiptune, 8-bit, retro game music, lo-fi, dubstep, trap, ballad", target: 120,
       harmony: { key: 7, prog: 2 },
       brief: { theme: "朝日に向かって全力で走り出す、元気が出る音ゲー曲", words: "", pov: "auto", struct: "cur", line: "short", eng: "more", rhyme: false, kana: false, titles: false, essence: [], lang: "en" },
       lyrics: [
-        "[Intro: mid-energy, octave synth stabs, 2 bars]", "",
-        "[Instrumental: mid-energy, rapid 16th note synth arpeggio riffs, octave bouncing bass, 16 bars]", "[Chord Progression: Em7 - Esus4 - Gmaj7 - A]", "",
-        "[Drop: explosive, catchy synth lead, rave stabs, 16 bars]", "[Chord Progression: Em - C - D - G]", "[Orchestra Hit]", "",
-        "[Instrumental: powerful, bright major chord rave stabs, pitch bend siren trill, 8 bars]", "[Chord Progression: E - G - A7 - E]", "",
-        "[Drop: explosive, catchy synth lead, octave bouncing bass, 16 bars]", "[Chord Progression: Em - C - D - G]", "",
-        "[Drop: explosive, key change up, half step, 8 bars]", "[Chord Progression: Fm - Db - Eb - Ab]", "",
-        "[Outro: powerful, sudden ending hit, bright major chord, 4 bars]", "[Chord Progression: Ebsus4 - Abmaj7 - Eb - F]", "", "[End]", ""
+        "[Intro: powerful, octave-doubled saw lead, distorted guitar, 3 bars]", "[Chord Progression: Em - D - Em - G - A7]", "",
+        "[Instrumental: mid-energy, octave-doubled saw lead, synth bass, four-on-the-floor, 16 bars]", "[Chord Progression: Em7 - G6 - A7 - Em7]", "",
+        "[Drop: explosive, catchy saw lead, distorted guitar power chords, orchestra hits, 8 bars]", "[Chord Progression: Em - C - G - D]", "[Orchestra Hit]", "",
+        "[Instrumental: powerful, organ, guitar riffs, 8 bars]", "[Chord Progression: D7 - G - Em - C]", "",
+        "[Break: soft, polysynth pad, rising chromatic build, 6 bars]", "[Chord Progression: Em - G - A - Bb - C]", "",
+        "[Drop: explosive, catchy saw lead, orchestra hits, reverse cymbals, 8 bars]", "[Chord Progression: Em - C - G - D]", "",
+        "[Instrumental: powerful, organ, guitar riffs, extra kick fills, 10 bars]", "[Chord Progression: D7 - G - Em - C]", "",
+        "[Drop: explosive, key change up, half step, 8 bars]", "[Chord Progression: Fm - Db - Ab - Eb]", "",
+        "[Outro: powerful, sudden ending hit, bright major chord, 4 bars]", "[Chord Progression: Eb - F7 - F]", "", "[End]", ""
       ].join("\n")
     }
   }];
@@ -2332,10 +2334,36 @@ a.btn{text-decoration:none;display:inline-block}
       [40, "violin"], [41, "viola"], [42, "cello"], [43, "contrabass"], [44, "tremolo strings"], [45, "pizzicato strings"], [46, "harp"], [47, "timpani"], [48, "strings"], [50, "synth strings"], [52, "choir"], [54, "synth voice"], [55, "orchestra hits"],
       [56, "trumpet"], [57, "trombone"], [58, "tuba"], [60, "french horn"], [61, "brass section"], [62, "synth brass"], [64, "saxophone"], [68, "oboe"], [70, "bassoon"], [71, "clarinet"], [72, "piccolo"], [73, "flute"], [75, "pan flute"], [78, "whistle"], [79, "ocarina"],
       [80, "square lead synth"], [81, "saw lead synth"], [82, "synth lead"], [88, "synth pad"], [96, "synth fx"], [104, "sitar"], [105, "banjo"], [106, "shamisen"], [107, "koto"], [108, "kalimba"], [109, "bagpipe"], [110, "fiddle"],
-      [112, "bells"], [113, "agogo"], [114, "steel drums"], [116, "taiko drums"], [117, "toms"], [118, "synth drums"], [119, "reverse cymbals"], [120, "sound effects"]];
+      [112, "bells"], [113, "agogo"], [114, "steel drums"], [116, "taiko drums"], [117, "toms"], [118, "synth drums"], [119, "reverse cymbals"], [120, "guitar fret noise"], [121, "breath noise"], [122, "seashore fx"], [123, "bird tweet fx"], [124, "telephone fx"], [125, "helicopter fx"], [126, "crowd applause fx"], [127, "gunshot fx"]];
     let w = "piano"; r.forEach(([n, word]) => { if (prog >= n) w = word; }); return w;
   }
-  function analyzeMidi(m) {
+  function retimeMidi(m) {
+    // unquantized files (audio-to-MIDI, live recordings): estimate the real beat from the notes and rebuild the grid
+    const div = m.div, all = m.tracks.flatMap(t => t.notes);
+    if (all.length < 64) return null;
+    const grid = div / 4, onGrid = all.filter(n => { const r = n.t0 % grid; return r <= div / 32 || grid - r <= div / 32; }).length / all.length;
+    if (onGrid >= 0.7) return null;
+    const drum = m.tracks.find(t => t.chans.has(9));
+    const kicks = drum ? drum.notes.filter(n => n.pitch === 35 || n.pitch === 36).map(n => n.t0) : [];
+    const src = kicks.length >= 32 ? kicks : all.map(n => n.t0);
+    let best = { P: div, S: 0 };
+    for (let P = Math.round(div * 0.45); P <= Math.round(div * 1.6); P++) {
+      let re = 0, im = 0; for (const t of src) { const a = 2 * Math.PI * t / P; re += Math.cos(a); im += Math.sin(a); }
+      const S = Math.hypot(re, im) / src.length;
+      if (S > best.S) best = { P, S, ph: Math.atan2(im, re) };
+    }
+    if (best.S < 0.3 || Math.abs(best.P - div) / div < 0.03) return null;
+    const P = best.P, phaseTick = ((best.ph / (2 * Math.PI)) * P + P) % P;
+    const first = Math.min(...src);
+    const origin = first - ((first - phaseTick) % P + P) % P;
+    const fileUs = (m.tempos[0] || { us: 500000 }).us, fileBpm = 60e6 / fileUs;
+    const map = t => Math.max(0, Math.round((t - origin) * div / P));
+    const tracks = m.tracks.map(tr => ({ ...tr, notes: tr.notes.map(n => ({ ...n, t0: map(n.t0), t1: Math.max(map(n.t0) + 1, map(n.t1)) })) }));
+    const estBpm = Math.round(fileBpm * div / P * 10) / 10;
+    return { m2: { ...m, tracks, tempos: [{ tick: 0, us: 60e6 / estBpm }], endTick: map(m.endTick) }, fileBpm: Math.round(fileBpm * 10) / 10, estBpm };
+  }
+  function analyzeMidi(m0) {
+    const rt = retimeMidi(m0), m = rt ? rt.m2 : m0;
     const div = m.div, ts = m.timeSigs[0] || { num: 4, den: 4 }, tpb = div * 4 * ts.num / ts.den;
     const tempos = m.tempos.length ? m.tempos : [{ tick: 0, us: 500000 }];
     const sec = tick => { let s = 0, last = 0, us = tempos[0].us; for (const t of tempos) { if (t.tick >= tick) break; s += (t.tick - last) / div * us / 1e6; last = t.tick; us = t.us; } return s + (tick - last) / div * us / 1e6; };
@@ -2401,6 +2429,12 @@ a.btn{text-decoration:none;display:inline-block}
       for (let i = 0; i < segs.length; i++) if (segs[i].len < 2 && segs.length > 1) { const j = i > 0 ? i - 1 : i + 1; const a = Math.min(i, j), b = Math.max(i, j); segs[a] = { start: segs[a].start, len: segs[a].len + segs[b].len, sig: segs[a].len >= segs[b].len ? segs[a].sig : segs[b].sig }; segs.splice(b, 1); changed = true; break; }
       for (let i = 1; i < segs.length; i++) if (segs[i].sig === segs[i - 1].sig) { segs[i - 1].len += segs[i].len; segs.splice(i, 1); changed = true; break; }
     }
+    // busy arrangements: absorb pieces shorter than 4 bars into the previous section
+    if (segs.length > 10) {
+      for (let changed = true; changed;) { changed = false;
+        for (let i = 1; i < segs.length; i++) if (segs[i].len < 4 || (i === 1 && segs[0].len < 4 && false)) { segs[i - 1].len += segs[i].len; segs.splice(i, 1); changed = true; break; }
+      }
+    }
     // split long sections into 8-bar pieces
     segs = segs.flatMap(s => { if (s.len <= 16) return [s]; const out = []; for (let o = 0; o < s.len; o += 8) out.push({ start: s.start + o, len: Math.min(8, s.len - o), sig: s.sig }); if (out.length > 1 && out[out.length - 1].len < 4) { out[out.length - 2].len += out[out.length - 1].len; out.pop(); } return out; });
     const cnt = s => s.sig ? s.sig.split(",").length : 0;
@@ -2430,16 +2464,19 @@ a.btn{text-decoration:none;display:inline-block}
       if (s.start < nBars / 2) return;
       const k = keyOf(s.start * tpb, (s.start + s.len) * tpb);
       const rel = k.minor ? (k.tonic + 3) % 12 : k.tonic, shift = (rel - homeRel + 12) % 12;
-      if (k.r > 0.7 && shift >= 1 && shift <= 5) { s.keyShift = shift; s.keyName = nm(k.tonic) + (k.minor ? " minor" : " major"); }
+      if (k.r > 0.7 && shift >= 1 && shift <= 5) {
+        s.keyShift = shift;
+        s.keyName = best.minor ? nm((rel + 9) % 12) + " minor" : nm(rel) + " major";
+      }
     });
     const peak = Math.max(...segs.map(s => s.level));
     // uniform arrangement: tell sections apart by their chord roots
     const sigCount = new Map(); for (let b = 0; b < nBars; b++) { const g = sig(b); sigCount.set(g, (sigCount.get(g) || 0) + 1); }
     const uniform = Math.max(...sigCount.values()) / nBars >= 0.7 && segs.length >= 3;
+    const rootOf = c => { if (!c) return -1; const mm = c.match(/^([A-G])([#b]?)/); return mm ? ({ C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 }[mm[1]] + (mm[2] === "#" ? 1 : mm[2] === "b" ? -1 : 0) + 12) % 12 : -1; };
+    const roots = sg => Array.from({ length: sg.len }, (_, k) => rootOf(chords[(sg.start + k) * 2] || chords[(sg.start + k) * 2 + 1]));
+    const sim = (x, y, sh) => { const n = Math.min(x.length, y.length); if (!n) return 0; let same = 0; for (let k = 0; k < n; k++) if (x[k] >= 0 && y[k] >= 0 && (x[k] - y[k] - sh + 24) % 12 === 0) same++; return same / n; };
     if (uniform) {
-      const rootOf = c => { if (!c) return -1; const mm = c.match(/^([A-G])([#b]?)/); return mm ? ({ C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 }[mm[1]] + (mm[2] === "#" ? 1 : mm[2] === "b" ? -1 : 0) + 12) % 12 : -1; };
-      const roots = sg => Array.from({ length: sg.len }, (_, k) => rootOf(chords[(sg.start + k) * 2] || chords[(sg.start + k) * 2 + 1]));
-      const sim = (x, y, sh) => { const n = Math.min(x.length, y.length); if (!n) return 0; let same = 0; for (let k = 0; k < n; k++) if (x[k] >= 0 && y[k] >= 0 && (x[k] - y[k] - sh + 24) % 12 === 0) same++; return same / n; };
       const cl = [];
       segs.forEach((sg, i) => {
         const r = roots(sg); let f = -1;
@@ -2466,13 +2503,35 @@ a.btn{text-decoration:none;display:inline-block}
       else if (s.level === peak && s.hasLead) s.kind = "chorus";
       else s.kind = "verse";
     });
-    if (uniform) segs.forEach((sg, i) => { if (sg.keyShift && i > 0 && !segs[i - 1].keyShift && sg.kind !== "chorus") { sg.kind = "chorus"; sg.level = 5; } });
+    if (!uniform) {
+      // sections that share the chorus chords at a similar loudness are choruses too
+      const ch = segs.filter(sg => sg.kind === "chorus");
+      segs.forEach(sg => { if (sg.kind === "verse" && sg.len >= 4 && sg.level >= 4 && ch.some(c => sim(roots(sg), roots(c), 0) >= 0.6)) { sg.kind = "chorus"; sg.level = Math.max(sg.level, 5); } });
+    }
+    segs.forEach((sg, i) => { if (sg.keyShift && i > 0 && !segs[i - 1].keyShift && sg.kind !== "chorus") { sg.kind = "chorus"; sg.level = 5; } });
+    // split a quiet tail off the last section as its own outro
+    const lastSg = segs[segs.length - 1];
+    if (lastSg && lastSg.len >= 8 && lastSg.kind !== "outro") {
+      const bd = density.slice(lastSg.start, lastSg.start + lastSg.len), avg = bd.reduce((x, y) => x + y, 0) / bd.length;
+      let tail = 0; for (let k = bd.length - 1; k >= 0 && bd[k] < avg * 0.6; k--) tail++;
+      if (tail >= 2 && tail <= lastSg.len - 4) {
+        lastSg.len -= tail;
+        const out = { start: lastSg.start + lastSg.len, len: tail, sig: lastSg.sig, kind: "outro", level: 2, tracks: lastSg.tracks, hasLead: false, t0: sec((lastSg.start + lastSg.len) * tpb) };
+        const seq = []; for (let h = out.start * 2; h < (out.start + out.len) * 2; h++) { const c2 = chords[h]; if (c2 && seq[seq.length - 1] !== c2) seq.push(c2); }
+        out.chords = seq; lastSg.chords = lastSg.chords.slice(0, Math.max(1, lastSg.chords.length));
+        segs.push(out);
+      }
+    }
     const drumTr = trs.find(t => t.drums);
     let drumWords = [];
     if (drumTr) {
       const kicks = drumTr.notes.filter(n => n.pitch === 35 || n.pitch === 36);
-      const onBeat = kicks.filter(n => (n.t0 % div) < div * 0.1 || (n.t0 % div) > div * 0.9).length;
-      drumWords.push(kicks.length && onBeat / kicks.length > 0.8 && kicks.length >= nBars * 3 ? "four-on-the-floor" : "breakbeat drums");
+      const beatHit = new Set(kicks.filter(n => (n.t0 % div) < div * 0.15 || (n.t0 % div) > div * 0.85).map(n => Math.round(n.t0 / div)));
+      const activeBeats = new Set(drumTr.notes.map(n => Math.floor(n.t0 / div))).size || 1;
+      drumWords.push(kicks.length && beatHit.size / activeBeats >= 0.7 ? "four-on-the-floor" : "breakbeat drums");
+      if (kicks.length > beatHit.size * 1.25) drumWords.push("extra kick fills");
+      const snr = drumTr.notes.filter(n => n.pitch === 38 || n.pitch === 40 || n.pitch === 39);
+      if (snr.length > nBars * 4) drumWords.push("busy snare and claps");
       const ohh = drumTr.notes.filter(n => n.pitch === 46);
       if (ohh.length && ohh.filter(n => Math.abs((n.t0 % div) - div / 2) < div * 0.1).length / ohh.length > 0.6) drumWords.push("offbeat open hi-hats");
     }
@@ -2482,7 +2541,7 @@ a.btn{text-decoration:none;display:inline-block}
     for (let b = 0; b + 4 <= nBars; b++) { const g = barCh.slice(b, b + 4); if (g.some(x => !x) || new Set(g).size < 3) continue; const k = g.join(" - "); grams.set(k, (grams.get(k) || 0) + 1); }
     let loop = null, loopN = 0; grams.forEach((n, k) => { if (n > loopN) { loop = k; loopN = n; } });
     const barSec = Array.from({ length: nBars + 1 }, (_, b) => sec(b * tpb));
-    return { tpb, secOf: sec, barSec, loop, loopN, bpm, tempoChanges, ts, nBars, seconds: sec(m.endTick), tracks: trs, keyName, keyTonic: best.tonic, keyMinor: best.minor, keyConf: best.r, chords, segs, density, drumWords };
+    return { retimed: rt ? { fileBpm: rt.fileBpm, estBpm: rt.estBpm } : null, tpb, secOf: sec, barSec, loop, loopN, bpm, tempoChanges, ts, nBars, seconds: sec(m.endTick), tracks: trs, keyName, keyTonic: best.tonic, keyMinor: best.minor, keyConf: best.r, chords, segs, density, drumWords };
   }
 
   /* ---------- MIDI: UI ---------- */
@@ -2490,6 +2549,10 @@ a.btn{text-decoration:none;display:inline-block}
     ["brass section", "ブラス"], ["saxophone", "サックス"], ["electric guitar", "エレキギター"], ["acoustic guitar", "アコギ"], ["deep bassline", "低音のベース"], ["slap bass", "スラップベース"],
     ["synth bass", "シンセベース"], ["808 bass", "808 ベース"], ["synth lead", "シンセリード"], ["supersaw lead", "スーパーソウ"], ["bells", "ベル"], ["organ", "オルガン"], ["choir", "合唱"],
     ["orchestra hits", "オケヒ"], ["vocal melody", "歌のメロディ"]];
+  const SOUND_JA = { "saw lead synth": "ノコギリ波リード", "square lead synth": "矩形波リード", "synth lead": "シンセリード", "overdriven guitar": "オーバードライブギター", "distorted guitar": "ひずんだギター",
+    "electric guitar": "エレキギター", "acoustic guitar": "アコギ", "synth pad": "シンセパッド", "organ": "オルガン", "synth bass": "シンセベース", "orchestra hits": "オケヒ", "electric bass": "エレキベース",
+    "slap bass": "スラップベース", "strings": "ストリングス", "synth strings": "シンセストリングス", "brass section": "ブラス", "synth brass": "シンセブラス", "choir": "合唱", "bells": "ベル", "piano": "ピアノ",
+    "rhodes piano": "エレピ", "harpsichord": "チェンバロ", "saxophone": "サックス", "flute": "フルート", "violin": "ヴァイオリン", "reverse cymbals": "リバースシンバル", "timpani": "ティンパニ" };
   const ROLE_JA = { bass: "低音（ベース）", chords: "和音（伴奏）", lead: "主旋律", counter: "副旋律", accent: "飾り・効果音", drums: "ドラム" };
   let midiA = null;
   function midiDefaults(a) {
@@ -2497,7 +2560,7 @@ a.btn{text-decoration:none;display:inline-block}
     const allDefault = a.tracks.filter(t => !t.drums).every(t => t.gm == null || t.gm === 0);
     a.noProg = allDefault;
     a.tracks.forEach(t => {
-      if (!allDefault && t.gm != null && !t.drums) { t.sound = gmWord(t.gm); return; }
+      if (!allDefault && t.gm != null && !t.drums) { t.sound = t.gm >= 120 || t.role === "accent" ? "" : gmWord(t.gm); t.gmName = gmWord(t.gm); return; }
       t.sound = { bass: "deep bassline", chords: "piano chords", counter: "rhodes piano", accent: "", drums: "" }[t.role];
       if (t.role === "lead") t.sound = t === leads[0] ? "synth lead" : "rhodes piano";
     });
@@ -2533,12 +2596,12 @@ a.btn{text-decoration:none;display:inline-block}
   function renderMidi() {
     const a = midiA, box = $("#midiResult"); box.hidden = !a; if (!a) return;
     const kmap = normKey(a.keyName);
-    $("#midiStats").innerHTML = `<span><b>${fmtSec(a.seconds)}</b>長さ</span><span><b>${a.bpm}</b>BPM${a.tempoChanges.length > 1 ? "（途中で " + a.tempoChanges.join("→") + " に変化）" : ""}</span>`
+    $("#midiStats").innerHTML = `<span><b>${fmtSec(a.seconds)}</b>長さ</span><span><b>${a.bpm}</b>BPM${a.retimed ? `（ファイルの設定は ${a.retimed.fileBpm}。音の間隔から推定）` : ""}${a.tempoChanges.length > 1 ? "（途中で " + a.tempoChanges.join("→") + " に変化）" : ""}</span>`
       + `<span><b>${a.ts.num}/${a.ts.den}</b>拍子</span><span><b>${a.nBars}</b>小節</span><span><b>${esc(kmap.key || a.keyName)}</b>推定キー${a.keyConf < 0.6 ? "（自信低め）" : ""}</span>`
       + (a.segs.some(s => s.keyShift) ? `<span><b>${esc(a.segs.find(s => s.keyShift).keyName)}</b>${fmtSec(a.segs.find(s => s.keyShift).t0)}〜 転調</span>` : "");
     $("#midiTracks").innerHTML = a.tracks.map(t => {
       const opts = MIDI_SOUNDS.some(([v]) => v === t.sound) ? MIDI_SOUNDS : [[t.sound, t.sound], ...MIDI_SOUNDS];
-      return `<tr><td class="mono">${t.idx + 1}</td><td>${esc(t.name || "（名前なし）")}${t.gm != null && !t.drums ? `<br><span class="hint">音色番号 ${t.gm}</span>` : ""}</td>`
+      return `<tr><td class="mono">${t.idx + 1}</td><td>${esc(t.name || "（名前なし）")}${t.gm != null && !t.drums ? `<br><span class="hint">音色 ${t.gm}: ${esc(gmWord(t.gm))}</span>` : ""}</td>`
         + `<td class="mono">${PC_S[t.lo % 12]}${Math.floor(t.lo / 12) - 1}〜${PC_S[t.hi % 12]}${Math.floor(t.hi / 12) - 1}</td><td class="mono">${t.notes.length}</td><td>${ROLE_JA[t.role]}</td>`
         + `<td>${t.drums ? "（ドラム）" : `<select data-mtrack="${t.idx}" aria-label="トラック ${t.idx + 1} の音色">${opts.map(([v, l]) => `<option value="${esc(v)}"${v === t.sound ? " selected" : ""}>${esc(l)}</option>`).join("")}</select>`}</td></tr>`;
     }).join("");
@@ -2681,13 +2744,13 @@ a.btn{text-decoration:none;display:inline-block}
     midiUndoToast("MIDI の構成を LYRICS に入れました", p, prev);
   });
   function midiMemoText(a) {
-    const nameOf = ix => { const t = a.tracks.find(x => x.idx === ix); const o = t && MIDI_SOUNDS.find(([v]) => v === t.sound); return t && t.sound ? (o ? o[1] : t.sound) : ""; };
+    const nameOf = ix => { const t = a.tracks.find(x => x.idx === ix); const o = t && MIDI_SOUNDS.find(([v]) => v === t.sound); return t && t.sound ? (o ? o[1] : SOUND_JA[t.sound] || t.sound) : ""; };
     return a.segs.map((s, i) => {
       const parts = [`${fmtSec(s.t0)} ${SEC_JA[s.kind]}（${s.len}小節）`];
       if (s.level <= 2) parts.push("静かになる"); else if (s.level >= 5) parts.push("いちばん盛り上がる");
       if (s.keyShift && s.keyShift !== (i > 0 ? a.segs[i - 1].keyShift : 0)) parts.push(`${s.keyShift === 1 ? "半音" : s.keyShift === 2 ? "全音" : s.keyShift + "半音"}上がる転調（${s.keyName}）`);
       const ins = [...new Set(s.tracks.map(nameOf).filter(Boolean))];
-      if (ins.length) parts.push(ins.join("と") + "が鳴る");
+      if (ins.length) parts.push(ins.slice(0, 4).join("と") + (ins.length > 4 ? "など" : "") + "が鳴る");
       if (s.chords.length) parts.push("コード " + s.chords.slice(0, 4).map(chordName).join("→"));
       return parts.join("　");
     }).join("\n") + (a.segs.length ? `\n${fmtSec(a.seconds)} 終わり` : "");
