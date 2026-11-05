@@ -380,6 +380,12 @@ a.btn{text-decoration:none;display:inline-block}
       <div id="catGroups" class="group-list" style="display:flex;flex-direction:column;gap:18px"></div>
 
       <div class="group">
+        <h3>いちばん目立たせたい音<span class="count">スタイルの先頭に強い言葉で入ります</span></h3>
+        <div class="chips" id="focusChips"></div>
+        <div class="row"><button class="btn ghost" id="btnFocusTags" type="button">各セクションのタグにも入れる</button></div>
+      </div>
+
+      <div class="group">
         <h3>テンポとキー</h3>
         <div class="row">
           <div class="bpm">
@@ -637,6 +643,15 @@ a.btn{text-decoration:none;display:inline-block}
       ["アーバン R&B","urban R&B groove"],["ヒップホップのノリ","hip hop swing"],["深く温かい低音","deep warm bass"],["フィルターハウス","filtered disco house"],["フィルタースイープ","filter sweeps"],["2000年代レースゲーム","2000s racing game soundtrack"],["ヴィンテージ80年代","late 80s club record"],["アナログ機材","vintage analog production"],["ドライなミックス","dry mix"],["レコードの温もり","vinyl warmth"],["かすかなレコードノイズ","subtle vinyl crackle"],["テープの温かさ","warm tape saturation"],["12インチ盤","1980s 12-inch vinyl single"],["高音やわらか","soft rolled-off highs"],["アンセム系リード","anthemic lead"],["オク下重ね","octave-layered lead"],["ライザー","riser sweeps"],["16分ノイズチョップ","chopped noise 16th stutters"],["おしゃれなコード","jazzy chord progressions"],["augコード","augmented chords"],["急な転調","sudden key change"]
     ]}
   ];
+  const FOCUS = [
+    { id: "bass", ja: "低音のベース", style: ["heavy deep bassline", "bass-heavy mix"], tag: "deep bassline" },
+    { id: "piano", ja: "ピアノ", style: ["prominent piano chords", "piano-driven"], tag: "piano chords" },
+    { id: "epiano", ja: "エレピ", style: ["prominent rhodes piano"], tag: "rhodes piano" },
+    { id: "vocal", ja: "ボーカル", style: ["upfront lead vocals"], tag: "upfront vocals" },
+    { id: "drums", ja: "ドラム", style: ["hard-hitting drums"], tag: "hard-hitting drums" },
+    { id: "lead", ja: "シンセのリード", style: ["prominent synth lead"], tag: "synth lead" },
+    { id: "strings", ja: "ストリングス", style: ["lush prominent strings"], tag: "strings" }
+  ];
   const NO_RANDOM = new Set(["instrumental","rap","choir","duet"]);
   const KEYS = ["","C major","G major","D major","A major","E major","F major","B♭ major","E♭ major","A minor","E minor","B minor","F♯ minor","D minor","G minor","C minor"];
   const EXCLUDES = [["ラップ","rap"],["EDM","EDM"],["激しい歪み","heavy distortion"],["オートチューン","autotune"],["シャウト","screaming"],["語り","spoken word"],["男性ボーカル","male vocals"],["女性ボーカル","female vocals"],["Lo-fi","lo-fi"],["チップチューン","chiptune"],["8bit","8-bit"],["レトロゲーム","retro game music"],["今風のEDM","big room EDM"],["ドロップ","drops"],["サイドチェイン","sidechain pumping"],["ライザー","risers"],["スーパーソウ","supersaw"]];
@@ -734,7 +749,7 @@ a.btn{text-decoration:none;display:inline-block}
   const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
   const blank = () => ({ id: uid(), title: "", tags: { genre: [], jp: [], mood: [], vocal: [], inst: [], prod: [] }, jp: true, bpm: 100, bpmOn: false, key: "", custom: "", exclude: "", lyrics: "", readIgnore: [],
     brief: { theme: "", words: "", pov: "auto", struct: "cur", line: "mid", eng: "some", rhyme: true, kana: true, titles: true, essence: [], lang: "ja" },
-    idea: { image: "", ref: "", feel: "" }, ideas: [], target: 0, harmony: { key: -1, prog: 0 }, timeMemo: "", updated: Date.now() });
+    idea: { image: "", ref: "", feel: "" }, ideas: [], target: 0, harmony: { key: -1, prog: 0 }, timeMemo: "", focus: [], updated: Date.now() });
   const sample = () => Object.assign(blank(), {
     sample: true, title: "夕凪ハイウェイ",
     tags: { genre: ["city pop"], mood: ["nostalgic","bittersweet"], vocal: ["female vocals","airy vocals"], inst: ["rhodes piano","slap bass","brass section"], prod: ["80s","analog warmth"] },
@@ -837,6 +852,7 @@ a.btn{text-decoration:none;display:inline-block}
   const splitList = s => (s || "").split(/[,、\n]/).map(x => x.trim()).filter(Boolean);
   function styleText(p) {
     const parts = [], v = p.tags.vocal;
+    FOCUS.filter(f => (p.focus || []).includes(f.id)).forEach(f => parts.push(...f.style));
     const jpOn = p.jp && !v.includes("instrumental");
     const gender = v.includes("female vocals") || v.includes("male vocals");
     CATS.forEach(c => {
@@ -876,6 +892,14 @@ a.btn{text-decoration:none;display:inline-block}
     touch(); renderStyle();
   });
 
+  const focusBox = $("#focusChips");
+  focusBox.innerHTML = FOCUS.map(f => `<button type="button" class="chip" data-focus="${f.id}"><span>${f.ja}</span><small>${f.style[0]}</small></button>`).join("");
+  focusBox.addEventListener("click", e => {
+    const b = e.target.closest("[data-focus]"); if (!b) return;
+    const list = cur().focus, i = list.indexOf(b.dataset.focus);
+    if (i >= 0) list.splice(i, 1); else list.push(b.dataset.focus);
+    touch(); renderStyle();
+  });
   KEYS.forEach(k => { const o = document.createElement("option"); o.value = k; o.textContent = k ? "Key: " + k : "キー指定なし"; $("#key").appendChild(o); });
 
   const exWrap = $("#excludeChips");
@@ -1628,6 +1652,16 @@ a.btn{text-decoration:none;display:inline-block}
       touch(); fillFields(); renderStyle(); renderExclude();
     });
   });
+  $("#btnFocusTags").addEventListener("click", () => {
+    const p = cur(), words = FOCUS.filter(f => p.focus.includes(f.id)).map(f => f.tag);
+    if (!words.length) { toast("先に「いちばん目立たせたい音」を選んでください"); return; }
+    const secs = analyze(ta.value).secs;
+    if (!secs.length) { toast("先に LYRICS に構成のタグを入れてください"); return; }
+    const prev = ta.value, edits = new Map();
+    secs.forEach((sec, i) => { if (!/^(end|fade)/i.test(sec.base) && !/only/i.test(sec.name)) edits.set(i, t => { words.forEach(w => { if (!t.rest.includes(w)) t.rest.push(w); }); }); });
+    rewriteSections(edits);
+    toast(`${words.join("・")} を各セクションのタグに入れました（「〜 only」のセクションは除く）`, "元に戻す", () => setLyrics(prev, null, true));
+  });
   const KIND_VAR = { verse: "--sec-verse", pre: "--sec-pre", chorus: "--sec-chorus", bridge: "--sec-bridge", inst: "--sec-inst", edge: "--muted" };
   function renderDyn(secs) {
     const box = $("#console");
@@ -1930,27 +1964,28 @@ a.btn{text-decoration:none;display:inline-block}
       ].join("\n")
     }
   }, {
-    name: "80年代クラブ × アーバン（R4 風・低音の女性ボーカル）",
+    name: "80年代クラブ × アーバン（R4 風・低音の女性ボーカル・ベースとピアノ強め）",
     summary: "80年代のクラブ・レコードの温もりに、アーバンな R&B・ヒップホップのノリとアシッドジャズのコードを足す。低く太い女性ボーカルと、深く温かいベースが主役の夜の街の曲。",
     includes: ["STYLE: イタロ・ハウス × アーバン R&B × アシッドジャズ、120 BPM", "LYRICS: オリジナル英語歌詞「City After Midnight」（単純な英語の繰り返し）", "HARMONY: 丸サ進行", "DYNAMICS: エレピのイントロ → ブレイクビーツと4つ打ちのグルーヴ → サビ → ブレイク → ドラムフィル → サビ → フェードアウト"],
     data: {
       title: "City After Midnight", jp: false,
-      style: ["italo house","acid jazz","house","80s","energetic","female vocals","deep contralto female vocals","rhodes piano","slap bass","saxophone","four-on-the-floor","catchy hook","jazzy chord progressions"],
-      custom: "late 80s club record, urban R&B groove, hip hop swing, breakbeat drums layered with four-on-the-floor kick, deep warm bass, soulful diva shouts, vinyl warmth, warm tape saturation, vintage drum machine, dry mix, simple repetitive English hook",
+      focus: ["bass", "piano"],
+      style: ["italo house","acid jazz","house","80s","energetic","female vocals","deep contralto female vocals","piano","slap bass","four-on-the-floor","catchy hook","jazzy chord progressions"],
+      custom: "late 80s club record, urban R&B groove, hip hop swing, four-on-the-floor kick with light breakbeat, house piano stabs, deep warm bass, soulful diva shouts, vinyl warmth, warm tape saturation, vintage drum machine, dry mix, simple repetitive English hook",
       bpm: 120, key: "", exclude: "big room EDM, drops, sidechain pumping, risers, supersaw, trap, rap, heavy distortion, high-pitched vocals", target: 0,
       harmony: { key: -1, prog: 1 },
       brief: { theme: "真夜中の街をゆっくり歩きながら、低い声で歌う大人のクラブソング。単純な英語のフレーズを繰り返す", words: "city, midnight, street, lights, bass, move", pov: "auto", struct: "cur", line: "short", eng: "more", rhyme: true, kana: false, titles: false, essence: [], lang: "en" },
       lyrics: [
-        "[Intro: soft, rhodes piano, vinyl warmth, 4 bars]", "(Uh, yeah)", "",
-        "[Instrumental: mid-energy, breakbeat drums with four-on-the-floor kick, deep warm bass, 8 bars]", "",
-        "[Verse 1: mid-energy, deep contralto female vocals, 8 bars]", "Walking down the city street", "Concrete rhythm, steady beat", "Shadows dancing, lights so low", "Take it easy, take it slow", "",
-        "[Chorus: powerful, soulful diva shouts, 8 bars]", "City after midnight (oh)", "Feel it after midnight", "City after midnight (yeah)", "Move it after midnight", "",
-        "[Instrumental: mid-energy, rhodes piano, slap bass groove, saxophone, 8 bars]", "",
-        "[Verse 2: mid-energy, deep contralto female vocals, 8 bars]", "Taxi lights and saxophone", "Never feel I'm on my own", "Bass is humming through the floor", "Everybody wants some more", "",
-        "[Chorus: powerful, soulful diva shouts, 8 bars]", "City after midnight (oh)", "Feel it after midnight", "City after midnight (yeah)", "Move it after midnight", "",
-        "[Break: soft, rhodes piano and vocals only, 8 bars]", "After midnight", "After midnight", "",
+        "[Intro: soft, piano chords, deep bassline, vinyl warmth, 4 bars]", "(Uh, yeah)", "",
+        "[Instrumental: mid-energy, house piano stabs, deep bassline, four-on-the-floor kick, 8 bars]", "",
+        "[Verse 1: mid-energy, deep contralto female vocals, deep bassline, piano chords, 8 bars]", "Walking down the city street", "Concrete rhythm, steady beat", "Shadows dancing, lights so low", "Take it easy, take it slow", "",
+        "[Chorus: powerful, soulful diva shouts, deep bassline, house piano stabs, 8 bars]", "City after midnight (oh)", "Feel it after midnight", "City after midnight (yeah)", "Move it after midnight", "",
+        "[Instrumental: mid-energy, piano solo, slap bass groove, 8 bars]", "",
+        "[Verse 2: mid-energy, deep contralto female vocals, deep bassline, piano chords, 8 bars]", "Taxi lights and saxophone", "Never feel I'm on my own", "Bass is humming through the floor", "Everybody wants some more", "",
+        "[Chorus: powerful, soulful diva shouts, deep bassline, house piano stabs, 8 bars]", "City after midnight (oh)", "Feel it after midnight", "City after midnight (yeah)", "Move it after midnight", "",
+        "[Break: soft, piano, bass and vocals only, 8 bars]", "After midnight", "After midnight", "",
         "[Break: mid-energy, drum fill, 4 bars]", "[Shout]", "Come on!", "",
-        "[Chorus: powerful, 16 bars]", "City after midnight (oh)", "Feel it after midnight", "City after midnight (yeah)", "Move it after midnight", "City after midnight (oh)", "Feel it after midnight", "City after midnight (come on)", "Move it after midnight", "",
+        "[Chorus: powerful, deep bassline, house piano stabs, 16 bars]", "City after midnight (oh)", "Feel it after midnight", "City after midnight (yeah)", "Move it after midnight", "City after midnight (oh)", "Feel it after midnight", "City after midnight (come on)", "Move it after midnight", "",
         "[Outro: very soft, fade out, 8 bars]", "[Fade Out]", "", "[End]", ""
       ].join("\n")
     }
@@ -1964,7 +1999,7 @@ a.btn{text-decoration:none;display:inline-block}
     const conv = sanitizeIdea({ tags: { any: d.style }, extra: [] }, "preset");
     const extra = [...conv.extra, ...splitList(d.custom)];
     const p = normalize({
-      title: d.title, tags: conv.tags, jp: d.jp !== false, bpm: d.bpm, bpmOn: true, key: d.key, custom: [...new Set(extra)].join(", "),
+      title: d.title, tags: conv.tags, focus: [...(d.focus || [])], jp: d.jp !== false, bpm: d.bpm, bpmOn: true, key: d.key, custom: [...new Set(extra)].join(", "),
       exclude: d.exclude, lyrics: store.fadeOut ? enforceFade(d.lyrics) : d.lyrics, target: d.target, harmony: { ...d.harmony }, brief: JSON.parse(JSON.stringify(d.brief))
     });
     p.id = uid(); p.updated = Date.now();
@@ -2105,6 +2140,7 @@ a.btn{text-decoration:none;display:inline-block}
   function renderStyle() {
     const p = cur();
     document.querySelectorAll("#catGroups .chip").forEach(b => b.setAttribute("aria-pressed", p.tags[b.dataset.cat].includes(b.dataset.tag)));
+    document.querySelectorAll("#focusChips .chip").forEach(b => b.setAttribute("aria-pressed", String(p.focus.includes(b.dataset.focus))));
     CATS.forEach(c => { const n = p.tags[c.id].length; $(`[data-count="${c.id}"]`).textContent = n ? n + " 個選択" : ""; });
     $("#bpmOut").textContent = p.bpmOn ? p.bpm + " BPM" : "指定なし";
     $("#bpm").disabled = !p.bpmOn;
