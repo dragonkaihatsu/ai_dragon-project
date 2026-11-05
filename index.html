@@ -393,7 +393,8 @@ a.btn{text-decoration:none;display:inline-block}
       <div class="stats" id="midiStats"></div>
       <div class="f"><span class="lbl">トラック（役割は音域と和音の数から推定。音色は変えられます）</span>
         <div class="strip-scroll"><table class="midi-table"><thead><tr><th>#</th><th>名前</th><th>音域</th><th>ノート数</th><th>推定の役割</th><th>Suno での音色</th></tr></thead><tbody id="midiTracks"></tbody></table></div>
-        <p class="hint" id="midiDrumNote"></p></div>
+        <p class="hint" id="midiDrumNote"></p>
+        <div class="row"><button class="btn ghost" id="btnMidiPiano" type="button">全部ピアノにする</button><button class="btn ghost" id="btnMidiReset" type="button">音色をおすすめに戻す</button></div></div>
       <div class="f"><span class="lbl">小節ごとの音の多さと区切り</span>
         <div class="dens" id="midiDens"></div><div class="dens-labels" id="midiDensLabels"></div></div>
       <div class="f"><span class="lbl">よく出てくるコード進行（4小節）</span><div class="harm-words" id="midiLoop"></div></div>
@@ -2367,7 +2368,7 @@ a.btn{text-decoration:none;display:inline-block}
   }
 
   /* ---------- MIDI: UI ---------- */
-  const MIDI_SOUNDS = [["", "使わない"], ["piano chords", "ピアノ"], ["house piano stabs", "ハウスピアノ"], ["rhodes piano", "エレピ"], ["synth pad", "シンセパッド"], ["lush strings", "ストリングス"],
+  const MIDI_SOUNDS = [["", "使わない"], ["piano chords", "ピアノ"], ["piano melody", "ピアノ（メロディ）"], ["piano bass notes", "ピアノ（左手の低音）"], ["house piano stabs", "ハウスピアノ"], ["rhodes piano", "エレピ"], ["synth pad", "シンセパッド"], ["lush strings", "ストリングス"],
     ["brass section", "ブラス"], ["saxophone", "サックス"], ["electric guitar", "エレキギター"], ["acoustic guitar", "アコギ"], ["deep bassline", "低音のベース"], ["slap bass", "スラップベース"],
     ["synth bass", "シンセベース"], ["808 bass", "808 ベース"], ["synth lead", "シンセリード"], ["supersaw lead", "スーパーソウ"], ["bells", "ベル"], ["organ", "オルガン"], ["choir", "合唱"],
     ["orchestra hits", "オケヒ"], ["vocal melody", "歌のメロディ"]];
@@ -2403,6 +2404,7 @@ a.btn{text-decoration:none;display:inline-block}
   }
   function midiStyleWords(a) {
     const ws = [...new Set(a.tracks.map(t => t.sound).filter(w => w && w !== "vocal melody"))];
+    if (ws.length && ws.every(w => /^piano/.test(w))) ws.unshift("piano arrangement", "piano-driven");
     return [...ws, ...a.drumWords];
   }
   function renderMidi() {
@@ -2416,7 +2418,9 @@ a.btn{text-decoration:none;display:inline-block}
         + `<td class="mono">${PC_S[t.lo % 12]}${Math.floor(t.lo / 12) - 1}〜${PC_S[t.hi % 12]}${Math.floor(t.hi / 12) - 1}</td><td class="mono">${t.notes.length}</td><td>${ROLE_JA[t.role]}</td>`
         + `<td>${t.drums ? "（ドラム）" : `<select data-mtrack="${t.idx}" aria-label="トラック ${t.idx + 1} の音色">${opts.map(([v, l]) => `<option value="${esc(v)}"${v === t.sound ? " selected" : ""}>${esc(l)}</option>`).join("")}</select>`}</td></tr>`;
     }).join("");
-    $("#midiDrumNote").textContent = a.drumWords.length ? "ドラム: " + a.drumWords.join(", ") : "ドラムのトラックがありません。ドラムは STYLE（4つ打ち、ブレイクビーツなど）で指定してください。";
+    const noProg = a.tracks.every(t => t.gm == null);
+    $("#midiDrumNote").textContent = (noProg ? "このファイルには音色の指定がないので、再生ソフトでは全部ピアノで鳴ります。Suno で鳴らしたい音色を選んでください。 " : "")
+      + (a.drumWords.length ? "ドラム: " + a.drumWords.join(", ") : "ドラムのトラックがありません。ドラムは STYLE（4つ打ち、ブレイクビーツなど）で指定してください。");
     const maxD = Math.max(1, ...a.density);
     const kindAt = b => (a.segs.find(s => b >= s.start && b < s.start + s.len) || {}).kind || "verse";
     $("#midiDens").innerHTML = a.density.map((d, b) => `<i data-kind="${kindAt(b)}" style="height:${Math.max(4, d / maxD * 100)}%" title="${b + 1}小節目: ${d} ノート"></i>`).join("");
@@ -2441,6 +2445,12 @@ a.btn{text-decoration:none;display:inline-block}
       st.textContent = e && e.message === "no_notes" ? "音符が入っていない MIDI ファイルでした。" : "MIDI ファイルとして読めませんでした。拡張子が .mid のファイルを選んでください。";
     }
   }
+  $("#btnMidiPiano").addEventListener("click", () => {
+    if (!midiA) return;
+    midiA.tracks.forEach(t => { if (!t.drums) t.sound = { lead: "piano melody", chords: "piano chords", counter: "piano chords", bass: "piano bass notes", accent: "" }[t.role]; });
+    renderMidi(); toast("全トラックをピアノにしました");
+  });
+  $("#btnMidiReset").addEventListener("click", () => { if (!midiA) return; midiDefaults(midiA); renderMidi(); toast("音色をおすすめに戻しました"); });
   $("#midiFile").addEventListener("change", e => { loadMidiFile(e.target.files[0]); e.target.value = ""; });
   const drop = $("#midiDrop");
   drop.addEventListener("dragover", e => { e.preventDefault(); drop.dataset.over = "1"; });
