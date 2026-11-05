@@ -251,7 +251,7 @@ a.btn{text-decoration:none;display:inline-block}
 .midi-table select{font-size:12px;padding:4px}
 .dens{display:flex;align-items:flex-end;gap:1px;height:64px}
 .dens i{flex:1;min-width:2px;border-radius:1px 1px 0 0;background:var(--sec-verse)}
-.dens i[data-kind="chorus"]{background:var(--sec-chorus)} .dens i[data-kind="intro"],.dens i[data-kind="outro"]{background:var(--sec-edge)} .dens i[data-kind="break"]{background:var(--sec-inst)}
+.dens i[data-kind="chorus"]{background:var(--sec-chorus)} .dens i[data-kind="bridge"]{background:var(--sec-bridge)} .dens i[data-kind="intro"],.dens i[data-kind="outro"]{background:var(--sec-edge)} .dens i[data-kind="break"]{background:var(--sec-inst)}
 .dens-labels{display:flex;gap:1px;font-size:10.5px;font-family:var(--f-mono);color:var(--muted)}
 .dens-labels span{overflow:hidden;white-space:nowrap;text-overflow:ellipsis;border-left:1px solid var(--rule);padding-left:3px;min-width:0}
 #midiOut{white-space:pre-wrap;line-height:1.7}
@@ -262,7 +262,7 @@ a.btn{text-decoration:none;display:inline-block}
 .prog-secs{display:flex;flex-direction:column;gap:12px}
 .prog-sec h4{margin:0 0 6px;font-size:13px;display:flex;gap:8px;align-items:baseline}
 .prog-sec h4 i{display:inline-block;width:10px;height:10px;border-radius:2px;background:var(--sec-verse)}
-.prog-sec[data-kind="chorus"] h4 i{background:var(--sec-chorus)} .prog-sec[data-kind="intro"] h4 i,.prog-sec[data-kind="outro"] h4 i{background:var(--sec-edge)} .prog-sec[data-kind="break"] h4 i{background:var(--sec-inst)}
+.prog-sec[data-kind="chorus"] h4 i{background:var(--sec-chorus)} .prog-sec[data-kind="bridge"] h4 i{background:var(--sec-bridge)} .prog-sec[data-kind="bridge"] .barc{border-left-color:var(--sec-bridge)} .prog-sec[data-kind="intro"] h4 i,.prog-sec[data-kind="outro"] h4 i{background:var(--sec-edge)} .prog-sec[data-kind="break"] h4 i{background:var(--sec-inst)}
 .prog-sec h4 small{font-family:var(--f-mono);font-weight:400;color:var(--muted)}
 .bars{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px}
 @media (max-width:560px){.bars{grid-template-columns:repeat(2,minmax(0,1fr))}}
@@ -2109,6 +2109,27 @@ a.btn{text-decoration:none;display:inline-block}
         "[Outro: powerful, sudden ending hit, 2 bars]", "", "[End]", ""
       ].join("\n")
     }
+  }, {
+    name: "元気が出るスピードレイヴ（E マイナー 165 BPM・音ゲー）",
+    summary: "オクターブで跳ねるベースと16分の分散和音リフで走るスピードレイヴ。サビは Em → C → D → G、Cメロで明るい E メジャーのスタブとピッチが上下するトリル、最後は半音上がって明るいメジャーで締める約1分42秒の音ゲー曲。",
+    includes: ["STYLE: スピードレイヴ・レイヴ・90年代ハードコア、165 BPM、E マイナー", "LYRICS: インスト用の構成（盛り上がり・小節数・コード進行つき）", "HARMONY: 小室進行（G メジャー: Em → C → D → G）", "DYNAMICS: キメで終わる（フェードアウトはオフ）"],
+    data: {
+      title: "Turbo Sunrise", jp: false, noFade: true, focus: ["lead"],
+      style: ["speed rave","rave","hyper eurobeat","90s","energetic","uplifting","epic","instrumental","synth","piano","four-on-the-floor","catchy hook","orchestra hits","modern arcade rhythm game music"],
+      custom: "rapid 16th note synth arpeggio riffs, octave bouncing bass, bright major chord rave stabs, pitch bend siren trill, octave synth stabs, driving minor-key dance progression, half step key change, ends on a bright major chord, sudden ending hit",
+      bpm: 165, key: "E minor", exclude: "chiptune, 8-bit, retro game music, lo-fi, dubstep, trap, ballad", target: 120,
+      harmony: { key: 7, prog: 2 },
+      brief: { theme: "朝日に向かって全力で走り出す、元気が出る音ゲー曲", words: "", pov: "auto", struct: "cur", line: "short", eng: "more", rhyme: false, kana: false, titles: false, essence: [], lang: "en" },
+      lyrics: [
+        "[Intro: mid-energy, octave synth stabs, 2 bars]", "",
+        "[Instrumental: mid-energy, rapid 16th note synth arpeggio riffs, octave bouncing bass, 16 bars]", "[Chord Progression: Em7 - Esus4 - Gmaj7 - A]", "",
+        "[Drop: explosive, catchy synth lead, rave stabs, 16 bars]", "[Chord Progression: Em - C - D - G]", "[Orchestra Hit]", "",
+        "[Instrumental: powerful, bright major chord rave stabs, pitch bend siren trill, 8 bars]", "[Chord Progression: E - G - A7 - E]", "",
+        "[Drop: explosive, catchy synth lead, octave bouncing bass, 16 bars]", "[Chord Progression: Em - C - D - G]", "",
+        "[Drop: explosive, key change up, half step, 8 bars]", "[Chord Progression: Fm - Db - Eb - Ab]", "",
+        "[Outro: powerful, sudden ending hit, bright major chord, 4 bars]", "[Chord Progression: Ebsus4 - Abmaj7 - Eb - F]", "", "[End]", ""
+      ].join("\n")
+    }
   }];
   $("#combos").innerHTML = COMBOS.map((c, i) => `<article class="combo"><h4>${esc(c.name)}</h4><p>${esc(c.summary)}</p>
     <ul>${c.includes.map(x => `<li>${esc(x)}</li>`).join("")}</ul>
@@ -2412,13 +2433,40 @@ a.btn{text-decoration:none;display:inline-block}
       if (k.r > 0.7 && shift >= 1 && shift <= 5) { s.keyShift = shift; s.keyName = nm(k.tonic) + (k.minor ? " minor" : " major"); }
     });
     const peak = Math.max(...segs.map(s => s.level));
-    segs.forEach((s, i) => {
+    // uniform arrangement: tell sections apart by their chord roots
+    const sigCount = new Map(); for (let b = 0; b < nBars; b++) { const g = sig(b); sigCount.set(g, (sigCount.get(g) || 0) + 1); }
+    const uniform = Math.max(...sigCount.values()) / nBars >= 0.7 && segs.length >= 3;
+    if (uniform) {
+      const rootOf = c => { if (!c) return -1; const mm = c.match(/^([A-G])([#b]?)/); return mm ? ({ C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 }[mm[1]] + (mm[2] === "#" ? 1 : mm[2] === "b" ? -1 : 0) + 12) % 12 : -1; };
+      const roots = sg => Array.from({ length: sg.len }, (_, k) => rootOf(chords[(sg.start + k) * 2] || chords[(sg.start + k) * 2 + 1]));
+      const sim = (x, y, sh) => { const n = Math.min(x.length, y.length); if (!n) return 0; let same = 0; for (let k = 0; k < n; k++) if (x[k] >= 0 && y[k] >= 0 && (x[k] - y[k] - sh + 24) % 12 === 0) same++; return same / n; };
+      const cl = [];
+      segs.forEach((sg, i) => {
+        const r = roots(sg); let f = -1;
+        cl.forEach((c, ci) => { if (f < 0 && sim(r, c.rep, ((sg.keyShift || 0) - c.shift + 12) % 12) >= 0.6) f = ci; });
+        if (f < 0) { cl.push({ rep: r, shift: sg.keyShift || 0, ids: [i] }); sg.cluster = cl.length - 1; } else { cl[f].ids.push(i); sg.cluster = f; }
+      });
+      const multi = cl.map((c, ci) => ({ ci, n: c.ids.length, last: Math.max(...c.ids) })).filter(x => x.n >= 2).sort((x, y) => y.last - x.last || y.n - x.n);
+      const chorusC = multi.length ? multi[0].ci : segs.reduce((b, sg, i) => (dens(sg) > dens(segs[b]) ? i : b), 0);
+      const firstMain = segs.find((sg, i) => sg.len >= 4 && sg.cluster !== chorusC && sg.sig);
+      const verseC = firstMain ? firstMain.cluster : -1;
+      const ds = segs.map(dens), dMin = Math.min(...ds), dMax = Math.max(...ds) || 1;
+      segs.forEach((sg, i) => {
+        const rel = dMax === dMin ? 0.5 : (dens(sg) - dMin) / (dMax - dMin);
+        if (i === 0 && (sg.len <= 4 || !sg.sig) && sg.cluster !== chorusC) { sg.kind = "intro"; sg.level = 2; }
+        else if (i === segs.length - 1 && sg.len < 8 && segs.length > 2) { sg.kind = "outro"; sg.level = 3; }
+        else if (sg.cluster === chorusC) { sg.kind = "chorus"; sg.level = 4 + Math.round(rel); }
+        else if (sg.cluster === verseC) { sg.kind = "verse"; sg.level = 3; }
+        else { sg.kind = "bridge"; sg.level = 3 + Math.round(rel); }
+      });
+    } else segs.forEach((s, i) => {
       if (i === 0 && s.level < peak) s.kind = "intro";
       else if (i === segs.length - 1 && segs.length > 2 && s.level < peak) s.kind = "outro";
       else if (s.level <= 2) s.kind = "break";
       else if (s.level === peak && s.hasLead) s.kind = "chorus";
       else s.kind = "verse";
     });
+    if (uniform) segs.forEach((sg, i) => { if (sg.keyShift && i > 0 && !segs[i - 1].keyShift && sg.kind !== "chorus") { sg.kind = "chorus"; sg.level = 5; } });
     const drumTr = trs.find(t => t.drums);
     let drumWords = [];
     if (drumTr) {
@@ -2461,7 +2509,7 @@ a.btn{text-decoration:none;display:inline-block}
       return t && t.sound && !(vocal && t.sound === "vocal melody") ? { w: t.sound, pri: { lead: 0, chords: 1, bass: 2, counter: 3, accent: 4 }[t.role] ?? 5 } : null;
     };
     return a.segs.map((s, i) => {
-      let base = { intro: "Intro", outro: "Outro", break: "Break" }[s.kind];
+      let base = { intro: "Intro", outro: "Outro", break: "Break", bridge: vocal ? "Bridge" : "Instrumental" }[s.kind];
       if (!base) base = s.kind === "chorus" ? (vocal ? "Chorus" : "Instrumental") : (vocal ? "Verse " + (++vN) : "Instrumental");
       const ws = s.tracks.map(words).filter(Boolean).sort((x, y) => x.pri - y.pri).map(x => x.w);
       const rest = [...new Set(ws)].slice(0, 3);
@@ -2500,13 +2548,13 @@ a.btn{text-decoration:none;display:inline-block}
     const maxD = Math.max(1, ...a.density);
     const kindAt = b => (a.segs.find(s => b >= s.start && b < s.start + s.len) || {}).kind || "verse";
     $("#midiDens").innerHTML = a.density.map((d, b) => `<i data-kind="${kindAt(b)}" style="height:${Math.max(4, d / maxD * 100)}%" title="${b + 1}小節目: ${d} ノート"></i>`).join("");
-    const names = { intro: "イントロ", outro: "アウトロ", break: "ブレイク", chorus: "サビ", verse: "Aメロ" };
+    const names = SEC_JA;
     $("#midiDensLabels").innerHTML = a.segs.map(s => `<span style="flex:${s.len} 1 0" title="${fmtSec(s.t0)}〜 ${s.len}小節">${names[s.kind]}</span>`).join("");
     $("#midiLoop").textContent = a.loop ? `${a.loop}（${a.loopN}回）` : "はっきり繰り返す進行は見つかりませんでした";
     renderProg();
     $("#midiOut").textContent = midiText(a) + `\n推定の長さ ${fmtSec(a.segs.reduce((n, s) => n + s.len, 0) * 240 / a.bpm)}`;
   }
-  const SEC_JA = { intro: "イントロ", outro: "アウトロ", break: "ブレイク", chorus: "サビ", verse: "Aメロ" };
+  const SEC_JA = { intro: "イントロ", outro: "アウトロ", break: "ブレイク", chorus: "サビ", verse: "Aメロ", bridge: "Cメロ" };
   function chordName(c) { return c ? c.replace(/([A-G])b/g, "$1♭").replace(/b(?=\d)/g, "♭").replace(/#/g, "♯") : "—"; }
   function renderProg() {
     const a = midiA, box = $("#midiProg"); if (!a) { box.innerHTML = ""; return; }
