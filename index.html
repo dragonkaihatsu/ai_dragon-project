@@ -613,7 +613,7 @@ a.btn{text-decoration:none;display:inline-block}
       ["シンセウェイヴ","synthwave"],["Lo-fi ヒップホップ","lo-fi hip hop"],["トラップ","trap"],["R&B","R&B"],["ファンク","funk"],["ジャズ","jazz"],
       ["ボサノバ","bossa nova"],["バラード","ballad"],["フォーク","acoustic folk"],["アイドル","idol pop"],["演歌","enka"],["オーケストラ","orchestral"],["アンビエント","ambient"],
       ["ハードコア","hardcore techno"],["ガバ","gabber"],["J-CORE","J-core"],["トランスコア","trancecore"],["ハッピーハードコア","happy hardcore"],["ブレイクコア","breakcore"],["ジャングル","jungle"],["リキッドDnB","liquid drum and bass"],["トランス","trance"],["ハンズアップ","hands up"],["フューチャーファンク","future funk"],["フレンチハウス","french house"],["シンフォニックメタル","symphonic metal"],["イタロ・ハウス","italo house"],["ピアノハウス","piano house"],["Hi-NRG","hi-NRG"],
-      ["プログレッシブハウス","progressive house"],["ファンキーハウス","funky house"],["アシッドジャズ","acid jazz"],["ブレイクビーツ","breakbeat"],["UKガラージ","UK garage"]
+      ["ユーロビート","eurobeat"],["ハイパーユーロビート","hyper eurobeat"],["スピードレイヴ","speed rave"],["レイヴ","rave"],["プログレッシブハウス","progressive house"],["ファンキーハウス","funky house"],["アシッドジャズ","acid jazz"],["ブレイクビーツ","breakbeat"],["UKガラージ","UK garage"]
     ]},
     { id: "jp", ja: "和・日本らしさ", items: [
       ["歌謡曲","kayokyoku"],["昭和歌謡","Showa-era kayokyoku"],["渋谷系","Shibuya-kei"],["ヴィジュアル系","visual kei"],["アニメOP風","anime opening"],
@@ -640,7 +640,7 @@ a.btn{text-decoration:none;display:inline-block}
       ["アーメンブレイク","amen break"],["ボーカルチョップ","vocal chops"],["エアホーン","air horns"],["煽りボイス","hype vocal samples"],
       ["ツーバス","double kick drums"],["RPGのボス戦","JRPG boss battle"],
       ["DJスクラッチ","turntable scratches"],["グリッチ","glitch stutter edits"],["音ゲーっぽさ","modern arcade rhythm game music"],["スーパーソウ","supersaw lead"],
-      ["アーバン R&B","urban R&B groove"],["ヒップホップのノリ","hip hop swing"],["深く温かい低音","deep warm bass"],["フィルターハウス","filtered disco house"],["フィルタースイープ","filter sweeps"],["2000年代レースゲーム","2000s racing game soundtrack"],["ヴィンテージ80年代","late 80s club record"],["アナログ機材","vintage analog production"],["ドライなミックス","dry mix"],["レコードの温もり","vinyl warmth"],["かすかなレコードノイズ","subtle vinyl crackle"],["テープの温かさ","warm tape saturation"],["12インチ盤","1980s 12-inch vinyl single"],["高音やわらか","soft rolled-off highs"],["アンセム系リード","anthemic lead"],["オク下重ね","octave-layered lead"],["ライザー","riser sweeps"],["16分ノイズチョップ","chopped noise 16th stutters"],["おしゃれなコード","jazzy chord progressions"],["augコード","augmented chords"],["急な転調","sudden key change"]
+      ["オケヒ","orchestra hits"],["キュンと上がるオケヒ","rising pitch orchestra hits"],["バックで鳴るギター","electric guitar riffs in background"],["アーバン R&B","urban R&B groove"],["ヒップホップのノリ","hip hop swing"],["深く温かい低音","deep warm bass"],["フィルターハウス","filtered disco house"],["フィルタースイープ","filter sweeps"],["2000年代レースゲーム","2000s racing game soundtrack"],["ヴィンテージ80年代","late 80s club record"],["アナログ機材","vintage analog production"],["ドライなミックス","dry mix"],["レコードの温もり","vinyl warmth"],["かすかなレコードノイズ","subtle vinyl crackle"],["テープの温かさ","warm tape saturation"],["12インチ盤","1980s 12-inch vinyl single"],["高音やわらか","soft rolled-off highs"],["アンセム系リード","anthemic lead"],["オク下重ね","octave-layered lead"],["ライザー","riser sweeps"],["16分ノイズチョップ","chopped noise 16th stutters"],["おしゃれなコード","jazzy chord progressions"],["augコード","augmented chords"],["急な転調","sudden key change"]
     ]}
   ];
   const FOCUS = [
@@ -657,7 +657,7 @@ a.btn{text-decoration:none;display:inline-block}
   const EXCLUDES = [["ラップ","rap"],["EDM","EDM"],["激しい歪み","heavy distortion"],["オートチューン","autotune"],["シャウト","screaming"],["語り","spoken word"],["男性ボーカル","male vocals"],["女性ボーカル","female vocals"],["Lo-fi","lo-fi"],["チップチューン","chiptune"],["8bit","8-bit"],["レトロゲーム","retro game music"],["今風のEDM","big room EDM"],["ドロップ","drops"],["サイドチェイン","sidechain pumping"],["ライザー","risers"],["スーパーソウ","supersaw"]];
   const SEC_TAGS = [["Intro","イントロ"],["Verse","Aメロ"],["Pre-Chorus","Bメロ"],["Chorus","サビ"],["Post-Chorus","後サビ"],["Bridge","Cメロ"],["Instrumental","間奏"],["Guitar Solo","ソロ"],["Break","ブレイク"],["Build-up","ビルド"],["Drop","ドロップ"],["Hook","フック"],["Outro","アウトロ"],["Fade Out","フェードアウト"],["End","終わり"]];
   const CUE_TAGS = [["Whisper","ささやき"],["Spoken Word","語り"],["Female Vocal","女声"],["Male Vocal","男声"],["Harmony","ハモリ"],["Choir","合唱"],["Belting","張り上げ"],["Ad-lib","アドリブ"]];
-  const FX_TAGS = [["Air Horn","パーティーホーン"],["Shout","煽り","Somebody scream!"],["Siren","サイレン"],["Rewind","巻き戻し"],["Riser","ライザー"],["Vocal Chop","ボイスチョップ"],["Crowd Cheer","歓声"],["Silence","無音"],["Scratch","スクラッチ"],["Shout","煽り（Come on!）","Come on!"]];
+  const FX_TAGS = [["Air Horn","パーティーホーン"],["Shout","煽り","Somebody scream!"],["Siren","サイレン"],["Rewind","巻き戻し"],["Riser","ライザー"],["Vocal Chop","ボイスチョップ"],["Crowd Cheer","歓声"],["Silence","無音"],["Scratch","スクラッチ"],["Orchestra Hit","オケヒ"],["Shout","煽り（Come on!）","Come on!"]];
   const FEEL_WORDS = [
     ["清涼感",["crisp clean highs","airy pads"]],["透明感",["crystalline textures"]],["静寂",["sparse arrangement","spacious silence"]],["クール",["cool detached mood"]],
     ["浮遊感",["floating ethereal pads"]],["水・雨のよう",["water drop plucks","rain ambience"]],["キラキラ",["glittering bell arpeggios"]],["ピアノが綺麗",["glassy emotional piano"]],
@@ -1705,6 +1705,7 @@ a.btn{text-decoration:none;display:inline-block}
     { name: "半音で下りる", deg: "#IVm7b5 IVm6 IIIm7 VI7b9", tanaka: true, desc: "半音ずつしっとり下りていく、歌もので多い流れ。", words: ["chromatic descending chords", "bittersweet jazzy harmony"] },
     { name: "sus から解決", deg: "IIm7 IIm7/V V7b9 IM7 IIIm7/VI VIm7", tanaka: true, desc: "浮いたコードが動いて、気持ちよく解決する。", words: ["suspended chords resolving", "lush jazz voicings"] },
     { name: "短3度上へ", deg: "I IIIm7 Vm7 VI7b9", tanaka: true, desc: "マイナーが短3度上のマイナーへ動く、意外性のある流れ。", words: ["unexpected minor third chord shifts"] },
+    { name: "哀愁ユーロ進行", deg: "IV II IIIm VIm", desc: "90年代ユーロビートの哀愁サビの定番。G メジャーにすると C → A → Bm → Em で、マイナーのサビが切なく走る。", words: ["melancholic 90s eurobeat chord progression"] },
     { name: "サビ前で転調", deg: "IVM7 V7 IIIm7 VI7 | bVIM7 bVII7", desc: "Bメロ終わりで ♭VI→♭VII を鳴らして、一段上のキーのサビへ飛び込む。", words: ["sudden key change before the chorus", "modulating pre-chorus"] }
   ];
   const NOTE_S = ["C","C♯","D","D♯","E","F","F♯","G","G♯","A","A♯","B"];
@@ -1987,6 +1988,29 @@ a.btn{text-decoration:none;display:inline-block}
         "[Break: mid-energy, drum fill, 4 bars]", "[Shout]", "Come on!", "",
         "[Chorus: powerful, deep bassline, house piano stabs, 16 bars]", "City after midnight (oh)", "Feel it after midnight", "City after midnight (yeah)", "Move it after midnight", "City after midnight (oh)", "Feel it after midnight", "City after midnight (come on)", "Move it after midnight", "",
         "[Outro: very soft, fade out, 8 bars]", "[Fade Out]", "", "[End]", ""
+      ].join("\n")
+    }
+  }, {
+    name: "ハイパーユーロビート × スピードレイヴ（男性ラップ × 女性ボーカル）",
+    summary: "90年代の哀愁ユーロビートとレイヴの中間。キュンと上がるオケヒを連打し、ギターが後ろで鳴る。男性ラップの Aメロ、女性ボーカルのサビを2回繰り返す、約1分30秒の音ゲー向けダンス曲。",
+    includes: ["STYLE: ハイパーユーロビート・スピードレイヴ・90年代ユーロビート、160 BPM、E マイナー", "LYRICS: オリジナル英語歌詞「Fading Starlight」（男性ラップ × 女性ボーカル）", "HARMONY: 哀愁ユーロ進行（C → A → Bm → Em）", "DYNAMICS: オケヒのイントロ → ラップ → サビ → オケヒ → ラップ → サビ → フェードアウト（目標 1分30秒）"],
+    data: {
+      title: "Fading Starlight", jp: false,
+      style: ["hyper eurobeat","speed rave","eurobeat","rave","90s","melancholic","energetic","epic","rap","female vocals","synth","electric guitar","four-on-the-floor","catchy hook","rising pitch orchestra hits","orchestra hits","electric guitar riffs in background"],
+      custom: "melancholic 90s eurobeat chord progression, fast eurobeat synth lead, octave bouncing bass, male rap verses, female vocals on chorus, call and response vocals, rhythm game dance music",
+      bpm: 160, key: "E minor", exclude: "dubstep, trap, big room EDM, heavy metal, chiptune", target: 90,
+      harmony: { key: 7, prog: 9 },
+      brief: { theme: "失った恋を振り切るように、夜のダンスフロアで踊り続ける哀愁ユーロビート。男性のラップと女性のサビの掛け合い", words: "starlight, night, dance, heart, tears, rave", pov: "duo", struct: "cur", line: "short", eng: "more", rhyme: true, kana: false, titles: false, essence: [], lang: "en" },
+      lyrics: [
+        "[Intro: powerful, rising pitch orchestra hits, electric guitar riffs, 8 bars]", "[Chord Progression: C - A - Bm - Em]", "[Orchestra Hit]", "",
+        "[Verse 1: mid-energy, male rap, 8 bars]", "[Chord Progression: Em - C - D - Em]", "Yo, step up, the night is calling", "Lights go down and the stars are falling", "Heart beats fast but the love is gone", "Keep on moving, keep on dancing on", "",
+        "[Pre-Chorus: mid-energy, female vocals, rising tension, 4 bars]", "Tell me why, tell me why", "Every dream just passes by", "",
+        "[Chorus: powerful, female vocals, orchestra hits, 8 bars]", "[Chord Progression: C - A - Bm - Em]", "Fading starlight, don't you leave me", "Fading starlight, hold me tight", "Fading starlight, can you hear me", "Dancing all alone tonight", "",
+        "[Instrumental: powerful, rising pitch orchestra hits, eurobeat synth lead, 4 bars]", "[Orchestra Hit]", "",
+        "[Verse 2: mid-energy, male rap, 8 bars]", "[Chord Progression: Em - C - D - Em]", "One more time, let the beat take over", "Speed it up, we are never getting older", "Tears fall down like the summer rain", "Spin it back, feel the rave again", "",
+        "[Pre-Chorus: mid-energy, female vocals, rising tension, 4 bars]", "Tell me why, tell me why", "Every dream just passes by", "",
+        "[Chorus: powerful, female vocals, male rap ad-libs, orchestra hits, 8 bars]", "[Chord Progression: C - A - Bm - Em]", "Fading starlight, don't you leave me", "Fading starlight, hold me tight", "Fading starlight, can you hear me", "Dancing all alone tonight", "",
+        "[Outro: very soft, fade out, 4 bars]", "[Fade Out]", "", "[End]", ""
       ].join("\n")
     }
   }];
