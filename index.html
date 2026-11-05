@@ -645,6 +645,8 @@ a.btn{text-decoration:none;display:inline-block}
       <li data-k="exclude"><span class="num">3</span><div><b>Exclude styles</b><span class="state"></span></div><button class="btn" type="button" data-send="exclude">コピー</button></li>
       <li data-k="title"><span class="num">4</span><div><b>Song Title</b><span class="state"></span></div><button class="btn" type="button" data-send="title">コピー</button></li>
     </ol>
+    <label class="check" for="keepBars"><input type="checkbox" id="keepBars"> コピーするとき、タグの小節数（例: 8 bars）を残す</label>
+    <p class="hint">Suno は小節数を正確には守らないので、ふだんはコピー時に外します。小節数はこのアプリで長さを計算するために使っています。Suno の区切りと長さは、歌詞の量とタグの並び順で決まります。</p>
     <p class="hint" id="cropHint"></p>
     <div class="row">
       <a class="btn primary" href="https://suno.com/create" target="_blank" rel="noopener noreferrer">Suno の作成画面を開く ↗</a>
@@ -713,7 +715,7 @@ a.btn{text-decoration:none;display:inline-block}
       ["アーメンブレイク","amen break"],["ボーカルチョップ","vocal chops"],["エアホーン","air horns"],["煽りボイス","hype vocal samples"],
       ["ツーバス","double kick drums"],["RPGのボス戦","JRPG boss battle"],
       ["DJスクラッチ","turntable scratches"],["グリッチ","glitch stutter edits"],["音ゲーっぽさ","modern arcade rhythm game music"],["スーパーソウ","supersaw lead"],
-      ["オケヒ","orchestra hits"],["キュンと上がるオケヒ","rising pitch orchestra hits"],["バックで鳴るギター","electric guitar riffs in background"],["アーバン R&B","urban R&B groove"],["ヒップホップのノリ","hip hop swing"],["深く温かい低音","deep warm bass"],["フィルターハウス","filtered disco house"],["フィルタースイープ","filter sweeps"],["2000年代レースゲーム","2000s racing game soundtrack"],["ヴィンテージ80年代","late 80s club record"],["アナログ機材","vintage analog production"],["ドライなミックス","dry mix"],["レコードの温もり","vinyl warmth"],["かすかなレコードノイズ","subtle vinyl crackle"],["テープの温かさ","warm tape saturation"],["12インチ盤","1980s 12-inch vinyl single"],["高音やわらか","soft rolled-off highs"],["アンセム系リード","anthemic lead"],["オク下重ね","octave-layered lead"],["ライザー","riser sweeps"],["16分ノイズチョップ","chopped noise 16th stutters"],["おしゃれなコード","jazzy chord progressions"],["augコード","augmented chords"],["急な転調","sudden key change"]
+      ["オケヒ","orchestra hits"],["キュンと上がるオケヒ","rising pitch orchestra hits"],["バックで鳴るギター","electric guitar riffs in background"],["アーバン R&B","urban R&B groove"],["ヒップホップのノリ","hip hop swing"],["深く温かい低音","deep warm bass"],["フィルターハウス","filtered disco house"],["フィルタースイープ","filter sweeps"],["2000年代レースゲーム","2000s racing game soundtrack"],["ヴィンテージ80年代","late 80s club record"],["アナログ機材","vintage analog production"],["ドライなミックス","dry mix"],["レコードの温もり","vinyl warmth"],["かすかなレコードノイズ","subtle vinyl crackle"],["テープの温かさ","warm tape saturation"],["12インチ盤","1980s 12-inch vinyl single"],["高音やわらか","soft rolled-off highs"],["アンセム系リード","anthemic lead"],["リバースシンバル","reverse cymbal swells"],["ノイズのライザー","white noise risers"],["ノイズの一撃","short white noise bursts"],["グリッチノイズ","glitch noise stutters"],["レーザー音","laser zap blips"],["区切りでクラッシュ","crash cymbal on every section change"],["オク下重ね","octave-layered lead"],["ライザー","riser sweeps"],["16分ノイズチョップ","chopped noise 16th stutters"],["おしゃれなコード","jazzy chord progressions"],["augコード","augmented chords"],["急な転調","sudden key change"]
     ]}
   ];
   const FOCUS = [
@@ -731,7 +733,7 @@ a.btn{text-decoration:none;display:inline-block}
   const EXCLUDES = [["ラップ","rap"],["EDM","EDM"],["激しい歪み","heavy distortion"],["オートチューン","autotune"],["シャウト","screaming"],["語り","spoken word"],["男性ボーカル","male vocals"],["女性ボーカル","female vocals"],["Lo-fi","lo-fi"],["チップチューン","chiptune"],["8bit","8-bit"],["レトロゲーム","retro game music"],["今風のEDM","big room EDM"],["ドロップ","drops"],["サイドチェイン","sidechain pumping"],["ライザー","risers"],["スーパーソウ","supersaw"]];
   const SEC_TAGS = [["Intro","イントロ"],["Verse","Aメロ"],["Pre-Chorus","Bメロ"],["Chorus","サビ"],["Post-Chorus","後サビ"],["Bridge","Cメロ"],["Instrumental","間奏"],["Guitar Solo","ソロ"],["Break","ブレイク"],["Build-up","ビルド"],["Drop","ドロップ"],["Hook","フック"],["Outro","アウトロ"],["Fade Out","フェードアウト"],["End","終わり"]];
   const CUE_TAGS = [["Whisper","ささやき"],["Spoken Word","語り"],["Female Vocal","女声"],["Male Vocal","男声"],["Harmony","ハモリ"],["Choir","合唱"],["Belting","張り上げ"],["Ad-lib","アドリブ"]];
-  const FX_TAGS = [["Air Horn","パーティーホーン"],["Shout","煽り","Somebody scream!"],["Siren","サイレン"],["Rewind","巻き戻し"],["Riser","ライザー"],["Vocal Chop","ボイスチョップ"],["Crowd Cheer","歓声"],["Silence","無音"],["Scratch","スクラッチ"],["Orchestra Hit","オケヒ"],["Shout","煽り（Come on!）","Come on!"]];
+  const FX_TAGS = [["Air Horn","パーティーホーン"],["Shout","煽り","Somebody scream!"],["Siren","サイレン"],["Rewind","巻き戻し"],["Riser","ライザー"],["Vocal Chop","ボイスチョップ"],["Crowd Cheer","歓声"],["Silence","無音"],["Scratch","スクラッチ"],["Orchestra Hit","オケヒ"],["Reverse Cymbal","リバースシンバル"],["White Noise Riser","ノイズのライザー"],["Noise Burst","ノイズの一撃"],["Glitch Stutter","グリッチ"],["Laser Zap","レーザー音"],["Crash Cymbal","クラッシュ"],["Shout","煽り（Come on!）","Come on!"]];
   const FEEL_WORDS = [
     ["清涼感",["crisp clean highs","airy pads"]],["透明感",["crystalline textures"]],["静寂",["sparse arrangement","spacious silence"]],["クール",["cool detached mood"]],
     ["浮遊感",["floating ethereal pads"]],["水・雨のよう",["water drop plucks","rain ambience"]],["キラキラ",["glittering bell arpeggios"]],["ピアノが綺麗",["glassy emotional piano"]],
@@ -998,7 +1000,7 @@ a.btn{text-decoration:none;display:inline-block}
     if (/pre-?chorus|build|bメロ/.test(n)) return "pre";
     if (/instrumental|solo|break|drop|interlude|間奏|ソロ/.test(n)) return "inst";
     if (/chorus|hook|refrain|サビ/.test(n)) return "chorus";
-    if (/verse|aメロ/.test(n)) return "verse";
+    if (/\bverse|aメロ/.test(n)) return "verse";
     if (/bridge|cメロ/.test(n)) return "bridge";
     return null;
   };
@@ -1042,6 +1044,13 @@ a.btn{text-decoration:none;display:inline-block}
 
   /* ---------- lyrics editing ---------- */
   const ta = $("#lyrics");
+  function forSuno(text) {
+    if (store.keepBars) return text;
+    return String(text || "").split("\n").map(l => {
+      if (!/^\s*\[[^\]]*\]\s*$/.test(l)) return l;
+      return l.replace(/,?\s*\b\d{1,3}\s*bars?\b/gi, "").replace(/:\s*,\s*/, ": ").replace(/:\s*\]/, "]").replace(/,\s*\]/, "]");
+    }).join("\n");
+  }
   function setLyrics(v, caret, raw) {
     if (!raw && store.fadeOut) v = enforceFade(v);
     ta.value = v; cur().lyrics = v; touch(); renderLyrics();
@@ -1248,6 +1257,7 @@ a.btn{text-decoration:none;display:inline-block}
     if (b.kana && !en) L.push("- 読み方が複数ある漢字（今日、明日、空、辛い、方、間、心 など）はひらがなで書く");
     L.push("- コーラスや合いの手は ( ) で囲む");
     L.push("- 歌詞のない区間はタグだけを置き、説明文や記号を入れない");
+    L.push("- タグの小節数（bars）は長さの目安。歌詞の行数で長さを調整する（Suno は小節数より歌詞の量に合わせて長さが決まる）");
     L.push("", "## 出力", "Suno の Lyrics 欄にそのまま貼れるよう、タグと歌詞だけを出力してください。解説は不要です。");
     if (b.titles) L.push("歌詞のあとに区切り線（---）を入れ、タイトル案を3つ挙げてください。");
     if (store.fadeOut) L.push("曲の最後は [Outro: very soft, fade out] にして、だんだん音量が小さくなる終わり方にしてください。");
@@ -1523,7 +1533,7 @@ a.btn{text-decoration:none;display:inline-block}
 
   /* ---------- send to suno ---------- */
   const sent = new Set();
-  function sendValue(k) { const p = cur(); return { lyrics: p.lyrics, style: styleText(p), exclude: p.exclude, title: p.title }[k] || ""; }
+  function sendValue(k) { const p = cur(); return { lyrics: forSuno(p.lyrics), style: styleText(p), exclude: p.exclude, title: p.title }[k] || ""; }
   const SEND_NAME = { lyrics: "歌詞", style: "スタイル", exclude: "除外スタイル", title: "タイトル" };
   function renderSend() {
     document.querySelectorAll("#steps li").forEach(li => {
@@ -1545,6 +1555,8 @@ a.btn{text-decoration:none;display:inline-block}
     const k = b.dataset.send; if (k === "lyrics") fixFadeBeforeCopy(); copyText(sendValue(k).trim(), SEND_NAME[k]);
     sent.add(k); renderSend();
   });
+  $("#keepBars").checked = !!store.keepBars;
+  $("#keepBars").addEventListener("change", e => { store.keepBars = e.target.checked; save(); renderSend(); });
   $("#btnSendReset").addEventListener("click", () => { sent.clear(); renderSend(); });
 
   /* ---------- dynamics ---------- */
@@ -2114,24 +2126,24 @@ a.btn{text-decoration:none;display:inline-block}
   }, {
     name: "元気が出るスピードレイヴ（E マイナー 165 BPM・音ゲー）",
     summary: "オクターブ重ねのノコギリ波リードとひずんだギターのパワーコードで走るスピードレイヴ。サビは Em → C → G → D、オルガンとギターの後奏、半音ずつ上がるブレイクで溜め、最後は半音上に転調して明るいメジャーで締める約1分43秒の音ゲー曲。",
-    includes: ["STYLE: スピードレイヴ・レイヴ・90年代ハードコア、165 BPM、E マイナー（精度の高い MIDI の分析から）", "楽器: ノコギリ波リード（オクターブ重ね）、オルガン、ポリシンセのパッド、ひずんだギター、オケヒ、シンセベース", "ドラム: 4つ打ち＋キックのフィル、裏拍のオープンハイハット、手数の多いスネアとクラップ、リバースシンバル", "DYNAMICS: キメで終わる（フェードアウトはオフ）"],
+    includes: ["STYLE: スピードレイヴ・レイヴ・90年代ハードコア、165 BPM、E マイナー（精度の高い MIDI の分析から）", "楽器: ノコギリ波リード（オクターブ重ね）、オルガン、ポリシンセのパッド、ひずんだギター、オケヒ、シンセベース", "ドラム: 4つ打ち＋キックのフィル、裏拍のオープンハイハット、手数の多いスネアとクラップ", "効果音: リバースシンバル、レーザー音、サビ前のノイズのライザー、サビ頭のグリッチ、区切りごとのクラッシュとオケヒ、最後はオケヒ連打とクラッシュのロール", "DYNAMICS: キメで終わる（フェードアウトはオフ）"],
     data: {
       title: "Turbo Sunrise", jp: false, noFade: true, focus: ["lead"],
       style: ["speed rave","rave","hyper eurobeat","90s","energetic","uplifting","epic","instrumental","synth","organ","electric guitar","four-on-the-floor","catchy hook","orchestra hits","modern arcade rhythm game music"],
-      custom: "octave-doubled saw lead, distorted guitar power chord riffs, overdriven rhythm guitar, polysynth pad, synth bass, extra kick fills, offbeat open hi-hats, busy snare and claps, reverse cymbals, crash cymbals, rising chromatic build, half step key change, ends on a bright major chord, sudden ending hit",
+      custom: "octave-doubled saw lead, distorted guitar power chord riffs, overdriven rhythm guitar, polysynth pad, synth bass, extra kick fills, offbeat open hi-hats, busy snare and claps, rising chromatic build, half step key change, reverse cymbal swells, laser zap blips, white noise risers before each chorus, short white noise bursts, glitch noise stutters, crash cymbal on every section change, rapid orchestra hit stabs, crash cymbal roll ending, ends on a bright major chord, sudden ending hit",
       bpm: 165, key: "E minor", exclude: "chiptune, 8-bit, retro game music, lo-fi, dubstep, trap, ballad", target: 120,
       harmony: { key: 7, prog: 2 },
       brief: { theme: "朝日に向かって全力で走り出す、元気が出る音ゲー曲", words: "", pov: "auto", struct: "cur", line: "short", eng: "more", rhyme: false, kana: false, titles: false, essence: [], lang: "en" },
       lyrics: [
-        "[Intro: powerful, octave-doubled saw lead, distorted guitar, 3 bars]", "[Chord Progression: Em - D - Em - G - A7]", "",
-        "[Instrumental: mid-energy, octave-doubled saw lead, synth bass, four-on-the-floor, 16 bars]", "[Chord Progression: Em7 - G6 - A7 - Em7]", "",
-        "[Drop: explosive, catchy saw lead, distorted guitar power chords, orchestra hits, 8 bars]", "[Chord Progression: Em - C - G - D]", "[Orchestra Hit]", "",
-        "[Instrumental: powerful, organ, guitar riffs, 8 bars]", "[Chord Progression: D7 - G - Em - C]", "",
-        "[Break: soft, polysynth pad, rising chromatic build, 6 bars]", "[Chord Progression: Em - G - A - Bb - C]", "",
-        "[Drop: explosive, catchy saw lead, orchestra hits, reverse cymbals, 8 bars]", "[Chord Progression: Em - C - G - D]", "",
-        "[Instrumental: powerful, organ, guitar riffs, extra kick fills, 10 bars]", "[Chord Progression: D7 - G - Em - C]", "",
-        "[Drop: explosive, key change up, half step, 8 bars]", "[Chord Progression: Fm - Db - Ab - Eb]", "",
-        "[Outro: powerful, sudden ending hit, bright major chord, 4 bars]", "[Chord Progression: Eb - F7 - F]", "", "[End]", ""
+        "[Intro: powerful, octave-doubled saw lead, distorted guitar, 3 bars]", "[Reverse Cymbal]", "[Laser Zap]", "[Orchestra Hit]", "[Chord Progression: Em - D - Em - G - A7]", "",
+        "[Instrumental: mid-energy, octave-doubled saw lead, synth bass, four-on-the-floor, 16 bars]", "[Crash Cymbal]", "[Noise Burst]", "[Chord Progression: Em7 - G6 - A7 - Em7]", "[White Noise Riser]", "",
+        "[Drop: explosive, catchy saw lead, distorted guitar power chords, orchestra hits, 8 bars]", "[Crash Cymbal]", "[Glitch Stutter]", "[Chord Progression: Em - C - G - D]", "",
+        "[Instrumental: powerful, organ, guitar riffs, 8 bars]", "[Orchestra Hit]", "[Chord Progression: D7 - G - Em - C]", "",
+        "[Break: soft, polysynth pad, rising chromatic build, 6 bars]", "[Orchestra Hit]", "[Chord Progression: Em - G - A - Bb - C]", "[White Noise Riser]", "",
+        "[Drop: explosive, catchy saw lead, orchestra hits, 8 bars]", "[Crash Cymbal]", "[Glitch Stutter]", "[Chord Progression: Em - C - G - D]", "",
+        "[Instrumental: powerful, organ, guitar riffs, extra kick fills, 10 bars]", "[Orchestra Hit]", "[Chord Progression: D7 - G - Em - C]", "[White Noise Riser]", "",
+        "[Drop: explosive, key change up, half step, 8 bars]", "[Crash Cymbal]", "[Noise Burst]", "[Chord Progression: Fm - Db - Ab - Eb]", "",
+        "[Outro: powerful, rapid orchestra hit stabs, crash cymbal roll, sudden ending hit, bright major chord, 4 bars]", "[Orchestra Hit]", "[Chord Progression: Eb - F7 - F]", "", "[End]", ""
       ].join("\n")
     }
   }];
@@ -2547,10 +2559,14 @@ a.btn{text-decoration:none;display:inline-block}
   }
 
   /* ---------- MIDI: UI ---------- */
+  const FX_GM = { 119: "reverse cymbal swells", 120: "glitch noise stutters", 121: "breath noise fx", 122: "white noise sweeps", 123: "bird chirp fx", 124: "laser zap blips", 125: "helicopter whoosh fx", 126: "white noise risers", 127: "impact fx" };
+  const FX_SOUNDS = new Set(Object.values(FX_GM).concat(["short white noise bursts"]));
   const MIDI_SOUNDS = [["", "使わない"], ["piano chords", "ピアノ"], ["piano melody", "ピアノ（メロディ）"], ["piano bass notes", "ピアノ（左手の低音）"], ["house piano stabs", "ハウスピアノ"], ["rhodes piano", "エレピ"], ["synth pad", "シンセパッド"], ["lush strings", "ストリングス"],
     ["brass section", "ブラス"], ["saxophone", "サックス"], ["electric guitar", "エレキギター"], ["acoustic guitar", "アコギ"], ["deep bassline", "低音のベース"], ["slap bass", "スラップベース"],
     ["synth bass", "シンセベース"], ["808 bass", "808 ベース"], ["synth lead", "シンセリード"], ["supersaw lead", "スーパーソウ"], ["bells", "ベル"], ["organ", "オルガン"], ["choir", "合唱"],
-    ["orchestra hits", "オケヒ"], ["vocal melody", "歌のメロディ"]];
+    ["orchestra hits", "オケヒ"], ["vocal melody", "歌のメロディ"],
+    ["reverse cymbal swells", "効果音: リバースシンバル"], ["white noise risers", "効果音: ノイズのライザー"], ["short white noise bursts", "効果音: ノイズの一撃"], ["white noise sweeps", "効果音: ノイズのスイープ"],
+    ["glitch noise stutters", "効果音: グリッチノイズ"], ["laser zap blips", "効果音: レーザー音"], ["impact fx", "効果音: インパクト"]];
   const SOUND_JA = { "saw lead synth": "ノコギリ波リード", "square lead synth": "矩形波リード", "synth lead": "シンセリード", "overdriven guitar": "オーバードライブギター", "distorted guitar": "ひずんだギター",
     "electric guitar": "エレキギター", "acoustic guitar": "アコギ", "synth pad": "シンセパッド", "organ": "オルガン", "synth bass": "シンセベース", "orchestra hits": "オケヒ", "electric bass": "エレキベース",
     "slap bass": "スラップベース", "strings": "ストリングス", "synth strings": "シンセストリングス", "brass section": "ブラス", "synth brass": "シンセブラス", "choir": "合唱", "bells": "ベル", "piano": "ピアノ",
@@ -2562,7 +2578,11 @@ a.btn{text-decoration:none;display:inline-block}
     const allDefault = a.tracks.filter(t => !t.drums).every(t => t.gm == null || t.gm === 0);
     a.noProg = allDefault;
     a.tracks.forEach(t => {
-      if (!allDefault && t.gm != null && !t.drums) { t.sound = t.gm >= 120 || t.role === "accent" ? "" : gmWord(t.gm); t.gmName = gmWord(t.gm); return; }
+      if (!allDefault && t.gm != null && !t.drums) {
+        t.gmName = gmWord(t.gm);
+        if (FX_GM[t.gm]) { const durs = t.notes.map(n => n.t1 - n.t0), avg = durs.reduce((x, y) => x + y, 0) / durs.length; t.sound = t.gm === 126 && avg < a.tpb / 4 ? "short white noise bursts" : FX_GM[t.gm]; return; }
+        t.sound = t.role === "accent" ? "" : gmWord(t.gm); return;
+      }
       t.sound = { bass: "deep bassline", chords: "piano chords", counter: "rhodes piano", accent: "", drums: "" }[t.role];
       if (t.role === "lead") t.sound = t === leads[0] ? "synth lead" : "rhodes piano";
     });
@@ -2571,7 +2591,7 @@ a.btn{text-decoration:none;display:inline-block}
     let vN = 0;
     const words = ix => {
       const t = a.tracks.find(x => x.idx === ix);
-      return t && t.sound && !(vocal && t.sound === "vocal melody") ? { w: t.sound, pri: { lead: 0, chords: 1, bass: 2, counter: 3, accent: 4 }[t.role] ?? 5 } : null;
+      return t && t.sound && !FX_SOUNDS.has(t.sound) && !(vocal && t.sound === "vocal melody") ? { w: t.sound, pri: { lead: 0, chords: 1, bass: 2, counter: 3, accent: 4 }[t.role] ?? 5 } : null;
     };
     return a.segs.map((s, i) => {
       let base = { intro: "Intro", outro: "Outro", break: "Break", bridge: vocal ? "Bridge" : "Instrumental" }[s.kind];
@@ -2683,6 +2703,7 @@ a.btn{text-decoration:none;display:inline-block}
     const buses = new Map();
     active.forEach(t => {
       if (t.drums) { const g = ctx.createGain(); g.gain.value = 0.55; g.connect(comp); buses.set(t.idx, { g, drums: true }); return; }
+      if (FX_SOUNDS.has(t.sound)) { const g = ctx.createGain(); g.gain.value = 0.35; g.connect(comp); buses.set(t.idx, { g, fx: t.sound }); return; }
       const w = waveFor(t.sound, t.avg), f = ctx.createBiquadFilter(), g = ctx.createGain();
       f.type = "lowpass"; f.frequency.value = w.cut; g.gain.value = w.gain * per; f.connect(g); g.connect(comp);
       buses.set(t.idx, { f, w });
@@ -2698,6 +2719,13 @@ a.btn{text-decoration:none;display:inline-block}
       while (i < notes.length && notes[i].s0 < horizon) {
         const n = notes[i++], bus = buses.get(n.tr), start = t0 + Math.max(0, n.s0 - offset);
         if (bus.drums) { drumHit(ctx, bus.g, noise, n.p, start, n.v); continue; }
+        if (bus.fx) {
+          const dur = Math.max(0.06, Math.min(4, n.s1 - n.s0)), srcN = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain();
+          srcN.buffer = noise; srcN.loop = true; f.type = /laser|blip/.test(bus.fx) ? "bandpass" : "highpass"; f.Q.value = /laser/.test(bus.fx) ? 8 : 0.7;
+          if (/riser|sweep|reverse/.test(bus.fx)) { f.frequency.setValueAtTime(400, start); f.frequency.exponentialRampToValueAtTime(9000, start + dur); g.gain.setValueAtTime(0.0001, start); g.gain.exponentialRampToValueAtTime(0.6 * (0.3 + 0.7 * n.v), start + dur); g.gain.exponentialRampToValueAtTime(0.0001, start + dur + 0.05); }
+          else { f.frequency.value = /laser/.test(bus.fx) ? 3000 + (n.p - 60) * 60 : 2500; g.gain.setValueAtTime(0.0001, start); g.gain.exponentialRampToValueAtTime(0.5 * (0.3 + 0.7 * n.v), start + 0.004); g.gain.exponentialRampToValueAtTime(0.0001, start + Math.min(dur, 0.25)); }
+          srcN.connect(f); f.connect(g); g.connect(bus.g); srcN.start(start); srcN.stop(start + dur + 0.1); continue;
+        }
         const end = t0 + (n.s1 - offset); if (end <= start) continue;
         const o = ctx.createOscillator(), g = ctx.createGain();
         o.type = bus.w.type; o.frequency.value = 440 * Math.pow(2, (n.p - 69) / 12);
@@ -2978,13 +3006,13 @@ a.btn{text-decoration:none;display:inline-block}
     const b = e.target.closest("[data-copy]"); if (!b) return;
     if (b.dataset.copy === "lyrics") fixFadeBeforeCopy();
     const p = cur();
-    const map = { title: [p.title, "タイトル"], style: [styleText(p), "スタイル"], exclude: [p.exclude, "除外スタイル"], lyrics: [p.lyrics, "歌詞"], brief: [briefText(p), "作詞プロンプト"], idea: [ideaPrompt(p, false), "提案用の指示文"] };
+    const map = { title: [p.title, "タイトル"], style: [styleText(p), "スタイル"], exclude: [p.exclude, "除外スタイル"], lyrics: [forSuno(p.lyrics), "歌詞"], brief: [briefText(p), "作詞プロンプト"], idea: [ideaPrompt(p, false), "提案用の指示文"] };
     const [t, w] = map[b.dataset.copy]; copyText(t, w);
   });
   $("#btnCopyAll").addEventListener("click", () => {
     fixFadeBeforeCopy();
     const p = cur();
-    const parts = [["Title", p.title], ["Style of Music", styleText(p)], ["Exclude Styles", p.exclude], ["Lyrics", p.lyrics]]
+    const parts = [["Title", p.title], ["Style of Music", styleText(p)], ["Exclude Styles", p.exclude], ["Lyrics", forSuno(p.lyrics)]]
       .filter(([, v]) => v && v.trim()).map(([k, v]) => `■ ${k}\n${v.trim()}`);
     copyText(parts.join("\n\n"), "全項目");
   });

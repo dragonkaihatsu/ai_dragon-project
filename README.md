@@ -22,6 +22,8 @@ Suno で曲を作るときの補助アプリです。ブラウザで `index.html
 - **4つ打ち→サビでアーメン**: ふだんは4つ打ち、サビ（Drop）でアーメンブレイクに切り替え、溜めでライザー、アウトロで16分のノイズチョップを使う構成テンプレ（185 BPM・約1分49秒）。アンセム系リード・オク下重ね・ライザーなどの言葉と演出を追加。
 - **アウトロは必ずフェードアウト**: オンにすると（初期設定はオン）、テンプレ・組み合わせセット・時間メモ・Claude の歌詞など、どこから歌詞を入れても最後を `[Outro: very soft, fade out]` → `[Fade Out]` → `[End]` にそろえ、STYLE に fade out ending を足す。手で書き換えた場合も、歌詞をコピーするときに自動で整える。
 - **EDMっぽさを抜く**: Drop・Build-up のタグを Chorus・Break（ドラムフィル）に変え、explosive・riser・supersaw などの今風の言葉を外し、late 80s club record・vintage analog production などの言葉と、big room EDM・drops などの除外を足す。
+- **効果音**: [Reverse Cymbal]、[White Noise Riser]、[Noise Burst]、[Glitch Stutter]、[Laser Zap]、[Crash Cymbal] などのタグと、reverse cymbal swells・white noise risers などのスタイルの言葉。MIDI の効果音トラック（GM 119〜127）も自動でこれらの言葉に変換し、再生ではノイズで鳴らす。
+- **小節数はコピー時に外す**: Suno は小節数を正確には守らないため、Suno に貼るためのコピーではタグの「N bars」を自動で外す（アプリ内の長さ計算には使う）。残す設定もあり。
 - **ネタ・煽り**: [Air Horn]、[Shout] Somebody scream!、[Riser]、[Rewind] などの効果音タグをワンタップで挿入。
 - **構成チェック**: 歌詞からセクションを読み取り、Aメロ・Bメロ・サビの流れを帯で表示。歌詞のないセクション、日本語タグ、長すぎる行などを指摘。
 - **文字数カウント**: v4.5 以降（スタイル 1000 / 歌詞 5000）と v4 以前（200 / 3000）の上限を切り替え可能。
