@@ -721,6 +721,7 @@ a.btn{text-decoration:none;display:inline-block}
     { id: "vocal", ja: "ボーカル", style: ["upfront lead vocals"], tag: "upfront vocals" },
     { id: "drums", ja: "ドラム", style: ["hard-hitting drums"], tag: "hard-hitting drums" },
     { id: "lead", ja: "シンセのリード", style: ["prominent synth lead"], tag: "synth lead" },
+    { id: "supersaw", ja: "スーパーソー", style: ["prominent supersaw lead"], tag: "supersaw lead" },
     { id: "strings", ja: "ストリングス", style: ["lush prominent strings"], tag: "strings" }
   ];
   const NO_RANDOM = new Set(["instrumental","rap","choir","duet"]);
@@ -2084,6 +2085,30 @@ a.btn{text-decoration:none;display:inline-block}
         "[Outro: very soft, fade out, 4 bars]", "[Fade Out]", "", "[End]", ""
       ].join("\n")
     }
+  }, {
+    name: "ハンズアップ × 音ゲー（スーパーソーの主旋律・C マイナー 149 BPM）",
+    summary: "クラブ系のハンズアップ。ピアノのオクターブ刻みで始まり、スーパーソーの主旋律が Cm → A♭ → B♭ → E♭maj7 で駆け上がる。連打の溜めから大サビ、最後は全音上に転調して、明るいキメで終わる約1分56秒の音ゲー曲。",
+    includes: ["STYLE: ハンズアップ・トランス・J-CORE、149 BPM、C マイナー、主旋律はスーパーソー", "LYRICS: インスト用の構成（盛り上がり・小節数・コード進行つき）", "HARMONY: Cm → A♭ → B♭ → E♭maj7（i → VI → VII → III）、最後は全音上の D マイナー", "DYNAMICS: キメで終わる（フェードアウトはオフ）"],
+    data: {
+      title: "Skyward Rush", jp: false, noFade: true, focus: ["supersaw"],
+      style: ["hands up","trance","J-core","euphoric","uplifting","energetic","instrumental","supersaw lead","piano","four-on-the-floor","turntable scratches","vocal chops","modern arcade rhythm game music","polished production"],
+      custom: "arpeggiated supersaw lead melody, high counter melody, piano octave stabs, chromatic descending piano run, offbeat bass, punchy kick, crescendo note roll build-up, ascending bass inversions, whole step key change, sudden ending hit",
+      bpm: 149, key: "C minor", exclude: "chiptune, 8-bit, retro game music, lo-fi, dubstep, trap, vocals", target: 120,
+      harmony: { key: 3, prog: 2 },
+      brief: { theme: "空へ駆け上がるような、ハンズアップの音ゲー曲", words: "", pov: "auto", struct: "cur", line: "short", eng: "more", rhyme: false, kana: false, titles: false, essence: [], lang: "en" },
+      lyrics: [
+        "[Intro: powerful, piano octave stabs, chromatic descending piano run, 8 bars]", "[Chord Progression: C - Ab - C - Ab]", "[Scratch]", "",
+        "[Break: soft, piano, 2 bars]", "[Chord Progression: C - C7]", "",
+        "[Drop: explosive, supersaw lead, arpeggiated melody, 8 bars]", "[Chord Progression: Cm - Ab - Bb - Ebmaj7]", "",
+        "[Instrumental: mid-energy, piano, offbeat bass, 8 bars]", "[Chord Progression: Cm - Ab - Bb - Ebmaj7]", "",
+        "[Drop: explosive, supersaw lead, high counter melody, 8 bars]", "[Chord Progression: Cm - Abmaj7 - Bbsus4 - Ebmaj7]", "",
+        "[Drop: explosive, supersaw lead, anthem lead, 8 bars]", "[Chord Progression: Cm - Ab - Bbsus4 - Ebmaj7]", "",
+        "[Build-up: piano octave stabs, crescendo note roll build-up, 8 bars]", "[Chord Progression: C - Ab - C - Ab]", "[Vocal Chop]", "",
+        "[Drop: explosive, supersaw lead, ascending bass inversions, 16 bars]", "[Chord Progression: Cm/G - Abmaj7/Eb - Bb/F - Ebadd9]", "[Scratch]", "",
+        "[Drop: explosive, key change up, whole step, supersaw lead, 4 bars]", "[Chord Progression: Dm - Bbmaj7 - C - D]", "",
+        "[Outro: powerful, sudden ending hit, 2 bars]", "", "[End]", ""
+      ].join("\n")
+    }
   }];
   $("#combos").innerHTML = COMBOS.map((c, i) => `<article class="combo"><h4>${esc(c.name)}</h4><p>${esc(c.summary)}</p>
     <ul>${c.includes.map(x => `<li>${esc(x)}</li>`).join("")}</ul>
@@ -2095,10 +2120,11 @@ a.btn{text-decoration:none;display:inline-block}
     const extra = [...conv.extra, ...splitList(d.custom)];
     const p = normalize({
       title: d.title, tags: conv.tags, focus: [...(d.focus || [])], jp: d.jp !== false, bpm: d.bpm, bpmOn: true, key: d.key, custom: [...new Set(extra)].join(", "),
-      exclude: d.exclude, lyrics: store.fadeOut ? enforceFade(d.lyrics) : d.lyrics, target: d.target, harmony: { ...d.harmony }, brief: JSON.parse(JSON.stringify(d.brief))
+      exclude: d.exclude, lyrics: store.fadeOut && !d.noFade ? enforceFade(d.lyrics) : d.lyrics, target: d.target, harmony: { ...d.harmony }, brief: JSON.parse(JSON.stringify(d.brief))
     });
     p.id = uid(); p.updated = Date.now();
     const prevId = store.currentId;
+    if (d.noFade && store.fadeOut) { store.fadeOut = false; $("#fadeOn").checked = false; setTimeout(() => toast("この曲はキメで終わるので、「アウトロは必ずフェードアウト」をオフにしました"), 2600); }
     store.projects.push(p); store.currentId = p.id; save(); sent.clear(); renderAll();
     window.scrollTo({ top: 0, behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
     toast(`「${d.title}」を新しい曲として作りました`, "元に戻す", () => {
