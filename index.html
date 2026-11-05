@@ -649,6 +649,7 @@ a.btn{text-decoration:none;display:inline-block}
     </ol>
     <label class="check" for="keepBars"><input type="checkbox" id="keepBars"> コピーするとき、タグの小節数（例: 8 bars）を残す</label>
     <p class="hint">Suno は小節数を正確には守らないので、ふだんはコピー時に外します。小節数はこのアプリで長さを計算するために使っています。Suno の区切りと長さは、歌詞の量とタグの並び順で決まります。</p>
+    <p class="hint" id="durHint"></p>
     <p class="hint" id="cropHint"></p>
     <div class="row">
       <a class="btn primary" href="https://suno.com/create" target="_blank" rel="noopener noreferrer">Suno の作成画面を開く ↗</a>
@@ -667,7 +668,7 @@ a.btn{text-decoration:none;display:inline-block}
       <li>「日本語の歌として指定する」をオンにすると、スタイルに Japanese vocals（女性・男性ボーカルを選んでいれば Japanese female vocals など）が入る。</li>
       <li>Suno で同じ設定のまま何回か生成すると、毎回ちがうメロディになる。気に入るまで生成し直すのが近道。</li>
       <li>緩急は「タグの演出指定」「スタイルの言葉（dynamic build など）」「歌詞の密度」の3つで作る。静かな所は言葉を少なく、サビは短く強いフレーズに。</li>
-      <li>Suno は小節数や長さを厳密には守らない。2分以内にしたいときは、セクションを減らして間奏の繰り返しを1回までにし、最後に [End] を置く。確実に収めたいときは、生成後に Crop Song で切る。</li>
+      <li>長さは v5.5 の Duration スライダー（Web の Create 画面、10秒〜6分）で目標を決められる。ただし目標なので、歌詞やセクションが多すぎると途中で切れる。2分以内なら、セクションを減らして間奏の繰り返しを1回までにし、最後に [End] を置く。確実に収めたいときは、生成後に Crop Song で切る。</li>
       <li>歌わせたくない区間は <code>[Instrumental]</code> や <code>[Guitar Solo]</code> だけを置いて、歌詞を書かない。</li>
     </ul>
   </aside>
@@ -1571,7 +1572,12 @@ a.btn{text-decoration:none;display:inline-block}
     });
   }
   function renderCrop() {
-    const t = cur().target;
+    const t = cur().target, secs = analyze(ta.value).secs;
+    const est = secs.length ? songSeconds(secs) : 0;
+    const base = t ? Math.min(t, est || t) : est;
+    $("#durHint").textContent = base
+      ? `Suno の Duration（v5.5・Web の Create 画面）の目安: ${fmtSec(Math.min(360, Math.max(10, Math.ceil((base + 10) / 5) * 5)))}。推定の長さより少し長めにすると、最後のサビの途中で切れにくくなります。設定した長さで音が急に止まることがあるので、フェードアウトさせたい曲は Auto のまま生成して、あとで Crop Song で切る方が自然です。`
+      : "構成を入れると、Suno の Duration（v5.5・Web の Create 画面）に入れる長さの目安を出します。";
     $("#cropHint").textContent = "長くなりすぎたら: Suno で曲の「…」→ Edit → Crop Song で残す範囲を選ぶと、短くした曲が新しく保存されます（Pro / Premier、PC 版）。"
       + (t ? `目標は ${fmtSec(t)} なので、最後のドロップが終わる所（${fmtSec(t)} より前）で切ってください。` : "");
   }
