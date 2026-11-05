@@ -391,6 +391,8 @@ a.btn{text-decoration:none;display:inline-block}
       <div class="group">
         <h3>情景から選ぶ<span class="count">すぐ使える組み合わせ</span></h3>
         <div class="presets" id="presets"></div>
+        <h3>音ゲーのジャンル図鑑<span class="count">初心者向けに人気のジャンルから</span></h3>
+        <div class="presets" id="genrePresets"></div>
       </div>
     </div>
     <div class="group">
@@ -782,6 +784,25 @@ a.btn{text-decoration:none;display:inline-block}
     ["アイドル","コールを入れたくなる、元気でかわいいアイドルポップ。",["idol pop","future bass","cute","energetic","uplifting","female vocals","vocal harmonies","synth","catchy hook","polished production"],160,["call and response chant"]]
   ].map(([name, summary, t, bpm, extra]) => sanitizeIdea({ name, summary, tags: { any: t }, bpm, extra }, "preset"));
 
+  const GENRE_PRESETS = [
+    ["ピアノハウス","しっとりしたピアノが主役の、テンポが安定したハウス。",["piano house","house","chill","uplifting","piano","four-on-the-floor","catchy hook"],130,["smooth house piano chords","soulful vocal chops","warm bassline"]],
+    ["フィルターハウス","ディスコのループにフィルターをかけ、開いたり閉じたりさせるハウス。",["house","french house","energetic","slap bass","four-on-the-floor"],126,["filtered disco loops","filter sweeps","funky guitar chops"]],
+    ["クロスオーバーハウス","少し速めのハウスで、爽快に駆け抜ける。",["house","refreshing","energetic","piano","synth","four-on-the-floor"],145,["crossover house","fast house groove","bright synth chords"]],
+    ["ドリームトランス","空まで突き抜けるような、ふわっと高揚するトランス。",["trance","dreamy","uplifting","euphoric","synth","supersaw lead","wide stereo"],145,["dream trance","soaring melody","airy pads"]],
+    ["メロディックDnB","夜の情景が浮かぶ、メロディアスなドラムンベース。",["drum and bass","liquid drum and bass","dreamy","emotional","female vocals","piano"],174,["melodic drum and bass","rolling breakbeats","night city atmosphere"]],
+    ["スウィングワルツ","硬派な曲が多い中で目立つ、3拍子のスウィング。",["jazz","romantic","piano","strings","brass section"],160,["swing waltz","3/4 time","big band swing"]],
+    ["ピアノのワルツ","ピアノ主体の、クラシック調の速いワルツ。",["orchestral","instrumental","piano","dramatic"],180,["piano waltz","3/4 time","virtuosic classical piano"]],
+    ["テックダンス","細かく刻むリズムパターンが聴きどころのダンス曲。",["energetic","synth","punchy drums","four-on-the-floor"],150,["tech dance","intricate rhythmic patterns","glitchy percussion"]],
+    ["サイバーリキッドファンク","エモいシンセと跳ねるベースのリキッドファンク。",["liquid drum and bass","funk","emotional","synth","slap bass"],174,["cyber liquid funk","emo synth chords","rolling breakbeats"]],
+    ["80年代シンセファンク","80年代風の、シンセとベースが跳ねるファンク。",["funk","80s","synth","slap bass","catchy hook"],112,["80s synth funk","retro synth brass","talkbox"]],
+    ["アシッドジャズ","エレピとサックスが鳴る、おしゃれなジャズファンク。",["acid jazz","jazz","rhodes piano","saxophone","slap bass"],110,["acid jazz groove","jazzy breakbeat"]],
+    ["インダストリアルベース","大きなスピーカーで鳴らしたい、強い音圧の低音。",["dark","aggressive","808 bass","synth"],140,["industrial bass","massive sub bass pressure","distorted mechanical drums"]],
+    ["ハードテクノ","体に響くキックが主役の、音圧の大きいテクノ。",["aggressive","energetic","four-on-the-floor"],155,["hard techno","pounding distorted kick","huge loudness"]],
+    ["ダブステップ","うなるベースと重いリズムのダブステップ。",["dark","aggressive","half-time groove","synth"],140,["dubstep","wobble bass","heavy bass drops"]],
+    ["サイトランス","うねるベースとアシッドの音が続くサイケデリックなトランス。",["trance","energetic","synth","four-on-the-floor"],145,["full-on psytrance","rolling psy bassline","acid squelches"]],
+    ["ハッピーハードコア","明るく疾走する、ピアノとかわいい声のハードコア。",["happy hardcore","cute","energetic","uplifting","piano"],175,["happy hardcore piano stabs","pitched-up vocals"]],
+    ["和風テクノ","琴や三味線のフレーズが走る、高速の和風テクノ。",["traditional Japanese","koto","shamisen","energetic","synth"],160,["japanese techno","high-speed techno"]]
+  ].map(([name, summary, t, bpm, extra]) => sanitizeIdea({ name, summary, tags: { any: t }, bpm, extra }, "preset"));
   function normKey(k) {
     let s = String(k || "").trim();
     if (!s) return { key: "" };
@@ -1307,12 +1328,16 @@ a.btn{text-decoration:none;display:inline-block}
     ].filter(l => l !== "").join("\n").replace(/\n## /g, "\n\n## ");
   }
   const presetBox = $("#presets");
+  const ALL_PRESETS = PRESETS.concat(GENRE_PRESETS);
   presetBox.innerHTML = PRESETS.map((x, i) => `<button type="button" class="chip" data-preset="${i}" title="${esc(x.summary)}">${esc(x.name)}</button>`).join("");
-  presetBox.addEventListener("click", e => {
+  $("#genrePresets").innerHTML = GENRE_PRESETS.map((x, i) => `<button type="button" class="chip" data-preset="${PRESETS.length + i}" title="${esc(x.summary)}">${esc(x.name)}</button>`).join("");
+  const onPreset = e => {
     const b = e.target.closest("[data-preset]"); if (!b) return;
-    const p = cur(), x = PRESETS[+b.dataset.preset];
+    const p = cur(), x = ALL_PRESETS[+b.dataset.preset];
     p.ideas = [x, ...p.ideas.filter(i => i.name !== x.name)].slice(0, 6); touch(); renderIdeas();
-  });
+  };
+  presetBox.addEventListener("click", onPreset);
+  $("#genrePresets").addEventListener("click", onPreset);
   function ideaStyle(x) {
     return styleText(Object.assign(blank(), { jp: cur().jp, tags: x.tags, bpm: x.bpm || 100, bpmOn: !!x.bpm, key: x.key, custom: x.extra.join(", ") }));
   }
