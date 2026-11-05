@@ -419,7 +419,9 @@ a.btn{text-decoration:none;display:inline-block}
         <div class="prog-head">
           <button class="btn" id="btnMidiPlay" type="button">▶ 再生</button>
           <span class="prog-time" id="midiTime">0:00</span>
-          <span class="hint">小節を押すと、そこから再生します。「使わない」にしたトラックは鳴りません。音は簡易的な電子音です。</span>
+          <label class="check" for="midiDrumsOn"><input type="checkbox" id="midiDrumsOn" checked> ドラムも鳴らす</label>
+          <label class="field-inline" for="midiVol">音量</label><input type="range" id="midiVol" min="0" max="100" value="60" style="width:110px;accent-color:var(--accent)">
+          <span class="hint">小節を押すと、そこから再生します。「使わない」にしたトラックは鳴りません。音色はノコギリ波・矩形波などで近づけた簡易的な電子音です。</span>
         </div>
         <div class="prog-secs" id="midiProg"></div></div>
       <div class="f"><span class="lbl">よく出てくるコード進行（4小節）</span><div class="harm-words" id="midiLoop"></div></div>
@@ -2639,34 +2641,75 @@ a.btn{text-decoration:none;display:inline-block}
     play = null; $("#btnMidiPlay").textContent = "▶ 再生";
     document.querySelectorAll(".barc[data-now]").forEach(el => delete el.dataset.now);
   }
+  function waveFor(sound, pitch) {
+    const w = sound || "";
+    if (/saw|supersaw|guitar|brass|orchestra/.test(w)) return { type: "sawtooth", cut: /guitar/.test(w) ? 2200 : /orchestra/.test(w) ? 3500 : 4200, gain: /guitar/.test(w) ? 0.45 : 0.55 };
+    if (/square|organ|chiptune/.test(w)) return { type: "square", cut: 3000, gain: 0.4 };
+    if (/bass/.test(w) || pitch < 45) return { type: "sawtooth", cut: 700, gain: 0.9 };
+    if (/pad|strings|choir/.test(w)) return { type: "triangle", cut: 2500, gain: 0.5 };
+    if (/bell|vibraphone|glock|marimba/.test(w)) return { type: "sine", cut: 8000, gain: 0.6, pluck: true };
+    return { type: "triangle", cut: 6000, gain: 0.7 };
+  }
+  function drumHit(ctx, out, noise, pitch, t, vel) {
+    const v = 0.35 + 0.65 * vel;
+    const env = (node, peak, dur) => { const g = ctx.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(peak * v, t + 0.003); g.gain.exponentialRampToValueAtTime(0.0001, t + dur); node.connect(g); g.connect(out); return dur; };
+    const nz = (type, freq, q, peak, dur) => { const src = ctx.createBufferSource(); src.buffer = noise; const f = ctx.createBiquadFilter(); f.type = type; f.frequency.value = freq; f.Q.value = q; src.connect(f); env(f, peak, dur); src.start(t); src.stop(t + dur + 0.05); };
+    if (pitch === 35 || pitch === 36) {
+      const o = ctx.createOscillator(); o.type = "sine"; o.frequency.setValueAtTime(160, t); o.frequency.exponentialRampToValueAtTime(42, t + 0.12);
+      env(o, 1.6, 0.28); o.start(t); o.stop(t + 0.32);
+    } else if (pitch === 38 || pitch === 40) { nz("bandpass", 1900, 0.8, 0.9, 0.16); const o = ctx.createOscillator(); o.type = "triangle"; o.frequency.value = 190; env(o, 0.5, 0.08); o.start(t); o.stop(t + 0.1); }
+    else if (pitch === 39) { nz("bandpass", 1300, 1.2, 1.0, 0.12); }
+    else if (pitch === 42 || pitch === 44) { nz("highpass", 7500, 0.7, 0.35, 0.045); }
+    else if (pitch === 46) { nz("highpass", 7000, 0.7, 0.35, 0.25); }
+    else if (pitch === 49 || pitch === 57 || pitch === 52 || pitch === 55) { nz("highpass", 5000, 0.5, 0.45, 1.1); }
+    else if (pitch === 51 || pitch === 59 || pitch === 53) { nz("bandpass", 6000, 2, 0.3, 0.35); }
+    else if (pitch >= 41 && pitch <= 50) { const o = ctx.createOscillator(); o.type = "sine"; const f0 = 80 + (pitch - 41) * 18; o.frequency.setValueAtTime(f0 * 1.6, t); o.frequency.exponentialRampToValueAtTime(f0, t + 0.15); env(o, 1.0, 0.25); o.start(t); o.stop(t + 0.3); }
+    else nz("bandpass", 3000, 1, 0.3, 0.08);
+  }
   function playMidi(fromBar) {
     stopMidi();
     const a = midiA; if (!a) return;
     const AC = window.AudioContext || window.webkitAudioContext;
     if (!AC) { toast("このブラウザでは再生できません"); return; }
-    const ctx = new AC(), master = ctx.createGain(); master.gain.value = 0.18; master.connect(ctx.destination);
-    const offset = a.barSec[fromBar] || 0, t0 = ctx.currentTime + 0.1;
+    const ctx = new AC(), master = ctx.createGain(); master.connect(ctx.destination);
+    const comp = ctx.createDynamicsCompressor(); comp.threshold.value = -14; comp.ratio.value = 4; comp.connect(master);
+    const vol = () => (+$("#midiVol").value / 100) * 0.5;
+    master.gain.value = vol();
+    const noise = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate); { const d = noise.getChannelData(0); for (let k = 0; k < d.length; k++) d[k] = Math.random() * 2 - 1; }
+    const offset = a.barSec[fromBar] || 0, t0 = ctx.currentTime + 0.12;
+    const withDrums = $("#midiDrumsOn").checked;
+    const active = a.tracks.filter(t => t.drums ? withDrums : !!t.sound);
+    const per = 1 / Math.sqrt(Math.max(1, active.filter(t => !t.drums).length));
+    const buses = new Map();
+    active.forEach(t => {
+      if (t.drums) { const g = ctx.createGain(); g.gain.value = 0.55; g.connect(comp); buses.set(t.idx, { g, drums: true }); return; }
+      const w = waveFor(t.sound, t.avg), f = ctx.createBiquadFilter(), g = ctx.createGain();
+      f.type = "lowpass"; f.frequency.value = w.cut; g.gain.value = w.gain * per; f.connect(g); g.connect(comp);
+      buses.set(t.idx, { f, w });
+    });
     const notes = [];
-    a.tracks.forEach(t => { if (t.drums || !t.sound) return; t.notes.forEach(n => { const s0 = a.secOf(n.t0), s1 = a.secOf(n.t1); if (s1 > offset) notes.push({ s0, s1, p: n.pitch, v: n.vel / 127 }); }); });
+    active.forEach(t => t.notes.forEach(n => { const s0 = a.secOf(n.t0), s1 = a.secOf(n.t1); if (s1 > offset - 0.01 && s0 >= offset - 0.01) notes.push({ s0, s1, p: n.pitch, v: n.vel / 127, tr: t.idx }); }));
     notes.sort((x, y) => x.s0 - y.s0);
     let i = 0;
     const schedule = () => {
-      const horizon = ctx.currentTime - t0 + offset + 1.0;
+      if (!play) return;
+      master.gain.setTargetAtTime(vol(), ctx.currentTime, 0.05);
+      const horizon = ctx.currentTime - t0 + offset + 0.8;
       while (i < notes.length && notes[i].s0 < horizon) {
-        const n = notes[i++], start = t0 + Math.max(0, n.s0 - offset), end = t0 + (n.s1 - offset);
-        if (end <= start) continue;
+        const n = notes[i++], bus = buses.get(n.tr), start = t0 + Math.max(0, n.s0 - offset);
+        if (bus.drums) { drumHit(ctx, bus.g, noise, n.p, start, n.v); continue; }
+        const end = t0 + (n.s1 - offset); if (end <= start) continue;
         const o = ctx.createOscillator(), g = ctx.createGain();
-        o.type = n.p < 48 ? "sine" : "triangle";
-        o.frequency.value = 440 * Math.pow(2, (n.p - 69) / 12);
-        const peak = 0.25 + 0.75 * n.v, dur = Math.min(end - start, 4);
-        g.gain.setValueAtTime(0, start); g.gain.linearRampToValueAtTime(peak, start + 0.008);
-        g.gain.exponentialRampToValueAtTime(Math.max(0.001, peak * 0.35), start + Math.min(dur, 0.6));
-        g.gain.setValueAtTime(Math.max(0.001, peak * 0.35), start + dur); g.gain.exponentialRampToValueAtTime(0.0005, start + dur + 0.12);
-        o.connect(g); g.connect(master); o.start(start); o.stop(start + dur + 0.15);
+        o.type = bus.w.type; o.frequency.value = 440 * Math.pow(2, (n.p - 69) / 12);
+        const peak = 0.2 + 0.8 * n.v, dur = Math.min(end - start, 4), sus = bus.w.pluck ? 0.05 : 0.45;
+        g.gain.setValueAtTime(0.0001, start); g.gain.exponentialRampToValueAtTime(peak, start + 0.006);
+        g.gain.exponentialRampToValueAtTime(Math.max(0.001, peak * sus), start + Math.min(dur, bus.w.pluck ? 0.4 : 0.35));
+        g.gain.setValueAtTime(Math.max(0.001, peak * sus), start + dur); g.gain.exponentialRampToValueAtTime(0.0001, start + dur + 0.1);
+        o.connect(g); g.connect(bus.f); o.start(start); o.stop(start + dur + 0.12);
       }
     };
-    schedule();
-    play = { ctx, timer: setInterval(schedule, 200), raf: 0 };
+    play = { ctx, timer: 0, raf: 0 };
+    schedule(); play.timer = setInterval(schedule, 150);
     $("#btnMidiPlay").textContent = "■ 停止";
     const end = a.barSec[a.nBars];
     let lastBar = -1;
@@ -2685,6 +2728,7 @@ a.btn{text-decoration:none;display:inline-block}
       play.raf = requestAnimationFrame(tick);
     };
     play.raf = requestAnimationFrame(tick);
+    if (ctx.state === "suspended") ctx.resume().catch(() => {});
   }
   $("#btnMidiPlay").addEventListener("click", () => { if (play) stopMidi(); else playMidi(0); });
   $("#midiProg").addEventListener("click", e => { const b = e.target.closest("[data-bar]"); if (b) playMidi(+b.dataset.bar); });
