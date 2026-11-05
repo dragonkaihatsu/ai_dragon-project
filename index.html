@@ -256,6 +256,24 @@ a.btn{text-decoration:none;display:inline-block}
 .dens-labels span{overflow:hidden;white-space:nowrap;text-overflow:ellipsis;border-left:1px solid var(--rule);padding-left:3px;min-width:0}
 #midiOut{white-space:pre-wrap;line-height:1.7}
 
+/* chord chart */
+.prog-head{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.prog-time{font-family:var(--f-mono);font-size:14px;font-variant-numeric:tabular-nums}
+.prog-secs{display:flex;flex-direction:column;gap:12px}
+.prog-sec h4{margin:0 0 6px;font-size:13px;display:flex;gap:8px;align-items:baseline}
+.prog-sec h4 i{display:inline-block;width:10px;height:10px;border-radius:2px;background:var(--sec-verse)}
+.prog-sec[data-kind="chorus"] h4 i{background:var(--sec-chorus)} .prog-sec[data-kind="intro"] h4 i,.prog-sec[data-kind="outro"] h4 i{background:var(--sec-edge)} .prog-sec[data-kind="break"] h4 i{background:var(--sec-inst)}
+.prog-sec h4 small{font-family:var(--f-mono);font-weight:400;color:var(--muted)}
+.bars{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px}
+@media (max-width:560px){.bars{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.barc{border:1px solid var(--rule);border-left:3px solid var(--sec-verse);border-radius:3px;padding:6px 8px;background:var(--sheet);min-width:0;cursor:pointer;text-align:left;display:flex;flex-direction:column;gap:2px}
+.prog-sec[data-kind="chorus"] .barc{border-left-color:var(--sec-chorus)} .prog-sec[data-kind="intro"] .barc,.prog-sec[data-kind="outro"] .barc{border-left-color:var(--sec-edge)} .prog-sec[data-kind="break"] .barc{border-left-color:var(--sec-inst)}
+.barc small{font-family:var(--f-mono);font-size:10px;color:var(--muted)}
+.barc b{font-family:var(--f-mono);font-size:14px;font-weight:600;overflow-wrap:anywhere}
+.barc b span{color:var(--muted);font-weight:400}
+.barc[data-now]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.barc[data-now] small,.barc[data-now] b span{color:inherit;opacity:.8}
+
 /* tips + footer */
 .tips{background:var(--sheet);border:1px solid var(--rule);border-radius:6px;padding:16px 20px}
 .tips h2{font-size:13px;letter-spacing:.1em;margin:0 0 8px;color:var(--muted)}
@@ -397,6 +415,13 @@ a.btn{text-decoration:none;display:inline-block}
         <div class="row"><button class="btn ghost" id="btnMidiPiano" type="button">全部ピアノにする</button><button class="btn ghost" id="btnMidiReset" type="button">音色をおすすめに戻す</button></div></div>
       <div class="f"><span class="lbl">小節ごとの音の多さと区切り</span>
         <div class="dens" id="midiDens"></div><div class="dens-labels" id="midiDensLabels"></div></div>
+      <div class="f"><span class="lbl">曲の進行（小節ごとのコード）</span>
+        <div class="prog-head">
+          <button class="btn" id="btnMidiPlay" type="button">▶ 再生</button>
+          <span class="prog-time" id="midiTime">0:00</span>
+          <span class="hint">小節を押すと、そこから再生します。「使わない」にしたトラックは鳴りません。音は簡易的な電子音です。</span>
+        </div>
+        <div class="prog-secs" id="midiProg"></div></div>
       <div class="f"><span class="lbl">よく出てくるコード進行（4小節）</span><div class="harm-words" id="midiLoop"></div></div>
       <div class="row">
         <label class="check" for="midiVocal"><input type="checkbox" id="midiVocal"> 歌ものとして作る（Verse / Chorus にする）</label>
@@ -2364,7 +2389,8 @@ a.btn{text-decoration:none;display:inline-block}
     const grams = new Map();
     for (let b = 0; b + 4 <= nBars; b++) { const g = barCh.slice(b, b + 4); if (g.some(x => !x)) continue; const k = g.join(" - "); grams.set(k, (grams.get(k) || 0) + 1); }
     let loop = null, loopN = 0; grams.forEach((n, k) => { if (n > loopN) { loop = k; loopN = n; } });
-    return { loop, loopN, bpm, tempoChanges, ts, nBars, seconds: sec(m.endTick), tracks: trs, keyName, keyTonic: best.tonic, keyMinor: best.minor, keyConf: best.r, chords, segs, density, drumWords };
+    const barSec = Array.from({ length: nBars + 1 }, (_, b) => sec(b * tpb));
+    return { tpb, secOf: sec, barSec, loop, loopN, bpm, tempoChanges, ts, nBars, seconds: sec(m.endTick), tracks: trs, keyName, keyTonic: best.tonic, keyMinor: best.minor, keyConf: best.r, chords, segs, density, drumWords };
   }
 
   /* ---------- MIDI: UI ---------- */
@@ -2427,9 +2453,82 @@ a.btn{text-decoration:none;display:inline-block}
     const names = { intro: "イントロ", outro: "アウトロ", break: "ブレイク", chorus: "サビ", verse: "Aメロ" };
     $("#midiDensLabels").innerHTML = a.segs.map(s => `<span style="flex:${s.len} 1 0" title="${fmtSec(s.t0)}〜 ${s.len}小節">${names[s.kind]}</span>`).join("");
     $("#midiLoop").textContent = a.loop ? `${a.loop}（${a.loopN}回）` : "はっきり繰り返す進行は見つかりませんでした";
+    renderProg();
     $("#midiOut").textContent = midiText(a) + `\n推定の長さ ${fmtSec(a.segs.reduce((n, s) => n + s.len, 0) * 240 / a.bpm)}`;
   }
+  const SEC_JA = { intro: "イントロ", outro: "アウトロ", break: "ブレイク", chorus: "サビ", verse: "Aメロ" };
+  function chordName(c) { return c ? c.replace(/([A-G])b/g, "$1♭").replace(/b(?=\d)/g, "♭").replace(/#/g, "♯") : "—"; }
+  function renderProg() {
+    const a = midiA, box = $("#midiProg"); if (!a) { box.innerHTML = ""; return; }
+    box.innerHTML = a.segs.map(sg => {
+      const cells = [];
+      for (let b = sg.start; b < sg.start + sg.len; b++) {
+        const c1 = a.chords[b * 2], c2 = a.chords[b * 2 + 1];
+        const txt = c2 && c2 !== c1 ? `${chordName(c1)} <span>|</span> ${chordName(c2)}` : chordName(c1 || c2);
+        cells.push(`<button type="button" class="barc" data-bar="${b}"><small>${b + 1}小節 ${fmtSec(a.barSec[b])}</small><b>${txt}</b></button>`);
+      }
+      return `<div class="prog-sec" data-kind="${sg.kind}"><h4><i></i>${SEC_JA[sg.kind]}<small>${fmtSec(sg.t0)}〜 ${sg.len}小節</small></h4><div class="bars">${cells.join("")}</div></div>`;
+    }).join("");
+  }
+  let play = null;
+  function stopMidi() {
+    if (!play) return;
+    clearInterval(play.timer); cancelAnimationFrame(play.raf);
+    try { play.ctx.close(); } catch (e) {}
+    play = null; $("#btnMidiPlay").textContent = "▶ 再生";
+    document.querySelectorAll(".barc[data-now]").forEach(el => delete el.dataset.now);
+  }
+  function playMidi(fromBar) {
+    stopMidi();
+    const a = midiA; if (!a) return;
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) { toast("このブラウザでは再生できません"); return; }
+    const ctx = new AC(), master = ctx.createGain(); master.gain.value = 0.18; master.connect(ctx.destination);
+    const offset = a.barSec[fromBar] || 0, t0 = ctx.currentTime + 0.1;
+    const notes = [];
+    a.tracks.forEach(t => { if (t.drums || !t.sound) return; t.notes.forEach(n => { const s0 = a.secOf(n.t0), s1 = a.secOf(n.t1); if (s1 > offset) notes.push({ s0, s1, p: n.pitch, v: n.vel / 127 }); }); });
+    notes.sort((x, y) => x.s0 - y.s0);
+    let i = 0;
+    const schedule = () => {
+      const horizon = ctx.currentTime - t0 + offset + 1.0;
+      while (i < notes.length && notes[i].s0 < horizon) {
+        const n = notes[i++], start = t0 + Math.max(0, n.s0 - offset), end = t0 + (n.s1 - offset);
+        if (end <= start) continue;
+        const o = ctx.createOscillator(), g = ctx.createGain();
+        o.type = n.p < 48 ? "sine" : "triangle";
+        o.frequency.value = 440 * Math.pow(2, (n.p - 69) / 12);
+        const peak = 0.25 + 0.75 * n.v, dur = Math.min(end - start, 4);
+        g.gain.setValueAtTime(0, start); g.gain.linearRampToValueAtTime(peak, start + 0.008);
+        g.gain.exponentialRampToValueAtTime(Math.max(0.001, peak * 0.35), start + Math.min(dur, 0.6));
+        g.gain.setValueAtTime(Math.max(0.001, peak * 0.35), start + dur); g.gain.exponentialRampToValueAtTime(0.0005, start + dur + 0.12);
+        o.connect(g); g.connect(master); o.start(start); o.stop(start + dur + 0.15);
+      }
+    };
+    schedule();
+    play = { ctx, timer: setInterval(schedule, 200), raf: 0 };
+    $("#btnMidiPlay").textContent = "■ 停止";
+    const end = a.barSec[a.nBars];
+    let lastBar = -1;
+    const tick = () => {
+      if (!play) return;
+      const now = ctx.currentTime - t0 + offset;
+      $("#midiTime").textContent = fmtSec(Math.max(0, now));
+      let bar = 0; while (bar < a.nBars - 1 && a.barSec[bar + 1] <= now) bar++;
+      if (bar !== lastBar) {
+        document.querySelectorAll(".barc[data-now]").forEach(el => delete el.dataset.now);
+        const el = document.querySelector(`.barc[data-bar="${bar}"]`);
+        if (el) { el.dataset.now = "1"; const r = el.getBoundingClientRect(); if (r.top < 0 || r.bottom > innerHeight) el.scrollIntoView({ block: "center" }); }
+        lastBar = bar;
+      }
+      if (now >= end + 0.3) { stopMidi(); $("#midiTime").textContent = fmtSec(end); return; }
+      play.raf = requestAnimationFrame(tick);
+    };
+    play.raf = requestAnimationFrame(tick);
+  }
+  $("#btnMidiPlay").addEventListener("click", () => { if (play) stopMidi(); else playMidi(0); });
+  $("#midiProg").addEventListener("click", e => { const b = e.target.closest("[data-bar]"); if (b) playMidi(+b.dataset.bar); });
   async function loadMidiFile(f) {
+    stopMidi();
     const st = $("#midiName");
     if (!f) return;
     if (f.size > 4 * 1024 * 1024) { st.textContent = "ファイルが大きすぎます（4MB まで）。"; return; }
