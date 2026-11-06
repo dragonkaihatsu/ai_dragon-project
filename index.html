@@ -280,6 +280,14 @@ a.btn{text-decoration:none;display:inline-block}
 .barc[data-now]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
 .barc[data-now] small,.barc[data-now] b span{color:inherit;opacity:.8}
 
+/* soramimi */
+.sora-table{width:100%;border-collapse:collapse;font-size:13px}
+.sora-table td{padding:5px 8px;border-bottom:1px solid var(--rule);vertical-align:top}
+.sora-table td.en{font-family:var(--f-mono);font-size:13px}
+.sora-table td.ja{color:var(--muted)}
+.sora-table tr.tag td{font-family:var(--f-mono);font-weight:600;color:var(--accent);border-bottom:none;padding-top:12px}
+#soraTheme{width:100%;min-height:72px;background:var(--sheet);border:1px solid var(--rule);border-radius:4px;padding:8px;resize:vertical}
+
 /* tips + footer */
 .tips{background:var(--sheet);border:1px solid var(--rule);border-radius:6px;padding:16px 20px}
 .tips h2{font-size:13px;letter-spacing:.1em;margin:0 0 8px;color:var(--muted)}
@@ -652,6 +660,28 @@ a.btn{text-decoration:none;display:inline-block}
     </div>
   </section>
 
+  <section class="sheet" aria-labelledby="soraTape">
+    <div class="tape" id="soraTape">SORAMIMI<small>空耳英語の歌詞</small></div>
+    <p class="hint">英語として歌っているのに、日本語に聞こえる歌詞を作ります（例: "What time is it now?" →「掘った芋いじるな」、"How much?" →「ハマチ」）。構成は PROMPT の「構成」の設定を使います。Suno には英語だけを入れ、日本語の聞こえ方は確認用に表示します。</p>
+    <div class="form">
+      <div class="f"><label class="lbl" for="soraTheme">日本語で言いたいこと（テーマや入れたい言葉）</label>
+        <textarea id="soraTheme" placeholder="例: ありがとう、君が好き、また明日、夢をあきらめない"></textarea></div>
+      <div class="askrow">
+        <button class="btn primary" id="btnSora" type="button" disabled>Claude に空耳英語の歌詞を作ってもらう</button>
+        <button class="btn ghost" id="btnSoraCopy" type="button">指示文をコピー（ほかの AI 用）</button>
+        <button class="btn ghost" id="btnSoraEx" type="button">例を見る</button>
+        <span class="status" id="soraStatus" role="status"></span>
+      </div>
+      <div id="soraOut" hidden>
+        <div class="strip-scroll"><table class="sora-table"><tbody id="soraRows"></tbody></table></div>
+        <div class="row">
+          <button class="btn primary" id="btnSoraUse" type="button">英語だけを LYRICS に入れる</button>
+          <button class="btn ghost" id="btnSoraVocal" type="button">英語の歌い方にする（日本語の歌の指定をオフ）</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <section class="sheet" aria-labelledby="sendTape">
     <div class="tape" id="sendTape">SEND<small>Suno に貼る</small></div>
     <p class="hint">Suno の作成画面で「Custom」を選び、上から順にコピーして貼り付けます。Suno には外部から曲を作らせる公開 API がないため、貼り付けと生成ボタンは Suno の画面で押してください。</p>
@@ -864,7 +894,7 @@ a.btn{text-decoration:none;display:inline-block}
   const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
   const blank = () => ({ id: uid(), title: "", tags: { genre: [], jp: [], mood: [], vocal: [], inst: [], prod: [] }, jp: true, bpm: 100, bpmOn: false, key: "", custom: "", exclude: "", lyrics: "", readIgnore: [],
     brief: { theme: "", words: "", pov: "auto", struct: "cur", line: "mid", eng: "some", rhyme: true, kana: true, titles: true, essence: [], lang: "ja" },
-    idea: { image: "", ref: "", feel: "" }, ideas: [], target: 0, harmony: { key: -1, prog: 0 }, timeMemo: "", focus: [], updated: Date.now() });
+    idea: { image: "", ref: "", feel: "" }, ideas: [], target: 0, harmony: { key: -1, prog: 0 }, timeMemo: "", focus: [], sora: { theme: "", result: null }, updated: Date.now() });
   const sample = () => Object.assign(blank(), {
     sample: true, title: "夕凪ハイウェイ",
     tags: { genre: ["city pop"], mood: ["nostalgic","bittersweet"], vocal: ["female vocals","airy vocals"], inst: ["rhodes piano","slap bass","brass section"], prod: ["80s","analog warmth"] },
@@ -951,6 +981,7 @@ a.btn{text-decoration:none;display:inline-block}
     out.idea = Object.assign({ image: "", ref: "", feel: "" }, (p && p.idea) || {});
     if (!Array.isArray(out.ideas)) out.ideas = [];
     out.harmony = Object.assign({ key: -1, prog: 0 }, (p && p.harmony) || {});
+    out.sora = Object.assign({ theme: "", result: null }, (p && p.sora) || {});
     const moved = ["shamisen", "koto", "taiko drums"];
     out.tags.inst = out.tags.inst.filter(t => {
       if (!moved.includes(t)) return true;
@@ -2991,6 +3022,83 @@ a.btn{text-decoration:none;display:inline-block}
     playChordAt(ctx, b.dataset.chord, ctx.currentTime + 0.02, 1.6, $("#harmArp").checked);
   });
 
+  /* ---------- soramimi (English that sounds like Japanese) ---------- */
+  const SORA_EXAMPLES = { title: "空耳英語の有名な例", sections: [{ tag: "例", lines: [
+    { en: "What time is it now?", ja: "掘った芋いじるな" }, { en: "Sit down, please", ja: "知らんぷり" }, { en: "I get off", ja: "揚げ豆腐" },
+    { en: "How much?", ja: "ハマチ" }, { en: "Alligator", ja: "ありがとう" }, { en: "Ohio", ja: "おはよう" } ] }] };
+  function soraPrompt(p) {
+    const secs = structFor(p);
+    const plan = secs.map(name => { const base = baseOf(name), kind = kindOf(base) || "verse"; return `[${base}] … ${NO_LYRIC_OK.test(base) ? "歌詞なし" : (/^chorus|hook/i.test(base) ? "4行" : "4行")}`; }).join("\n");
+    return [
+      "英語なのに日本語に聞こえる「空耳英語」の歌詞を作ってください。",
+      "",
+      "## 条件",
+      "- 各行は英語として意味が通じる文（短いフレーズでよい）にし、英語の発音で歌ったときに、日本語のフレーズに聞こえるようにする。",
+      "- その行が、どんな日本語に聞こえるかも書く。聞こえる日本語がつながって、全体で一つの日本語の歌のようになるとなおよい。",
+      "- サビは同じ空耳フレーズを繰り返して、耳に残るようにする。",
+      "- 下品な言葉、差別的な言葉、実在の人物名、既存の歌詞は使わない。",
+      `- 日本語で言いたいこと: ${p.sora.theme.trim() || "（自由。明るく前向きな内容）"}`,
+      `- 曲の雰囲気: ${styleText(p) || "（自由）"}`,
+      "- 有名な例: \"What time is it now?\" →「掘った芋いじるな」、\"Sit down, please\" →「知らんぷり」、\"How much?\" →「ハマチ」",
+      "",
+      "## 構成（この順番で、各セクションの行数に合わせる）",
+      plan,
+      "",
+      "## 出力",
+      '次の形の JSON だけを返してください。{"title":"英語の曲名","sections":[{"tag":"Verse 1","lines":[{"en":"英語の歌詞","ja":"聞こえる日本語"}]}]}'
+    ].join("\n");
+  }
+  function sanitizeSora(raw) {
+    const secs = raw && Array.isArray(raw.sections) ? raw.sections : [];
+    const out = secs.slice(0, 20).map(sc => ({
+      tag: String(sc && sc.tag || "Verse").replace(/^\[|\]$/g, "").slice(0, 60),
+      lines: (sc && Array.isArray(sc.lines) ? sc.lines : []).slice(0, 12).map(l => ({ en: String(l && l.en || "").trim().slice(0, 120), ja: String(l && l.ja || "").trim().slice(0, 80) })).filter(l => l.en)
+    }));
+    return out.length ? { title: String(raw.title || "").slice(0, 60), sections: out } : null;
+  }
+  function renderSora(res) {
+    const box = $("#soraOut"); box.hidden = !res; if (!res) return;
+    $("#soraRows").innerHTML = (res.title ? `<tr class="tag"><td colspan="2">${esc(res.title)}</td></tr>` : "") + res.sections.map(sc =>
+      `<tr class="tag"><td colspan="2">[${esc(sc.tag)}]</td></tr>` + (sc.lines.length ? sc.lines.map(l => `<tr><td class="en">${esc(l.en)}</td><td class="ja">${l.ja ? "→「" + esc(l.ja) + "」に聞こえる" : ""}</td></tr>`).join("") : `<tr><td class="ja" colspan="2">（歌詞なし）</td></tr>`)).join("");
+    $("#btnSoraUse").hidden = res === SORA_EXAMPLES;
+  }
+  $("#soraTheme").addEventListener("input", e => { cur().sora.theme = e.target.value; touch(); });
+  $("#btnSoraEx").addEventListener("click", () => { renderSora(SORA_EXAMPLES); });
+  $("#btnSoraCopy").addEventListener("click", () => copyText(soraPrompt(cur()), "空耳英語の指示文"));
+  $("#btnSoraUse").addEventListener("click", () => {
+    const r = cur().sora.result; if (!r) return;
+    const prev = ta.value, p = cur();
+    setLyrics(r.sections.map(sc => `[${sc.tag}]\n` + sc.lines.map(l => l.en).join("\n")).join("\n\n") + "\n");
+    if (r.title && !p.title.trim()) { p.title = r.title; $("#title").value = r.title; renderTitle(); renderProjects(); }
+    $("#lyricsTape").scrollIntoView({ block: "start" });
+    toast("空耳英語の歌詞を LYRICS に入れました（英語だけ）", "元に戻す", () => setLyrics(prev, null, true));
+  });
+  $("#btnSoraVocal").addEventListener("click", () => {
+    const p = cur(); p.jp = false; p.brief.lang = "en"; $("#jpOn").checked = false; $("#bLang").value = "en"; touch(); renderStyle(); renderBrief();
+    toast("英語の歌い方にしました（STYLE の日本語の歌の指定をオフ）");
+  });
+  if (window.claude && typeof window.claude.use === "function") {
+    window.claude.use("sample").then(sm => {
+      const btn = $("#btnSora");
+      if (!sm) { btn.hidden = true; return; }
+      btn.disabled = false;
+      btn.addEventListener("click", async () => {
+        const p = cur(), st = $("#soraStatus");
+        btn.disabled = true; st.textContent = "作っています…（30秒〜1分ほど）"; st.dataset.tone = "";
+        try {
+          const res = sanitizeSora(await sm.json(soraPrompt(p), { cache: false }));
+          if (!res) { st.textContent = "うまく作れませんでした。もう一度押してください。"; st.dataset.tone = "bad"; return; }
+          p.sora.result = res; touch(); renderSora(res);
+          st.textContent = "できました。英語の行がどう聞こえるかを確かめてから LYRICS に入れてください。"; btn.textContent = "別の案を作ってもらう";
+        } catch (e) {
+          const code = e && e.code;
+          if (HIDE.has(code)) { btn.hidden = true; st.textContent = "ここでは Claude を呼び出せないため、「指示文をコピー」でほかの AI に頼んでください。"; }
+          else { st.textContent = ASK_ERR[code] || "うまく受け取れませんでした。もう一度押してください。"; st.dataset.tone = "bad"; }
+        } finally { btn.disabled = false; }
+      });
+    }, () => { $("#btnSora").hidden = true; });
+  } else { $("#btnSora").hidden = true; }
+
   /* ---------- rendering ---------- */
   function meter(el, n, max) {
     const pct = max ? Math.min(100, n / max * 100) : 0;
@@ -3065,6 +3173,7 @@ a.btn{text-decoration:none;display:inline-block}
     $("#custom").value = p.custom; $("#exclude").value = p.exclude; ta.value = p.lyrics; $("#limitMode").value = store.limit;
     $("#jpOn").checked = p.jp;
     $("#iImage").value = p.idea.image; $("#iRef").value = p.idea.ref; $("#iFeel").value = p.idea.feel; $("#timeMemo").value = p.timeMemo;
+    $("#soraTheme").value = p.sora.theme; if (typeof renderSora === "function") renderSora(p.sora.result);
     const b = p.brief;
     $("#bTheme").value = b.theme; $("#bWords").value = b.words; $("#bPov").value = b.pov; $("#bStruct").value = b.struct;
     renderEss();
