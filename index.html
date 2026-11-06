@@ -708,7 +708,7 @@ a.btn{text-decoration:none;display:inline-block}
     { id: "inst", ja: "楽器", items: [
       ["ピアノ","piano"],["エレピ","rhodes piano"],["アコギ","acoustic guitar"],["エレキ","electric guitar"],["シンセ","synth"],["ストリングス","strings"],
       ["ヴァイオリン","violin"],["ブラス","brass section"],["サックス","saxophone"],["スラップベース","slap bass"],["808","808 bass"],["オルガン","organ"],
-      ["チップチューン","chiptune"],["パイプオルガン","pipe organ"],["チェンバロ","harpsichord"],["ティンパニ","timpani"]
+      ["チップチューン","chiptune"],["パイプオルガン","pipe organ"],["カリンバ","kalimba"],["コンガ","congas"],["チェンバロ","harpsichord"],["ティンパニ","timpani"]
     ]},
     { id: "prod", ja: "サウンド・制作", items: [
       ["高音質","polished production"],["Lo-fi","lo-fi"],["アナログ感","analog warmth"],["リバーブ深め","reverb-heavy"],["ワイドなステレオ","wide stereo"],
@@ -729,6 +729,7 @@ a.btn{text-decoration:none;display:inline-block}
     { id: "drums", ja: "ドラム", style: ["hard-hitting drums"], tag: "hard-hitting drums" },
     { id: "lead", ja: "シンセのリード", style: ["prominent synth lead"], tag: "synth lead" },
     { id: "supersaw", ja: "スーパーソー", style: ["prominent supersaw lead"], tag: "supersaw lead" },
+    { id: "horns", ja: "ホーン", style: ["prominent horn section"], tag: "horn section" },
     { id: "strings", ja: "ストリングス", style: ["lush prominent strings"], tag: "strings" }
   ];
   const NO_RANDOM = new Set(["instrumental","rap","choir","duet"]);
@@ -2177,6 +2178,32 @@ a.btn{text-decoration:none;display:inline-block}
         "[Instrumental: powerful, organ, guitar riffs, extra kick fills, 10 bars]", "[Orchestra Hit]", "[Chord Progression: D7 - G - Em - C]", "[White Noise Riser]", "",
         "[Drop: explosive, key change up, half step, 8 bars]", "[Crash Cymbal]", "[Noise Burst]", "[Chord Progression: Fm - Db - Ab - Eb]", "",
         "[Outro: powerful, rapid orchestra hit stabs, crash cymbal roll, sudden ending hit, bright major chord, 4 bars]", "[Orchestra Hit]", "[Chord Progression: Eb - F7 - F]", "", "[End]", ""
+      ].join("\n")
+    }
+  }, {
+    name: "EW&F 風ディスコ・ファンク（生演奏・ホーンとファルセット）",
+    summary: "厚いホーンセクションとカリンバ、テナーの歌声に高いファルセットのハモりが重なる、70年代の生演奏ディスコ・ファンク。ジャズっぽいコードとラテンのパーカッションで、明るく祝福するように踊る曲。",
+    includes: ["STYLE: ディスコ・ファンク・ファンク・ソウル、70年代、生演奏、124 BPM、E♭ メジャー", "LYRICS: オリジナル英語歌詞「Golden Hour Groove」（テナー＋ファルセット＋グループのコーラス）", "HARMONY: 丸サ進行（E♭: A♭maj7 → G7 → Cm7 → B♭m7）", "いちばん目立たせたい音: ホーン"],
+    data: {
+      title: "Golden Hour Groove", jp: false, focus: ["horns"],
+      style: ["disco funk","funk","soul","70s","live band","uplifting","energetic","vocal harmonies","falsetto","brass section","saxophone","kalimba","congas","slap bass","electric guitar","rhodes piano","strings","catchy hook","jazzy chord progressions"],
+      custom: "punchy horn section, trumpet and saxophone stabs, soulful male tenor lead vocals, soaring falsetto harmonies, group vocal hooks, scat vocal chorus, tight funk rhythm guitar, lush string section, latin percussion, tight live drums, joyful celebration, vinyl warmth",
+      bpm: 124, key: "E♭ major", exclude: "EDM, synth, drum machine, trap, lo-fi, autotune", target: 0,
+      harmony: { key: 3, prog: 1 },
+      brief: { theme: "夕暮れの金色の光の中で、みんなで手を取り合って踊る、祝福のディスコ・ファンク", words: "golden, light, groove, love, dance, sky", pov: "auto", struct: "cur", line: "short", eng: "more", rhyme: true, kana: false, titles: false, essence: [], lang: "en" },
+      lyrics: [
+        "[Intro: powerful, punchy horn section, kalimba, congas, 8 bars]", "(Hey! Ooh-wah!)", "",
+        "[Verse 1: mid-energy, soulful male tenor lead vocals, tight funk rhythm guitar, 8 bars]", "[Chord Progression: Fm9 - Bb13 - Ebmaj9 - Cm9]", "Do you remember the golden light", "Shining down on a summer night", "Every heartbeat was moving free", "Come on and dance with me", "",
+        "[Pre-Chorus: mid-energy, soaring falsetto harmonies, string swells, 4 bars]", "Lift your hands up to the sky", "Let the music take you high", "",
+        "[Chorus: powerful, group vocal hooks, horn stabs, 8 bars]", "[Chord Progression: Abmaj7 - G7 - Cm7 - Bbm7]", "Golden hour, feel the groove (ooh-wah)", "Golden hour, nothing to lose", "Golden hour, light it up", "Dance until the sun comes up", "",
+        "[Instrumental: powerful, horn section solo, kalimba, latin percussion, 8 bars]", "",
+        "[Verse 2: mid-energy, soulful male tenor lead vocals, 8 bars]", "[Chord Progression: Fm9 - Bb13 - Ebmaj9 - Cm9]", "Brothers and sisters, side by side", "Open your heart and feel alive", "Love is the rhythm, love is the key", "Come on and sing with me", "",
+        "[Pre-Chorus: mid-energy, soaring falsetto harmonies, string swells, 4 bars]", "Lift your hands up to the sky", "Let the music take you high", "",
+        "[Chorus: powerful, group vocal hooks, horn stabs, 8 bars]", "[Chord Progression: Abmaj7 - G7 - Cm7 - Bbm7]", "Golden hour, feel the groove (ooh-wah)", "Golden hour, nothing to lose", "Golden hour, light it up", "Dance until the sun comes up", "",
+        "[Bridge: soft, kalimba and falsetto, 8 bars]", "Ooh-wah, ooh-wah", "Love will find a way", "Ooh-wah, ooh-wah", "Shining every day", "",
+        "[Break: mid-energy, drum fill, horn swell, 2 bars]", "",
+        "[Chorus: explosive, key change up, scat vocal chorus, horn section, 8 bars]", "[Chord Progression: Amaj7 - G#7 - C#m7 - Bm7]", "Golden hour, feel the groove (ooh-wah)", "Golden hour, nothing to lose", "Golden hour, light it up", "Dance until the sun comes up", "",
+        "[Outro: very soft, fade out, group vocals ad-libs, horn stabs, 8 bars]", "(Ooh-wah, golden hour)", "[Fade Out]", "", "[End]", ""
       ].join("\n")
     }
   }];
