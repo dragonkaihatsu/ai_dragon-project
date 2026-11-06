@@ -690,7 +690,7 @@ a.btn{text-decoration:none;display:inline-block}
       ["ポップパンク","pop punk"],["メタル","metal"],["EDM","EDM"],["フューチャーベース","future bass"],["ハウス","house"],["ドラムンベース","drum and bass"],
       ["シンセウェイヴ","synthwave"],["Lo-fi ヒップホップ","lo-fi hip hop"],["トラップ","trap"],["R&B","R&B"],["ファンク","funk"],["ジャズ","jazz"],
       ["ボサノバ","bossa nova"],["バラード","ballad"],["フォーク","acoustic folk"],["アイドル","idol pop"],["演歌","enka"],["オーケストラ","orchestral"],["アンビエント","ambient"],
-      ["ハードコア","hardcore techno"],["ガバ","gabber"],["J-CORE","J-core"],["トランスコア","trancecore"],["ハッピーハードコア","happy hardcore"],["ブレイクコア","breakcore"],["ジャングル","jungle"],["リキッドDnB","liquid drum and bass"],["トランス","trance"],["ハンズアップ","hands up"],["フューチャーファンク","future funk"],["フレンチハウス","french house"],["シンフォニックメタル","symphonic metal"],["イタロ・ハウス","italo house"],["ピアノハウス","piano house"],["Hi-NRG","hi-NRG"],
+      ["ハードコア","hardcore techno"],["ガバ","gabber"],["J-CORE","J-core"],["トランスコア","trancecore"],["ハッピーハードコア","happy hardcore"],["ブレイクコア","breakcore"],["ジャングル","jungle"],["リキッドDnB","liquid drum and bass"],["トランス","trance"],["ハンズアップ","hands up"],["フューチャーファンク","future funk"],["フレンチハウス","french house"],["シンフォニックメタル","symphonic metal"],["ディスコ","disco"],["ディスコ・ファンク","disco funk"],["ソウル","soul"],["イタロ・ハウス","italo house"],["ピアノハウス","piano house"],["Hi-NRG","hi-NRG"],
       ["ユーロビート","eurobeat"],["ハイパーユーロビート","hyper eurobeat"],["スピードレイヴ","speed rave"],["レイヴ","rave"],["プログレッシブハウス","progressive house"],["ファンキーハウス","funky house"],["アシッドジャズ","acid jazz"],["ブレイクビーツ","breakbeat"],["UKガラージ","UK garage"]
     ]},
     { id: "jp", ja: "和・日本らしさ", items: [
@@ -713,7 +713,7 @@ a.btn{text-decoration:none;display:inline-block}
     { id: "prod", ja: "サウンド・制作", items: [
       ["高音質","polished production"],["Lo-fi","lo-fi"],["アナログ感","analog warmth"],["リバーブ深め","reverb-heavy"],["ワイドなステレオ","wide stereo"],
       ["パンチのあるドラム","punchy drums"],["4つ打ち","four-on-the-floor"],["ハーフタイム","half-time groove"],["ミニマル","minimal"],
-      ["80年代","80s"],["90年代","90s"],["キャッチーなフック","catchy hook"],
+      ["70年代","70s"],["80年代","80s"],["90年代","90s"],["生演奏のバンド","live band"],["キャッチーなフック","catchy hook"],
       ["だんだん盛り上がる","dynamic build"],["サビで爆発","explosive chorus"],["静と動の対比","quiet-loud dynamics"],["転調あり","key change"],
       ["アーメンブレイク","amen break"],["ボーカルチョップ","vocal chops"],["エアホーン","air horns"],["煽りボイス","hype vocal samples"],
       ["ツーバス","double kick drums"],["RPGのボス戦","JRPG boss battle"],
@@ -802,6 +802,8 @@ a.btn{text-decoration:none;display:inline-block}
     ["ダブステップ","うなるベースと重いリズムのダブステップ。",["dark","aggressive","half-time groove","synth"],140,["dubstep","wobble bass","heavy bass drops"]],
     ["サイトランス","うねるベースとアシッドの音が続くサイケデリックなトランス。",["trance","energetic","synth","four-on-the-floor"],145,["full-on psytrance","rolling psy bassline","acid squelches"]],
     ["ハッピーハードコア","明るく疾走する、ピアノとかわいい声のハードコア。",["happy hardcore","cute","energetic","uplifting","piano"],175,["happy hardcore piano stabs","pitched-up vocals"]],
+    ["70年代ディスコ（生演奏）","生のドラムとベース、カッティングギター、ストリングスで踊る70年代のディスコ。",["disco","70s","live band","energetic","uplifting","male vocals","vocal harmonies","falsetto","electric guitar","strings","four-on-the-floor"],104,["funky clean guitar chops","melodic disco bassline","lush string section","falsetto harmonies"]],
+    ["ディスコ・ファンク（ホーン）","ホーンセクションとコーラスが華やかな、ソウル寄りのディスコ・ファンク。",["disco funk","funk","soul","70s","live band","energetic","uplifting","vocal harmonies","brass section","slap bass","electric guitar","rhodes piano"],124,["punchy horn section","group vocal hooks","congas and percussion","tight live drums"]],
     ["和風テクノ","琴や三味線のフレーズが走る、高速の和風テクノ。",["traditional Japanese","koto","shamisen","energetic","synth"],160,["japanese techno","high-speed techno"]]
   ].map(([name, summary, t, bpm, extra]) => sanitizeIdea({ name, summary, tags: { any: t }, bpm, extra }, "preset"));
   function normKey(k) {
