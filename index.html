@@ -227,7 +227,13 @@ a.btn{text-decoration:none;display:inline-block}
 .prog[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 3px 0 0 var(--accent)}
 .prog .who{font-size:10.5px;color:var(--accent);font-family:var(--f-mono)}
 .chords{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,104px),1fr));gap:6px}
-.chord{border:1px solid var(--rule);border-radius:4px;padding:10px 8px;background:var(--sunk);display:flex;flex-direction:column;gap:2px;min-width:0}
+.chord{border:1px solid var(--rule);border-radius:4px;padding:10px 8px;background:var(--sunk);display:flex;flex-direction:column;gap:2px;min-width:0;text-align:left;cursor:pointer;color:var(--ink)}
+.chord:hover{border-color:var(--accent)}
+.chord[data-now]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.chord[data-now] span{color:inherit;opacity:.8}
+.qual-row{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.form select#harmTempo{width:auto}
+.qual-row .chip small{font-family:var(--f-mono)}
 .chord b{font-family:var(--f-mono);font-size:17px;font-weight:600;overflow-wrap:anywhere}
 .chord span{font-family:var(--f-mono);font-size:11px;color:var(--muted)}
 #memoOut{white-space:pre-wrap;line-height:1.7}
@@ -576,7 +582,15 @@ a.btn{text-decoration:none;display:inline-block}
           <select id="hKey"></select>
           <span class="hint" id="hKeyNote"></span>
         </div>
+        <div class="row">
+          <button class="btn" id="btnHarmPlay" type="button">▶ 進行を再生</button>
+          <label class="field-inline" for="harmTempo">速さ</label>
+          <select id="harmTempo"><option value="2">ゆっくり（1コード2拍）</option><option value="4" selected>ふつう（1コード4拍）</option><option value="1">速め（1コード1拍）</option></select>
+          <label class="check" for="harmArp"><input type="checkbox" id="harmArp"> 分散和音で鳴らす</label>
+        </div>
         <div class="chords" id="chords"></div>
+        <p class="hint">コードのマスを押すと、その和音が鳴ります。</p>
+        <div class="f"><span class="lbl">響きを聴き比べる（主音を同じにして種類だけ変える）</span><div class="qual-row" id="qualRow"></div></div>
         <p class="hint" id="progDesc"></p>
         <div class="f"><span class="lbl">STYLE に足す言葉</span><div class="harm-words" id="harmWords"></div></div>
         <div class="row">
@@ -1869,12 +1883,14 @@ a.btn{text-decoration:none;display:inline-block}
     let shift = 0;
     $("#chords").innerHTML = toks.map(t => {
       if (t === "|") { shift = 1; return ""; }
-      return `<div class="chord"><b>${esc(realize(t, root))}</b><span>${esc(degLabel(t))}</span></div>`;
+      const nm = realize(t, root, true);
+      return `<button type="button" class="chord" data-chord="${esc(nm)}"><b>${esc(realize(t, root))}</b><span>${esc(degLabel(t))}</span></button>`;
     }).join("");
     $("#progDesc").textContent = pr.desc + (shift ? " ｜ のあとが転調のきっかけになるコードです。" : "");
     $("#harmWords").textContent = pr.words.join(", ");
+    if (typeof renderQualRow === "function") renderQualRow();
   }
-  $("#progs").addEventListener("click", e => { const b = e.target.closest("[data-prog]"); if (!b) return; cur().harmony.prog = +b.dataset.prog; touch(); renderHarmony(); });
+  $("#progs").addEventListener("click", e => { const b = e.target.closest("[data-prog]"); if (!b) return; if (harmTimer) stopHarm(); cur().harmony.prog = +b.dataset.prog; touch(); renderHarmony(); });
   $("#hKey").addEventListener("change", e => { cur().harmony.key = +e.target.value; touch(); renderHarmony(); });
   $("#btnHarmStyle").addEventListener("click", () => {
     const p = cur(), pr = PROGS[p.harmony.prog] || PROGS[0], list = splitList(p.custom), prev = p.custom;
@@ -2899,6 +2915,80 @@ a.btn{text-decoration:none;display:inline-block}
     setLyrics(midiText(midiA));
     $("#styleTape").scrollIntoView({ block: "start" });
     midiUndoToast("MIDI の分析を STYLE と LYRICS にまとめて反映しました", p, prev);
+  });
+
+  /* ---------- chord playback ---------- */
+  const QUAL = { "": [0, 4, 7], "m": [0, 3, 7], "7": [0, 4, 7, 10], "maj7": [0, 4, 7, 11], "M7": [0, 4, 7, 11], "m7": [0, 3, 7, 10], "6": [0, 4, 7, 9], "m6": [0, 3, 7, 9],
+    "dim": [0, 3, 6], "dim7": [0, 3, 6, 9], "aug": [0, 4, 8], "sus4": [0, 5, 7], "sus2": [0, 2, 7], "7sus4": [0, 5, 7, 10], "m7b5": [0, 3, 6, 10], "7b9": [0, 4, 7, 10, 13],
+    "add9": [0, 4, 7, 14], "maj9": [0, 4, 7, 11, 14], "m9": [0, 3, 7, 10, 14], "9": [0, 4, 7, 10, 14], "13": [0, 4, 7, 10, 14, 21], "mM7": [0, 3, 7, 11], "7#9": [0, 4, 7, 10, 15] };
+  const PCN = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
+  function chordNotes(name) {
+    const n = String(name || "").replace(/♭/g, "b").replace(/♯/g, "#").trim();
+    const m = n.match(/^([A-G])([#b]?)([^/]*)(?:\/([A-G])([#b]?))?$/);
+    if (!m) return null;
+    const pc = (l, a) => (PCN[l] + (a === "#" ? 1 : a === "b" ? -1 : 0) + 12) % 12;
+    const root = pc(m[1], m[2]), iv = QUAL[m[3]] || QUAL[m[3].replace(/^M(?=7|9)/, "maj")] || QUAL[""];
+    const bass = m[4] ? pc(m[4], m[5]) : root;
+    const top = iv.map(x => 60 + root + x - (root > 6 ? 12 : 0));
+    return { bass: 36 + bass + (bass > 7 ? 0 : 12) - 12 + (bass > 7 ? 0 : 0), notes: top };
+  }
+  let harmCtx = null, harmTimer = null;
+  function harmAudio() {
+    const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return null;
+    if (!harmCtx) { harmCtx = new AC(); harmCtx.master = harmCtx.createGain(); harmCtx.master.gain.value = 0.22; harmCtx.master.connect(harmCtx.destination); }
+    if (harmCtx.state === "suspended") harmCtx.resume().catch(() => {});
+    return harmCtx;
+  }
+  function playChordAt(ctx, name, t, dur, arp) {
+    const c = chordNotes(name); if (!c) return false;
+    const all = [c.bass, ...c.notes], per = 0.9 / Math.sqrt(all.length);
+    all.forEach((p, k) => {
+      const st = t + (arp ? k * Math.min(0.12, dur / (all.length + 1)) : 0);
+      [["triangle", 1], ["sine", 0.5]].forEach(([type, mul]) => {
+        const o = ctx.createOscillator(), g = ctx.createGain();
+        o.type = type; o.frequency.value = 440 * Math.pow(2, (p - 69 + (type === "sine" ? 12 : 0)) / 12);
+        const peak = per * mul * (k === 0 ? 1.1 : 1);
+        g.gain.setValueAtTime(0.0001, st); g.gain.exponentialRampToValueAtTime(peak, st + 0.008);
+        g.gain.exponentialRampToValueAtTime(peak * 0.25, st + Math.min(1.2, dur));
+        g.gain.exponentialRampToValueAtTime(0.0001, t + dur + 0.25);
+        o.connect(g); g.connect(ctx.master); o.start(st); o.stop(t + dur + 0.3);
+      });
+    });
+    return true;
+  }
+  function stopHarm() { clearTimeout(harmTimer); harmTimer = null; $("#btnHarmPlay").textContent = "▶ 進行を再生"; document.querySelectorAll("#chords .chord[data-now]").forEach(el => delete el.dataset.now); }
+  $("#chords").addEventListener("click", e => {
+    const b = e.target.closest("[data-chord]"); if (!b) return;
+    const ctx = harmAudio(); if (!ctx) { toast("このブラウザでは音を鳴らせません"); return; }
+    if (!playChordAt(ctx, b.dataset.chord, ctx.currentTime + 0.02, 1.6, $("#harmArp").checked)) toast("このコードは鳴らせませんでした");
+    b.dataset.now = "1"; setTimeout(() => { if (!harmTimer) delete b.dataset.now; }, 600);
+  });
+  $("#btnHarmPlay").addEventListener("click", () => {
+    if (harmTimer) { stopHarm(); return; }
+    const ctx = harmAudio(); if (!ctx) { toast("このブラウザでは音を鳴らせません"); return; }
+    const cells = [...document.querySelectorAll("#chords [data-chord]")]; if (!cells.length) return;
+    const bpm = cur().bpmOn ? cur().bpm : 100, beats = +$("#harmTempo").value, dur = beats * 60 / bpm, arp = $("#harmArp").checked;
+    let i = 0; $("#btnHarmPlay").textContent = "■ 停止";
+    const step = () => {
+      document.querySelectorAll("#chords .chord[data-now]").forEach(el => delete el.dataset.now);
+      if (i >= cells.length) { stopHarm(); return; }
+      const el = cells[i++]; el.dataset.now = "1";
+      playChordAt(ctx, el.dataset.chord, ctx.currentTime + 0.02, dur, arp);
+      harmTimer = setTimeout(step, dur * 1000);
+    };
+    step();
+  });
+  const QUAL_DEMO = [["", "メジャー", "明るくまっすぐ"], ["maj7", "maj7", "明るいのに少し切ない、おしゃれ"], ["7", "7", "ブルージー、次へ進みたくなる"], ["m", "マイナー", "暗く切ない"], ["m7", "m7", "暗めでやわらかい、大人っぽい"],
+    ["6", "6", "のどかで懐かしい"], ["add9", "add9", "きらっと広がる"], ["maj9", "maj9", "ふわっと都会的"], ["sus4", "sus4", "浮いていて、解決したくなる"], ["aug", "aug", "ふわっと不思議、浮遊感"], ["dim", "dim", "不安でつなぎの響き"], ["m7b5", "m7♭5", "切なくジャジー"]];
+  function renderQualRow() {
+    const root = harmKey(), names = FLAT_KEYS.has(root) ? NOTE_F : NOTE_S, r = names[root];
+    const ascii = r.replace("♭", "b").replace("♯", "#");
+    $("#qualRow").innerHTML = QUAL_DEMO.map(([q, label, desc]) => `<button type="button" class="chip" data-chord="${esc(ascii + q)}" title="${esc(desc)}"><span>${esc(r + label.replace(/^メジャー$/, "").replace(/^マイナー$/, "m"))}</span><small>${esc(desc)}</small></button>`).join("");
+  }
+  $("#qualRow").addEventListener("click", e => {
+    const b = e.target.closest("[data-chord]"); if (!b) return;
+    const ctx = harmAudio(); if (!ctx) return;
+    playChordAt(ctx, b.dataset.chord, ctx.currentTime + 0.02, 1.6, $("#harmArp").checked);
   });
 
   /* ---------- rendering ---------- */
